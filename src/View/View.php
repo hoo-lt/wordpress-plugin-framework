@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\View;
 class View implements ViewInterface
 {
 	public function __construct(
-		protected readonly string $path = __DIR__ . '/../Views',
+		protected readonly string $path,
 	) {
 	}
 
