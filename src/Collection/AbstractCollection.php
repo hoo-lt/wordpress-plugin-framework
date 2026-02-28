@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Collection;
+namespace Hoo\WordPressPluginFramework\Collection;
 
 use ArrayIterator;
 use IteratorAggregate;

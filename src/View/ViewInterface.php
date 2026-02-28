@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\View;
+namespace Hoo\WordPressPluginFramework\View;
 
 interface ViewInterface
 {

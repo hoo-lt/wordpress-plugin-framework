@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Cache;
+namespace Hoo\WordPressPluginFramework\Cache;
 
 interface CacheInterface
 {

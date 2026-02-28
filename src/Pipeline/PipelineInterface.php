@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Pipeline;
+namespace Hoo\WordPressPluginFramework\Pipeline;
 
 interface PipelineInterface
 {

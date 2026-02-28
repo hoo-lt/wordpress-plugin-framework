@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Database;
+namespace Hoo\WordPressPluginFramework\Database;
 
 interface DatabaseInterface
 {

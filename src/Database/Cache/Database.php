@@ -1,11 +1,11 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Database\Cache;
+namespace Hoo\WordPressPluginFramework\Database\Cache;
 
-use Hoo\WordpressPluginFramework\Cache\CacheInterface;
-use Hoo\WordpressPluginFramework\Database\DatabaseInterface;
+use Hoo\WordPressPluginFramework\Cache\CacheInterface;
+use Hoo\WordPressPluginFramework\Database\DatabaseInterface;
 
-use Hoo\WordpressPluginFramework\Database\Query;
+use Hoo\WordPressPluginFramework\Database\Query;
 
 class Database implements DatabaseInterface
 {

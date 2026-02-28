@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Http;
+namespace Hoo\WordPressPluginFramework\Http;
 
 interface ResponseInterface
 {

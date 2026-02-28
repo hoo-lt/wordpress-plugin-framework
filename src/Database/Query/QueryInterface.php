@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Database\Query;
+namespace Hoo\WordPressPluginFramework\Database\Query;
 
 interface QueryInterface
 {

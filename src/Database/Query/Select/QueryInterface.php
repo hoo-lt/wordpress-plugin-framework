@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Database\Query\Select;
+namespace Hoo\WordPressPluginFramework\Database\Query\Select;
 
-use Hoo\WordpressPluginFramework\Database\Query;
+use Hoo\WordPressPluginFramework\Database\Query;
 
 interface QueryInterface extends Query\QueryInterface
 {

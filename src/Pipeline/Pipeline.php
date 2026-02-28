@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordpressPluginFramework\Pipeline;
+namespace Hoo\WordPressPluginFramework\Pipeline;
 
-use Hoo\WordpressPluginFramework\Middleware;
+use Hoo\WordPressPluginFramework\Middleware;
 
 use Psr\Container\ContainerInterface;
 
