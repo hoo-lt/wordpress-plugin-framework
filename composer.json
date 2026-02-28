@@ -1,0 +1,17 @@
+{
+	"name": "hoo-lt/wordpress-plugin-framework",
+	"type": "library",
+	"license": "GPL-3.0",
+	"autoload": {
+		"psr-4": {
+			"Hoo\\WordpressPluginFramework\\": "src/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Baltic digital agency, UAB",
+			"email": "hoo@hoo.lt"
+		}
+	],
+	"require": {}
+}
