@@ -118,13 +118,7 @@ readonly class Url implements UrlInterface
 
 	public function __toString(): string
 	{
-		$url = sprintf(
-			'%s://%s:%d%s?%s',
-			$this->scheme(),
-			$this->host(),
-			$this->port(),
-			$this->path(),
-		);
+		$url = "{$this->scheme()}://{$this->host()}:{$this->port()}{$this->path()}";
 
 		$query = $this->query();
 		if ($query) {
