@@ -9,13 +9,13 @@ class Middleware implements MiddlewareInterface
 {
 	public function __construct(
 		protected readonly RequestInterface $request,
-		protected readonly string $name,
+		protected readonly string $nonceName,
 	) {
 	}
 
 	public function __invoke(object $object, callable $callable): mixed
 	{
-		$nonce = $this->request->post($this->name);
+		$nonce = $this->request->post($this->nonceName);
 		if (!$nonce) {
 			//throw
 		}
