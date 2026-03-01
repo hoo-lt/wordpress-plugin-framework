@@ -88,7 +88,7 @@ readonly class Url implements UrlInterface
 
 	public function __toString(): string
 	{
-		return "{$this->scheme}://{$this->host}{$this->path}?{$this->query}";
+		return "{$this->scheme->value}://{$this->host}{$this->path}?{$this->query}";
 	}
 
 	protected static function parseUrl(string $url): array
