@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http;
 
-class Response implements ResponseInterface
+readonly class Response implements ResponseInterface
 {
 	public function __construct(
 		protected readonly array $headers,
