@@ -16,8 +16,13 @@ readonly class Url implements UrlInterface
 	public static function from(string $url): UrlInterface
 	{
 		return new self(
-			...self::parseUrl($url)
+			...self::parse($url)
 		);
+	}
+
+	public function scheme(): string
+	{
+		return $this->scheme->value;
 	}
 
 	public function withScheme(string $scheme): UrlInterface
@@ -31,6 +36,11 @@ readonly class Url implements UrlInterface
 		);
 	}
 
+	public function host(): string
+	{
+		return $this->host;
+	}
+
 	public function withHost(string $host): UrlInterface
 	{
 		return new self(
@@ -40,6 +50,11 @@ readonly class Url implements UrlInterface
 			$this->path,
 			$this->query,
 		);
+	}
+
+	public function port(): int
+	{
+		return $this->port;
 	}
 
 	public function withPort(int $port): UrlInterface
@@ -53,6 +68,11 @@ readonly class Url implements UrlInterface
 		);
 	}
 
+	public function path(): string
+	{
+		return $this->path;
+	}
+
 	public function withPath(string $path): UrlInterface
 	{
 		return new self(
@@ -64,7 +84,12 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function withQuery(array $query): UrlInterface
+	public function query(): string
+	{
+		return $this->query;
+	}
+
+	public function withQuery(string $query): UrlInterface
 	{
 		return new self(
 			$this->scheme,
@@ -75,41 +100,55 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function withQueryValue(string $name, string $value): UrlInterface
+	public function queryValue(string $key): string
+	{
+		return $this->query->value($key);
+	}
+
+	public function withQueryValue(string $key, string $value): UrlInterface
 	{
 		return new self(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$this->query->withValue($name, $value),
+			$this->query->withValue($key, $value),
 		);
 	}
 
 	public function __toString(): string
 	{
-		return "{$this->scheme->value}://{$this->host}{$this->path}?{$this->query}";
+		$url = sprintf(
+			'%s://%s:%d%s?%s',
+			$this->scheme(),
+			$this->host(),
+			$this->port(),
+			$this->path(),
+		);
+
+		$query = $this->query();
+		if ($query) {
+			$url .= "?{$query}";
+		}
+
+		return $url;
 	}
 
-	protected static function parseUrl(string $url): array
+	protected static function parse(string $url): array
 	{
 		$components = parse_url($url);
 		if (!$components) {
 			//throw new...
 		}
 
-		$components['scheme'] = Url\Scheme::from($components['scheme']);
+		$components['scheme'] = Url\Scheme::from($components['scheme'] ?? '');
 		$components['host'] ??= '';
 		$components['port'] ??= match ($components['scheme']) {
 			Url\Scheme::Http => 80,
 			Url\Scheme::Https => 443,
 		};
 		$components['path'] ??= '';
-		$components['query'] ??= '';
-
-		parse_str($components['query'], $components['query']);
-
-		$components['query'] = Url\Query::from($components['query']);
+		$components['query'] = Url\Query::from($components['query'] ?? '');
 
 		return $components;
 	}

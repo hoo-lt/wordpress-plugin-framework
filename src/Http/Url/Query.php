@@ -5,28 +5,40 @@ namespace Hoo\WordPressPluginFramework\Http\Url;
 readonly class Query implements QueryInterface
 {
 	protected function __construct(
-		protected array $query,
+		protected array $values,
 	) {
 	}
 
-	public static function from(array $query): QueryInterface
+	public static function from(string $query): QueryInterface
 	{
 		return new self(
-			$query,
+			self::parse($query)
 		);
 	}
 
-	public function withValue(string $name, string $value): QueryInterface
+	public function value(string $key): string
+	{
+		return $this->values[$key];
+	}
+
+	public function withValue(string $key, string $value): QueryInterface
 	{
 		return new self(
-			array_filter(array_merge($this->query, [
-				$name => $value,
+			array_filter(array_merge($this->values, [
+				$key => $value,
 			]))
 		);
 	}
 
 	public function __toString(): string
 	{
-		return http_build_query($this->query);
+		return http_build_query($this->values);
+	}
+
+	protected static function parse(string $query): array
+	{
+		parse_str($query, $query);
+
+		return $query;
 	}
 }
