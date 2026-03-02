@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Middleware\VerifyNonce;
 
 use Hoo\WordPressPluginFramework\Http\RequestInterface;
+use Hoo\WordPressPluginFramework\Middleware\MiddlewareException;
 use Hoo\WordPressPluginFramework\Middleware\MiddlewareInterface;
 
 class Middleware implements MiddlewareInterface
@@ -17,11 +18,11 @@ class Middleware implements MiddlewareInterface
 	{
 		$nonce = $this->request->post($this->nonceName);
 		if (!$nonce) {
-			//throw
+			throw new MiddlewareException('nonce is not presented');
 		}
 
 		if (!wp_verify_nonce($nonce, -1)) {
-			//throw
+			throw new MiddlewareException('error verifying nonce');
 		}
 
 		return $callable($object);

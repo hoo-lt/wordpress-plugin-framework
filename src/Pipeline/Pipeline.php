@@ -32,7 +32,7 @@ class Pipeline implements PipelineInterface
 		foreach ($middlewares as $middleware) {
 			$middleware = $this->container->get($middleware);
 			if (!$middleware instanceof Middleware\MiddlewareInterface) {
-				//throw there
+				throw new PipelineException('class must implement middleware interface');
 			}
 
 			$clone->middlewares[] = $middleware;
@@ -44,7 +44,7 @@ class Pipeline implements PipelineInterface
 	public function __invoke(callable $callable): mixed
 	{
 		if (!$this->object) {
-			//throw there
+			throw new PipelineException('object must be there');
 		}
 
 		return array_reduce(array_reverse($this->middlewares), fn($callable, $middleware) => fn($object) => $middleware($object, $callable), $callable)($this->object);
