@@ -132,7 +132,7 @@ readonly class Url implements UrlInterface
 	{
 		$components = parse_url($url);
 		if (!$components) {
-			//throw new...
+			throw new UrlException('unable to parse url');
 		}
 
 		$components['scheme'] = Url\Scheme::from($components['scheme'] ?? '');

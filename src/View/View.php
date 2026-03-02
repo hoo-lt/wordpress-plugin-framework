@@ -13,7 +13,7 @@ class View implements ViewInterface
 	{
 		$path = "{$this->path}{$view}/View.php";
 		if (!file_exists($path)) {
-			//throw exception here
+			throw new ViewException('view not found');
 		}
 
 		ob_start();
