@@ -10,13 +10,13 @@ readonly class Request implements RequestInterface
 	) {
 	}
 
-	public function get(string $name): ?string
+	public function get(string $key): ?string
 	{
-		return $this->get[$name] ?? null;
+		return $this->get[$key] ?? null;
 	}
 
-	public function post(string $name): ?string
+	public function post(string $key): ?string
 	{
-		return $this->post[$name] ?? null;
+		return $this->post[$key] ?? null;
 	}
 }

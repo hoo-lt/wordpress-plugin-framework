@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http;
 
 interface RequestInterface
 {
-	public function get(string $name): ?string;
-	public function post(string $name): ?string;
+	public function get(string $key): ?string;
+	public function post(string $key): ?string;
 }
