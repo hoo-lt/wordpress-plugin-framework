@@ -17,6 +17,6 @@ readonly class Request implements RequestInterface
 
 	public function post(string $name): ?string
 	{
-		return $this->get[$name] ?? null;
+		return $this->post[$name] ?? null;
 	}
 }
