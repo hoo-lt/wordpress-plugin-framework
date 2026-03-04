@@ -7,9 +7,9 @@ readonly class Url implements UrlInterface
 	protected function __construct(
 		protected Url\Scheme $scheme,
 		protected string $host,
-		protected int $port,
+		protected ?int $port,
 		protected string $path,
-		protected Url\QueryInterface $query,
+		protected ?array $query,
 	) {
 	}
 
@@ -27,8 +27,10 @@ readonly class Url implements UrlInterface
 
 	public function withScheme(string $scheme): UrlInterface
 	{
+		$scheme = self::parseScheme($scheme);
+
 		return new self(
-			Url\Scheme::from($scheme),
+			$scheme,
 			$this->host,
 			$this->port,
 			$this->path,
@@ -43,6 +45,8 @@ readonly class Url implements UrlInterface
 
 	public function withHost(string $host): UrlInterface
 	{
+		$host = self::parseHost($host);
+
 		return new self(
 			$this->scheme,
 			$host,
@@ -52,13 +56,15 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function port(): int
+	public function port(): ?int
 	{
 		return $this->port;
 	}
 
-	public function withPort(int $port): UrlInterface
+	public function withPort(?int $port): UrlInterface
 	{
+		$port = self::parsePort($port);
+
 		return new self(
 			$this->scheme,
 			$this->host,
@@ -75,6 +81,8 @@ readonly class Url implements UrlInterface
 
 	public function withPath(string $path): UrlInterface
 	{
+		$path = self::parsePath($path);
+
 		return new self(
 			$this->scheme,
 			$this->host,
@@ -84,44 +92,66 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function query(): string
+	public function query(): ?string
 	{
-		return $this->query;
+		return $this->query ? http_build_query($this->query, PHP_QUERY_RFC3986) : null;
 	}
 
-	public function withQuery(string $query): UrlInterface
+	public function withQuery(?string $query): UrlInterface
 	{
+		$query = self::parseQuery($query);
+
 		return new self(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			Url\Query::from($query),
+			$query,
 		);
 	}
 
-	public function queryValue(string $key): string
+	public function queryValue(string $key): ?string
 	{
-		return $this->query->value($key);
+		return $this->query[$key] ?? null;
 	}
 
-	public function withQueryValue(string $key, string $value): UrlInterface
+	public function withQueryValue(string $key, ?string $value): UrlInterface
 	{
+		$query = $this->query;
+
+		if ($value !== null) {
+			$query ??= [];
+			$query[$key] = $value;
+		} else {
+			unset($query[$key]);
+		}
+
 		return new self(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$this->query->withValue($key, $value),
+			$query,
 		);
 	}
 
 	public function __toString(): string
 	{
-		$url = "{$this->scheme()}://{$this->host()}:{$this->port()}{$this->path()}";
-
+		$scheme = $this->scheme();
+		$host = $this->host();
+		$port = $this->port();
+		$path = $this->path();
 		$query = $this->query();
-		if ($query) {
+
+		$url = "{$scheme}://{$host}";
+
+		if ($port !== null) {
+			$url .= ":{$port}";
+		}
+
+		$url .= $path;
+
+		if ($query !== null) {
 			$url .= "?{$query}";
 		}
 
@@ -130,20 +160,71 @@ readonly class Url implements UrlInterface
 
 	protected static function parse(string $url): array
 	{
-		$components = parse_url($url);
-		if (!$components) {
-			throw new UrlException('unable to parse url');
+		$url = parse_url($url);
+		if ($url) {
+			return [
+				'scheme' => self::parseScheme($url['scheme'] ?? ''),
+				'host' => self::parseHost($url['host'] ?? ''),
+				'port' => self::parsePort($url['port'] ?? null),
+				'path' => self::parsePath($url['path'] ?? ''),
+				'query' => self::parseQuery($url['query'] ?? null),
+			];
 		}
 
-		$components['scheme'] = Url\Scheme::from($components['scheme'] ?? '');
-		$components['host'] ??= '';
-		$components['port'] ??= match ($components['scheme']) {
-			Url\Scheme::Http => 80,
-			Url\Scheme::Https => 443,
-		};
-		$components['path'] ??= '';
-		$components['query'] = Url\Query::from($components['query'] ?? '');
+		throw new UrlException('url cannot be empty string');
+	}
 
-		return $components;
+	protected static function parseScheme(string $scheme): Url\Scheme
+	{
+		if ($scheme !== '') {
+			return Url\Scheme::from($scheme);
+		}
+
+		throw new UrlException('scheme is mandatory');
+	}
+
+	protected static function parseHost(string $host): string
+	{
+		if ($host !== '') {
+			return $host;
+		}
+
+		throw new UrlException('host is mandatory');
+	}
+
+	protected static function parsePort(?int $port): ?int
+	{
+
+		if ($port === null) {
+			return $port;
+		}
+
+		if (
+			$port >= 1 &&
+			$port <= 65535
+		) {
+			return $port;
+		}
+
+		throw new UrlException('invalid port');
+	}
+
+	protected static function parsePath(string $path): string
+	{
+		if ($path === '') {
+			return $path;
+		}
+
+		return '/' . ltrim($path, '/');
+	}
+
+	protected static function parseQuery(?string $query): ?array
+	{
+		if ($query === null) {
+			return $query;
+		}
+
+		parse_str($query, $query);
+		return $query;
 	}
 }
