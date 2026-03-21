@@ -10,11 +10,11 @@ interface UrlInterface
 	public function withHost(string $host): self;
 	public function port(): ?int;
 	public function withPort(int $port): self;
-	public function path(): ?string;
+	public function withoutPort(): self;
+	public function path(): string;
 	public function withPath(string $path): self;
 	public function query(): ?string;
 	public function withQuery(string $query): self;
-	public function queryValue(string $key): ?string;
-	public function withQueryValue(string $key, string $value): self;
+	public function withoutQuery(): self;
 	public function __toString(): string;
 }

@@ -5,12 +5,39 @@ namespace Hoo\WordPressPluginFramework\Http;
 readonly class Url implements UrlInterface
 {
 	protected function __construct(
-		protected Url\Scheme $scheme,
+		protected string $scheme,
 		protected string $host,
 		protected ?int $port,
 		protected string $path,
-		protected ?array $query,
+		protected ?string $query,
 	) {
+		if (
+			$scheme !== 'http' &&
+			$scheme !== 'https'
+		) {
+			throw new UrlException('http(s) only supported');
+		}
+
+		if ($host === '') {
+			throw new UrlException('host is mandatory');
+		}
+
+		if (
+			$port !== null &&
+			(
+				$port < 1 ||
+				$port > 65535
+			)
+		) {
+			throw new UrlException('port must be within range');
+		}
+
+		if (
+			$path !== '' &&
+			$path[0] !== '/'
+		) {
+			throw new UrlException('Path must be empty or start with "/" when host is present');
+		}
 	}
 
 	public static function from(string $url): UrlInterface
@@ -22,13 +49,11 @@ readonly class Url implements UrlInterface
 
 	public function scheme(): string
 	{
-		return $this->scheme->value;
+		return $this->scheme;
 	}
 
 	public function withScheme(string $scheme): UrlInterface
 	{
-		$scheme = self::parseScheme($scheme);
-
 		return new self(
 			$scheme,
 			$this->host,
@@ -45,8 +70,6 @@ readonly class Url implements UrlInterface
 
 	public function withHost(string $host): UrlInterface
 	{
-		$host = self::parseHost($host);
-
 		return new self(
 			$this->scheme,
 			$host,
@@ -61,14 +84,23 @@ readonly class Url implements UrlInterface
 		return $this->port;
 	}
 
-	public function withPort(?int $port): UrlInterface
+	public function withPort(int $port): UrlInterface
 	{
-		$port = self::parsePort($port);
-
 		return new self(
 			$this->scheme,
 			$this->host,
 			$port,
+			$this->path,
+			$this->query,
+		);
+	}
+
+	public function withoutPort(): UrlInterface
+	{
+		return new self(
+			$this->scheme,
+			$this->host,
+			null,
 			$this->path,
 			$this->query,
 		);
@@ -81,8 +113,6 @@ readonly class Url implements UrlInterface
 
 	public function withPath(string $path): UrlInterface
 	{
-		$path = self::parsePath($path);
-
 		return new self(
 			$this->scheme,
 			$this->host,
@@ -94,13 +124,11 @@ readonly class Url implements UrlInterface
 
 	public function query(): ?string
 	{
-		return $this->query ? http_build_query($this->query, PHP_QUERY_RFC3986) : null;
+		return $this->query;
 	}
 
-	public function withQuery(?string $query): UrlInterface
+	public function withQuery(string $query): UrlInterface
 	{
-		$query = self::parseQuery($query);
-
 		return new self(
 			$this->scheme,
 			$this->host,
@@ -110,28 +138,14 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function queryValue(string $key): ?string
+	public function withoutQuery(): UrlInterface
 	{
-		return $this->query[$key] ?? null;
-	}
-
-	public function withQueryValue(string $key, ?string $value): UrlInterface
-	{
-		$query = $this->query;
-
-		if ($value !== null) {
-			$query ??= [];
-			$query[$key] = $value;
-		} else {
-			unset($query[$key]);
-		}
-
 		return new self(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$query,
+			null,
 		);
 	}
 
@@ -160,71 +174,21 @@ readonly class Url implements UrlInterface
 
 	protected static function parse(string $url): array
 	{
+		if ($url === '') {
+			throw new UrlException('url cannot be empty string');
+		}
+
 		$url = parse_url($url);
-		if ($url) {
-			return [
-				'scheme' => self::parseScheme($url['scheme'] ?? ''),
-				'host' => self::parseHost($url['host'] ?? ''),
-				'port' => self::parsePort($url['port'] ?? null),
-				'path' => self::parsePath($url['path'] ?? ''),
-				'query' => self::parseQuery($url['query'] ?? null),
-			];
+		if (!$url) {
+			throw new UrlException('seriously darmaged url');
 		}
 
-		throw new UrlException('url cannot be empty string');
-	}
-
-	protected static function parseScheme(string $scheme): Url\Scheme
-	{
-		if ($scheme !== '') {
-			return Url\Scheme::from($scheme);
-		}
-
-		throw new UrlException('scheme is mandatory');
-	}
-
-	protected static function parseHost(string $host): string
-	{
-		if ($host !== '') {
-			return $host;
-		}
-
-		throw new UrlException('host is mandatory');
-	}
-
-	protected static function parsePort(?int $port): ?int
-	{
-
-		if ($port === null) {
-			return $port;
-		}
-
-		if (
-			$port >= 1 &&
-			$port <= 65535
-		) {
-			return $port;
-		}
-
-		throw new UrlException('invalid port');
-	}
-
-	protected static function parsePath(string $path): string
-	{
-		if ($path === '') {
-			return $path;
-		}
-
-		return '/' . ltrim($path, '/');
-	}
-
-	protected static function parseQuery(?string $query): ?array
-	{
-		if ($query === null) {
-			return $query;
-		}
-
-		parse_str($query, $query);
-		return $query;
+		return [
+			'scheme' => $url['scheme'] ?? '',
+			'host' => $url['host'] ?? '',
+			'port' => $url['port'] ?? null,
+			'path' => $url['path'] ?? '',
+			'query' => $url['query'] ?? null,
+		];
 	}
 }
