@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Database\Cache;
 
 use Hoo\WordPressPluginFramework\Cache\CacheInterface;
 use Hoo\WordPressPluginFramework\Database\DatabaseInterface;
-
 use Hoo\WordPressPluginFramework\Database\Query;
 
 class Database implements DatabaseInterface
@@ -15,7 +14,7 @@ class Database implements DatabaseInterface
 	) {
 	}
 
-	public function select(Query\Select\QueryInterface $query): ?array
+	public function select(Query\Select\QueryInterface $query): array
 	{
 		$key = $this->key($query);
 

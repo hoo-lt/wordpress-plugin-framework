@@ -11,8 +11,13 @@ class Database implements DatabaseInterface
 	) {
 	}
 
-	public function select(Query\Select\QueryInterface $query): ?array
+	public function select(Query\Select\QueryInterface $query): array
 	{
-		return $this->wpdb->get_results($query(), ARRAY_A);
+		$results = $this->wpdb->get_results($query(), ARRAY_A);
+		if (!$results) {
+			throw new DatabaseException('invalid query');
+		}
+
+		return $results;
 	}
 }
