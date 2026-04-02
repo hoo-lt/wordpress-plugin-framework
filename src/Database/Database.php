@@ -23,7 +23,7 @@ readonly class Database implements DatabaseInterface
 		$results = $this->wpdb->get_results($query(), ARRAY_A);
 
 		if ($this->wpdb->last_error) {
-			throw new DatabaseException('invalid query');
+			throw new DatabaseException($this->wpdb->last_error);
 		}
 
 		if ($results === null) {
@@ -38,7 +38,7 @@ readonly class Database implements DatabaseInterface
 		$var = $this->wpdb->get_var($query());
 
 		if ($this->wpdb->last_error) {
-			throw new DatabaseException('invalid query');
+			throw new DatabaseException($this->wpdb->last_error);
 		}
 
 		if ($var === null) {
