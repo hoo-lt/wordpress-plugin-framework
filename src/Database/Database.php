@@ -11,6 +11,11 @@ readonly class Database implements DatabaseInterface
 		protected wpdb $wpdb,
 		protected Json\JsonInterface $json,
 	) {
+		/*
+		$this->wpdb->query(
+			"SET SESSION group_concat_max_len = 1048576"
+		);
+		*/
 	}
 
 	public function select(Query\Select\QueryInterface $query): array
