@@ -16,6 +16,21 @@ class Database implements DatabaseInterface
 
 	public function select(Query\Select\QueryInterface $query): array
 	{
+		return $this->value($query, fn() => $this->database->select($query));
+	}
+
+	public function json(Query\Select\QueryInterface $query): array
+	{
+		return $this->value($query, fn() => $this->database->json($query));
+	}
+
+	protected function key(Query\QueryInterface $query): string
+	{
+		return md5($query());
+	}
+
+	protected function value(Query\QueryInterface $query, callable $callable): array
+	{
 		$key = $this->key($query);
 
 		$value = $this->cache->get($key);
@@ -23,16 +38,11 @@ class Database implements DatabaseInterface
 			return $value;
 		}
 
-		$value = $this->database->select($query);
+		$value = $callable();
 		if ($value) {
 			$this->cache->set($key, $value);
 		}
 
 		return $value;
-	}
-
-	protected function key(Query\QueryInterface $query): string
-	{
-		return md5($query());
 	}
 }
