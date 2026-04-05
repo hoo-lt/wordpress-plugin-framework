@@ -44,6 +44,16 @@ abstract class AbstractCollection implements IteratorAggregate
 		return $this->items[$key];
 	}
 
+	public function shift(): mixed
+	{
+		return array_shift($this->items);
+	}
+
+	public function pop(): mixed
+	{
+		return array_pop($this->items);
+	}
+
 	public function remove(Item\Key\KeyInterface $key): void
 	{
 		if (!$this->has($key)) {
