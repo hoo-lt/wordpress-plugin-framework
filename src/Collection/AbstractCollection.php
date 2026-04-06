@@ -63,6 +63,15 @@ abstract class AbstractCollection implements IteratorAggregate
 		unset($this->items[$key()]);
 	}
 
+	public function merge(self $collection): self
+	{
+		foreach ($collection->items as $key => $item) {
+			$this->items[$key] = $item;
+		}
+
+		return $this;
+	}
+
 	public function all(): array
 	{
 		return array_values($this->items);
