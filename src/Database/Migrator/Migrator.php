@@ -2,33 +2,45 @@
 
 namespace Hoo\WordPressPluginFramework\Database\Migrator;
 
+use Hoo\WordPressPluginFramework\Repositories\Migrator\RepositoryInterface;
 use wpdb;
 
 readonly class Migrator implements MigratorInterface
 {
 	public function __construct(
-		protected MigratorRepositoryInterface $repository,
+		protected RepositoryInterface $repository,
 		protected wpdb $wpdb,
 		protected string $path,
 	) {
 	}
 
-	public function migrate(): void
+	public function __invoke(): void
 	{
-		$applied = $this->repository->applied();
-
-		foreach (glob($this->path . '/*.sql') as $file) {
-			$sql = file_get_contents($file);
-			$hash = md5($sql);
-
-			if (in_array($hash, $applied, true)) {
+		$queries = $this->queries();
+		foreach ($queries as $hash => $query) {
+			if ($this->repository->has($hash)) {
 				continue;
 			}
 
-			$sql = str_replace('{prefix}', $this->wpdb->prefix, $sql);
+			$this->wpdb->query($query);
 
-			$this->wpdb->query($sql);
-			$this->repository->apply($hash);
+			$this->repository->add($hash);
 		}
+	}
+
+	protected function queries(): array
+	{
+		$queries = [];
+
+		foreach (glob("{$this->path}/*.sql") as $path) {
+			$query = file_get_contents($path);
+			$hash = md5($query);
+
+			$queries[$hash] = strtr($query, [
+				':prefix' => $this->wpdb->prefix,
+			]);
+		}
+
+		return $queries;
 	}
 }
