@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Middleware;
+namespace Hoo\WordPressPluginFramework\Database;
 
 use Exception;
 
-class MiddlewareException extends Exception
+class SelectException extends Exception
 {
 	public function __construct(string $message)
 	{

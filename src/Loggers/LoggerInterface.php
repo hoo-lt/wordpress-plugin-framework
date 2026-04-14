@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Logger;
+namespace Hoo\WordPressPluginFramework\Loggers;
 
 interface LoggerInterface
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Middleware\VerifyNonce;
+namespace Hoo\WordPressPluginFramework\Middlewares\VerifyNonce;
 
 use Hoo\WordPressPluginFramework\Http\RequestInterface;
-use Hoo\WordPressPluginFramework\Middleware\MiddlewareException;
-use Hoo\WordPressPluginFramework\Middleware\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Middlewares\MiddlewareException;
+use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
 
 class Middleware implements MiddlewareInterface
 {

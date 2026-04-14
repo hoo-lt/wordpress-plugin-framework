@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Database;
+namespace Hoo\WordPressPluginFramework\Database\Migrator;
 
 use Exception;
 
-class DatabaseException extends Exception
+class MigratorException extends Exception
 {
 	public function __construct(string $message)
 	{

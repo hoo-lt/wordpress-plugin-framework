@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Database\Query;
+namespace Hoo\WordPressPluginFramework\Middlewares;
 
 use Exception;
 
-class QueryException extends Exception
+class MiddlewareException extends Exception
 {
 	public function __construct(string $message)
 	{
