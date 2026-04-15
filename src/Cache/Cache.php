@@ -2,10 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Cache;
 
-class Cache implements CacheInterface
+readonly class Cache implements CacheInterface
 {
 	public function __construct(
-		protected readonly int $ttl = 86400,
+		protected int $ttl = 86400,
 	) {
 	}
 

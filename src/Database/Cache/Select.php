@@ -6,11 +6,11 @@ use Hoo\WordPressPluginFramework\Cache\CacheInterface;
 use Hoo\WordPressPluginFramework\Database\SelectInterface;
 use Hoo\WordPressPluginFramework\Database\Queries;
 
-class Select implements SelectInterface
+readonly class Select implements SelectInterface
 {
 	public function __construct(
-		protected readonly CacheInterface $cache,
-		protected readonly SelectInterface $select,
+		protected CacheInterface $cache,
+		protected SelectInterface $select,
 	) {
 	}
 

@@ -2,10 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\View;
 
-class View implements ViewInterface
+readonly class View implements ViewInterface
 {
 	public function __construct(
-		protected readonly string $path,
+		protected string $path,
 	) {
 	}
 
@@ -19,8 +19,6 @@ class View implements ViewInterface
 		ob_start();
 
 		(static function ($path, $array) {
-			extract($array);
-
 			require($path);
 		})($path, $array);
 

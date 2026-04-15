@@ -11,15 +11,15 @@ readonly class Pipeline implements PipelineInterface
 	) {
 	}
 
-	public function middlewares(Middlewares\MiddlewareInterface ...$middlewares): self
+	public function withMiddlewares(Middlewares\MiddlewareInterface ...$middlewares): PipelineInterface
 	{
 		return new self(
 			$middlewares,
 		);
 	}
 
-	public function __invoke(callable $callable): mixed
+	public function __invoke(callable $callable): void
 	{
-		return array_reduce(array_reverse($this->middlewares), fn($callable, $middleware) => fn() => $middleware($callable), $callable)();
+		array_reduce(array_reverse($this->middlewares), fn($callable, $middleware) => fn() => $middleware($callable), $callable)();
 	}
 }

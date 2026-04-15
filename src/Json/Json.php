@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Json;
 
 use Throwable;
 
-class Json implements JsonInterface
+readonly class Json implements JsonInterface
 {
 	public function decode(string $json): array
 	{

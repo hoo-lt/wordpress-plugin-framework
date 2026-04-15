@@ -5,8 +5,8 @@ namespace Hoo\WordPressPluginFramework\Http;
 readonly class Response implements ResponseInterface
 {
 	public function __construct(
-		protected readonly array $headers,
-		protected readonly string $body,
+		protected array $headers,
+		protected string $body,
 	) {
 	}
 

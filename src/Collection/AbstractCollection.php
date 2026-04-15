@@ -3,10 +3,11 @@
 namespace Hoo\WordPressPluginFramework\Collection;
 
 use ArrayIterator;
+use Countable;
 use IteratorAggregate;
 use Traversable;
 
-abstract class AbstractCollection implements IteratorAggregate
+abstract class AbstractCollection implements IteratorAggregate, Countable
 {
 	protected array $items = [];
 
@@ -81,4 +82,10 @@ abstract class AbstractCollection implements IteratorAggregate
 	{
 		return new ArrayIterator(array_values($this->items));
 	}
+
+	public function count(): int
+	{
+		return count($this->items);
+	}
+
 }

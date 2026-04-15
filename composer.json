@@ -13,5 +13,7 @@
 			"email": "hoo@hoo.lt"
 		}
 	],
-	"require": {}
+	"require": {
+		"php": ">=8.2"
+	}
 }

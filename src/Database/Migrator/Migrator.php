@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Database\Migrator;
 
-use Hoo\WordPressPluginFramework\Repositories\Migrator\RepositoryInterface;
+use Hoo\WordPressPluginFramework\Repositories\Database\Migrator\RepositoryInterface;
 use wpdb;
 
 readonly class Migrator implements MigratorInterface

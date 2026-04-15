@@ -6,6 +6,6 @@ use Hoo\WordPressPluginFramework\Middlewares;
 
 interface PipelineInterface
 {
-	public function middlewares(Middlewares\MiddlewareInterface ...$middlewares): self;
-	public function __invoke(callable $callable): mixed;
+	public function withMiddlewares(Middlewares\MiddlewareInterface ...$middlewares): PipelineInterface;
+	public function __invoke(callable $callable): void;
 }

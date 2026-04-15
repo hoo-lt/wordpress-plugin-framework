@@ -5,8 +5,8 @@ namespace Hoo\WordPressPluginFramework\Http;
 readonly class Request implements RequestInterface
 {
 	public function __construct(
-		protected readonly array $get,
-		protected readonly array $post,
+		protected array $get,
+		protected array $post,
 	) {
 	}
 

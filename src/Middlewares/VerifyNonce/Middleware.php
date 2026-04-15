@@ -6,25 +6,35 @@ use Hoo\WordPressPluginFramework\Http\RequestInterface;
 use Hoo\WordPressPluginFramework\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
 
-class Middleware implements MiddlewareInterface
+readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
-		protected readonly RequestInterface $request,
-		protected readonly string $nonceName,
+		protected RequestInterface $request,
+		protected string $name,
+		protected string|int $action = -1,
 	) {
 	}
 
-	public function __invoke(callable $callable): mixed
+	public function withAction(string|int $action): self
 	{
-		$nonce = $this->request->post($this->nonceName);
+		return new self(
+			$this->request,
+			$this->name,
+			$action,
+		);
+	}
+
+	public function __invoke(callable $callable): void
+	{
+		$nonce = $this->request->post($this->name);
 		if (!$nonce) {
 			throw new MiddlewareException('nonce is not presented');
 		}
 
-		if (!wp_verify_nonce($nonce, -1)) {
+		if (!wp_verify_nonce($nonce, $this->action)) {
 			throw new MiddlewareException('error verifying nonce');
 		}
 
-		return $callable();
+		$callable();
 	}
 }
