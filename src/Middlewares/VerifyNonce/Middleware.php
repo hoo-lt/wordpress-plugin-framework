@@ -14,7 +14,7 @@ class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(object $object, callable $callable): mixed
+	public function __invoke(callable $callable): mixed
 	{
 		$nonce = $this->request->post($this->nonceName);
 		if (!$nonce) {
@@ -25,6 +25,6 @@ class Middleware implements MiddlewareInterface
 			throw new MiddlewareException('error verifying nonce');
 		}
 
-		return $callable($object);
+		return $callable();
 	}
 }

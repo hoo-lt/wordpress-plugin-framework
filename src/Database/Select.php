@@ -22,7 +22,7 @@ readonly class Select implements SelectInterface
 
 	public function __invoke(Queries\Select\QueryInterface $query): array
 	{
-		$this->wpdb->query($query());
+		$this->wpdb->query($query);
 
 		if ($this->wpdb->last_error) {
 			throw new SelectException($this->wpdb->last_error);

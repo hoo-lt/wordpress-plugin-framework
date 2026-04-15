@@ -9,13 +9,24 @@ class Cache implements CacheInterface
 	) {
 	}
 
-	public function get(string $key): ?array
+	public function remember(string $key, callable $callable): mixed
 	{
-		return get_transient($key) ?: null;
+		$value = get_transient($key);
+		if ($value !== false) {
+			return $value['value'];
+		}
+
+		$value = [
+			'value' => $callable(),
+		];
+
+		set_transient($key, $value, $this->ttl);
+
+		return $value['value'];
 	}
 
-	public function set(string $key, array $value): void
+	public function forget(string $key): void
 	{
-		set_transient($key, $value, $this->ttl);
+		delete_transient($key);
 	}
 }

@@ -35,17 +35,15 @@ readonly class Migrator implements MigratorInterface
 
 	protected function queries(): array
 	{
-		$queries = [];
-
-		foreach (glob("{$this->path}/*.sql") as $path) {
-			$query = file_get_contents($path);
-			$hash = md5($query);
-
-			$queries[$hash] = strtr($query, [
-				':prefix' => $this->wpdb->prefix,
-			]);
+		$paths = glob("{$this->path}/*.sql");
+		if ($paths === false) {
+			throw new MigratorException('unable to list migrations');
 		}
 
-		return $queries;
+		$queries = array_map(fn(string $path) => strtr(file_get_contents($path), [
+			':prefix' => $this->wpdb->prefix,
+		]), $paths);
+
+		return array_combine(array_map(md5(...), $queries), $queries);
 	}
 }
