@@ -18,8 +18,8 @@ readonly class Pipeline implements PipelineInterface
 		);
 	}
 
-	public function __invoke(callable $callable): void
+	public function __invoke(callable $callable): mixed
 	{
-		array_reduce(array_reverse($this->middlewares), fn($callable, $middleware) => fn() => $middleware($callable), $callable)();
+		return array_reduce(array_reverse($this->middlewares), fn($callable, $middleware) => fn() => $middleware($callable), $callable)();
 	}
 }

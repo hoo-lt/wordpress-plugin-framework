@@ -1,0 +1,9 @@
+<?php
+
+namespace Hoo\WordPressPluginFramework\Middlewares\CurrentUserCan\Capability;
+
+enum Capability: string implements CapabilityInterface
+{
+	case Hearts = 'H';
+	case Diamonds = 'D';
+}
