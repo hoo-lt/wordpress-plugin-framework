@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Route\Feed;
 use Closure;
 use Hoo\WordPressPluginFramework\Route\RouteInterface;
 use Hoo\WordPressPluginFramework\Hook\HookInterface;
-use Hoo\WordPressPluginFramework\Hook\Action\Hook;
+use Hoo\WordPressPluginFramework\Hook\HookFactoryInterface;
 use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
 
@@ -13,6 +13,7 @@ readonly class Route implements RouteInterface
 {
 	public function __construct(
 		protected PipelineInterface $pipeline,
+		protected HookFactoryInterface $hookFactory,
 		protected string $name,
 		protected Closure $closure,
 		protected array $middlewares = [],
@@ -23,6 +24,7 @@ readonly class Route implements RouteInterface
 	{
 		return new self(
 			$this->pipeline,
+			$this->hookFactory,
 			$this->name,
 			$this->closure,
 			$middlewares
@@ -31,11 +33,7 @@ readonly class Route implements RouteInterface
 
 	public function hook(): HookInterface
 	{
-		return new Hook(
-			$this->pipeline,
-			'init',
-			$this->closure()
-		);
+		return $this->hookFactory->action('init', $this->closure());
 	}
 
 	public function closure(): Closure
