@@ -2,38 +2,38 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
+use Hoo\WordPressPluginFramework\Hooker\HookerInterface;
 use Hoo\WordPressPluginFramework\Route\RouteInterface;
-use Hoo\WordPressPluginFramework\Route\Type\Type;
 
-class Router
+readonly class Router implements RouterInterface
 {
-	protected array $routes = [];
-
 	public function __construct(
-		protected readonly PipelineInterface $pipeline,
+		protected HookerInterface $hooker,
+		protected array $routes = [],
 	) {
 	}
 
-	public function addRoutes(RouteInterface ...$routes): void
+	public function withRoutes(RouteInterface ...$routes): static
 	{
-		$this->routes = [
-			...$this->routes,
-			...$routes
-		];
+		return new self(
+			$this->hooker,
+			$routes
+		);
 	}
 
 	public function __invoke(): void
 	{
 		foreach ($this->routes as $route) {
-			$handler = fn(mixed ...$args) => $this->pipeline
-				->withMiddlewares(...$route->middlewares())
-			(fn() => ($route->handler())(...$args));
+			$hooker = $this->hooker->withHooks($route->hook());
+			$hooker();
+		}
+	}
 
-			match ($route->type()) {
-				Type::Action => add_action($route->hook(), $handler, $route->priority(), PHP_INT_MAX),
-				Type::Filter => add_filter($route->hook(), $handler, $route->priority(), PHP_INT_MAX),
-			};
+	public function register(): void
+	{
+		foreach ($this->routes as $route) {
+			$closure = $route->closure();
+			$closure();
 		}
 	}
 }

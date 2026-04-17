@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Database;
 
 use Exception;
 
-class SelectException extends Exception
+class DatabaseException extends Exception
 {
 }

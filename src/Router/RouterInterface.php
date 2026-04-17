@@ -2,13 +2,13 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Closure;
+use Hoo\WordPressPluginFramework\Route\RouteInterface;
 
 interface RouterInterface
 {
-	public function action(string $hook, Closure $handler, int $priority = PHP_INT_MAX, int $acceptedArgs = 1): Route;
+	public function withRoutes(RouteInterface ...$routes): static;
 
-	public function filter(string $hook, Closure $handler, int $priority = PHP_INT_MAX, int $acceptedArgs = 1): Route;
+	public function __invoke(): void;
 
 	public function register(): void;
 }
