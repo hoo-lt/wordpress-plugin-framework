@@ -29,11 +29,18 @@ readonly class Router implements RouterInterface
 		}
 	}
 
-	public function register(): void
+	public function up(): void
 	{
 		foreach ($this->routes as $route) {
 			$closure = $route->closure();
 			$closure();
 		}
+
+		flush_rewrite_rules();
+	}
+
+	public function down(): void
+	{
+		flush_rewrite_rules();
 	}
 }

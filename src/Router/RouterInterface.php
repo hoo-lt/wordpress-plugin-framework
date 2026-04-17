@@ -10,5 +10,7 @@ interface RouterInterface
 
 	public function __invoke(): void;
 
-	public function register(): void;
+	public function up(): void;
+
+	public function down(): void;
 }
