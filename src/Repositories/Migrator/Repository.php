@@ -4,39 +4,38 @@ namespace Hoo\WordPressPluginFramework\Repositories\Database\Migrator;
 
 class Repository implements RepositoryInterface
 {
-	protected const OPTION = 'hoo_wordpress_plugin_framework_database_migrator';
+	protected array $migrations;
 
-	protected array $hashes;
-
-	public function __construct()
-	{
-		$this->hashes = get_option(self::OPTION, []);
+	public function __construct(
+		protected string $key,
+	) {
+		$this->migrations = get_option($this->key, []);
 	}
 
-	public function has(string $hash): bool
+	public function has(string $name): bool
 	{
-		return isset($this->hashes[$hash]);
+		return isset($this->migrations[$name]);
 	}
 
-	public function add(string $hash): void
+	public function add(string $name): void
 	{
-		if ($this->has($hash)) {
+		if ($this->has($name)) {
 			return;
 		}
 
-		$this->hashes[$hash] = time();
+		$this->migrations[$name] = time();
 
-		update_option(self::OPTION, $this->hashes);
+		update_option($this->key, $this->migrations);
 	}
 
-	public function remove(string $hash): void
+	public function remove(string $name): void
 	{
-		if (!$this->has($hash)) {
+		if (!$this->has($name)) {
 			return;
 		}
 
-		unset($this->hashes[$hash]);
+		unset($this->migrations[$name]);
 
-		update_option(self::OPTION, $this->hashes);
+		update_option($this->key, $this->migrations);
 	}
 }

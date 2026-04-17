@@ -27,6 +27,11 @@ readonly class Route implements RouteInterface
 		return new self(Type::Filter, $hook, $handler, $priority);
 	}
 
+	public static function feed(string $feedname, Closure $handler): self
+	{
+		return self::action('init', fn() => add_feed($feedname, $handler));
+	}
+
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): self
 	{
 		return new self(

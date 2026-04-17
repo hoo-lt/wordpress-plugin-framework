@@ -4,5 +4,6 @@ namespace Hoo\WordPressPluginFramework\Database\Migrator;
 
 interface MigratorInterface
 {
-	public function migrate(): void;
+	public function up(): void;
+	public function down(): void;
 }
