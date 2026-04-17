@@ -38,12 +38,7 @@ readonly class Route implements RouteInterface
 
 	public function hook(): HookInterface
 	{
-		return $this->hookFactory->action('rest_api_init', $this->closure());
-	}
-
-	public function closure(): Closure
-	{
-		return fn() => register_rest_route(
+		return $this->hookFactory->action('rest_api_init', fn() => register_rest_route(
 			$this->namespace,
 			$this->route,
 			[
@@ -53,6 +48,6 @@ readonly class Route implements RouteInterface
 				(fn() => ($this->closure)(...$args)),
 				'permission_callback' => fn() => true,
 			]
-		);
+		));
 	}
 }

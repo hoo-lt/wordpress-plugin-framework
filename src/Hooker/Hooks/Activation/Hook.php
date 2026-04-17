@@ -27,6 +27,11 @@ readonly class Hook implements HookInterface
 		);
 	}
 
+	public function closure(): Closure
+	{
+		return $this->closure;
+	}
+
 	public function __invoke(): void
 	{
 		register_activation_hook(

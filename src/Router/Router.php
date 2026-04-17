@@ -32,7 +32,7 @@ readonly class Router implements RouterInterface
 	public function up(): void
 	{
 		foreach ($this->routes as $route) {
-			$closure = $route->closure();
+			$closure = $route->hook()->closure();
 			$closure();
 		}
 

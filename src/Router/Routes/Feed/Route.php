@@ -33,16 +33,11 @@ readonly class Route implements RouteInterface
 
 	public function hook(): HookInterface
 	{
-		return $this->hookFactory->action('init', $this->closure());
-	}
-
-	public function closure(): Closure
-	{
-		return fn() => add_feed(
+		return $this->hookFactory->action('init', fn() => add_feed(
 			$this->name,
 			fn(mixed ...$args) => $this->pipeline
 				->withMiddlewares(...$this->middlewares)
 			(fn() => ($this->closure)(...$args))
-		);
+		));
 	}
 }
