@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\VerifyNonce;
 
-use Hoo\WordPressPluginFramework\Http\RequestInterface;
+use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareTrait;

@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Router\Routes;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Router\Routes\Rest\Method\Method;
+use Hoo\WordPressPluginFramework\Http\Method\Method;
 
 interface RouteFactoryInterface
 {

@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 
 use Closure;
 use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
-use Hoo\WordPressPluginFramework\Router\Routes\Rest\Method\Method;
+use Hoo\WordPressPluginFramework\Http\Method\Method;
 use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
 use Hoo\WordPressPluginFramework\Hooker\Hooks\HookFactoryInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
