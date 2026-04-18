@@ -4,5 +4,5 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan\Capab
 
 enum Capability: string
 {
-	case ManageWoocommerce = 'manage_woocommerce';
+	case ManageWooCommerce = 'manage_woocommerce';
 }
