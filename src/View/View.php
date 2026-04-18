@@ -36,7 +36,7 @@ readonly class View implements ViewInterface
 
 		try {
 			(static function ($path, $values) {
-				extract($values);
+				extract($values, EXTR_SKIP);
 
 				require($path);
 			})($path, $this->values);

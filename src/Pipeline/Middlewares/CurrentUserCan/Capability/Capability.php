@@ -2,8 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan\Capability;
 
-enum Capability: string implements CapabilityInterface
+enum Capability: string
 {
-	case Hearts = 'H';
-	case Diamonds = 'D';
+	case ManageWoocommerce = 'manage_woocommerce';
 }

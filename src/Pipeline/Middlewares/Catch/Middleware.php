@@ -1,7 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Catch;
 
+use Closure;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareTrait;
@@ -11,16 +12,17 @@ readonly class Middleware implements MiddlewareInterface
 	use MiddlewareTrait;
 
 	public function __construct(
-		protected Capability\Capability $capability,
+		protected MiddlewareInterface $middleware,
+		protected Closure $closure,
 	) {
 	}
 
 	public function __invoke(callable $callable): mixed
 	{
-		if (!current_user_can($this->capability->value)) {
-			throw new MiddlewareException('can not');
+		try {
+			return ($this->middleware)($callable);
+		} catch (MiddlewareException $middlewareException) {
+			return ($this->closure)($middlewareException);
 		}
-
-		return $callable();
 	}
 }

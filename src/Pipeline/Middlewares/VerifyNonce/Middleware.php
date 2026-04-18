@@ -5,23 +5,17 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\VerifyNonce;
 use Hoo\WordPressPluginFramework\Http\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareTrait;
 
 readonly class Middleware implements MiddlewareInterface
 {
+	use MiddlewareTrait;
+
 	public function __construct(
 		protected RequestInterface $request,
 		protected string $name,
-		protected string|int $action = -1,
+		protected string|int $action,
 	) {
-	}
-
-	public function withAction(string|int $action): self
-	{
-		return new self(
-			$this->request,
-			$this->name,
-			$action,
-		);
 	}
 
 	public function __invoke(callable $callable): mixed
