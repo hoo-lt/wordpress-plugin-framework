@@ -6,8 +6,8 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\Rule
 
 interface InputInterface
 {
-	public function name(): string;
+	public function key(): string;
 	public function value(): mixed;
 	public function rules(): array;
-	public function withRule(RuleInterface $rule): InputInterface;
+	public function withRules(RuleInterface ...$rules): InputInterface;
 }

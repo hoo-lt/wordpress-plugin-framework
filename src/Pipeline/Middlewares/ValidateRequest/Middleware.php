@@ -21,80 +21,65 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function post(string $name): self
+	public function withInput(InputInterface $input): self
 	{
 		return new self(
 			$this->request,
 			$this->inputs(),
+			$input,
+		);
+	}
+
+	public function post(string $key): self
+	{
+		return $this->withInput(
 			new Input\Post(
 				$this->request,
-				$name
-			)
+				$key,
+			),
 		);
 	}
 
-	public function get(string $name): self
+	public function get(string $key): self
 	{
-		return new self(
-			$this->request,
-			$this->inputs(),
+		return $this->withInput(
 			new Input\Get(
 				$this->request,
-				$name
-			)
+				$key,
+			),
 		);
 	}
 
-	public function int(): self
+	public function withRules(RuleInterface ...$rules): self
 	{
 		return new self(
 			$this->request,
 			$this->inputs,
-			$this->input->withRule(
-				new Rules\Int\Rule()
+			$this->input->withRules(
+				...$rules
 			)
 		);
 	}
 
 	public function float(): self
 	{
-		return new self(
-			$this->request,
-			$this->inputs,
-			$this->input->withRule(
-				new Rules\Float\Rule()
-			)
+		return $this->withRules(
+			new Rules\Float\Rule(),
+		);
+	}
+
+	public function int(): self
+	{
+		return $this->withRules(
+			new Rules\Int\Rule(),
 		);
 	}
 
 	public function string(): self
 	{
-		return new self(
-			$this->request,
-			$this->inputs,
-			$this->input->withRule(
-				new Rules\String\Rule()
-			)
+		return $this->withRules(
+			new Rules\String\Rule(),
 		);
-	}
-
-	public function rule(RuleInterface $rule): self
-	{
-		return new self(
-			$this->request,
-			$this->inputs,
-			$this->input->withRule(
-				$rule
-			)
-		);
-	}
-
-	protected function inputs(): array
-	{
-		return $this->input ? [
-			...$this->inputs,
-			$this->input
-		] : $this->inputs;
 	}
 
 	public function __invoke(callable $callable): mixed
@@ -104,7 +89,7 @@ readonly class Middleware implements MiddlewareInterface
 		foreach ($this->inputs() as $input) {
 			foreach ($input->rules() as $rule) {
 				if (!$rule($input->value())) {
-					$errors[] = "{$input->name()} {$rule->error()}";
+					$errors[] = "{$input->key()} {$rule->error()}";
 				}
 			}
 		}
@@ -114,5 +99,13 @@ readonly class Middleware implements MiddlewareInterface
 		}
 
 		return $callable();
+	}
+
+	protected function inputs(): array
+	{
+		return $this->input ? [
+			...$this->inputs,
+			$this->input
+		] : $this->inputs;
 	}
 }

@@ -14,7 +14,7 @@ readonly class Get implements InputInterface
 	) {
 	}
 
-	public function name(): string
+	public function key(): string
 	{
 		return $this->name;
 	}
@@ -29,8 +29,15 @@ readonly class Get implements InputInterface
 		return $this->rules;
 	}
 
-	public function withRule(RuleInterface $rule): InputInterface
+	public function withRules(RuleInterface ...$rules): InputInterface
 	{
-		return new self($this->request, $this->name, [...$this->rules, $rule]);
+		return new self(
+			$this->request,
+			$this->name,
+			[
+				...$this->rules,
+				...$rules
+			]
+		);
 	}
 }
