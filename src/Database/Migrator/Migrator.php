@@ -40,7 +40,7 @@ readonly class Migrator implements MigratorInterface
 
 	protected function migrate(string $name, string $direction): void
 	{
-		$query = strtr(file_get_contents("{$this->path}/{$name}/{$direction}.sql"), [
+		$query = strtr(file_get_contents("{$this->path}/migrations/{$name}/{$direction}.sql"), [
 			':prefix' => $this->wpdb->prefix,
 		]);
 
@@ -53,17 +53,18 @@ readonly class Migrator implements MigratorInterface
 
 	protected function names(): array
 	{
-		$paths = glob("{$this->path}/*/", GLOB_ONLYDIR);
-
+		$paths = glob("{$this->path}/migrations/*/", GLOB_ONLYDIR);
 		if ($paths === false) {
 			throw new MigratorException('unable to list migrations');
 		}
 
 		$names = array_map(basename(...), $paths);
-
 		foreach ($names as $name) {
-			foreach (['up', 'down'] as $direction) {
-				if (!file_exists("{$this->path}/{$name}/{$direction}.sql")) {
+			foreach ([
+				'up',
+				'down'
+			] as $direction) {
+				if (!file_exists("{$this->path}/migrations/{$name}/{$direction}.sql")) {
 					throw new MigratorException("missing {$direction}.sql for {$name}");
 				}
 			}
