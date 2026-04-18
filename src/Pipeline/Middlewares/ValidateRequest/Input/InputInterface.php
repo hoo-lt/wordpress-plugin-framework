@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Input;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Input;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface;
 
 interface InputInterface
 {

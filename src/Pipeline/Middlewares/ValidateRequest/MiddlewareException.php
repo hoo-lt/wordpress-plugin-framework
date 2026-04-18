@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 

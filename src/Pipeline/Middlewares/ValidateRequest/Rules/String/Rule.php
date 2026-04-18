@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\String;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\String;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface;
 
 readonly class Rule implements RuleInterface
 {

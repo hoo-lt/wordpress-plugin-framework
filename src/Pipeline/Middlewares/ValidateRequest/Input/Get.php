@@ -1,11 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Input;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Input;
 
 use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface;
 
-readonly class Post implements InputInterface
+readonly class Get implements InputInterface
 {
 	public function __construct(
 		private RequestInterface $request,
@@ -21,7 +21,7 @@ readonly class Post implements InputInterface
 
 	public function value(): mixed
 	{
-		return $this->request->post($this->name);
+		return $this->request->get($this->name);
 	}
 
 	public function rules(): array

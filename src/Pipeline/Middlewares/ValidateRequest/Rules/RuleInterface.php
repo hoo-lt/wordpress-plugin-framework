@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules;
 
 interface RuleInterface
 {
