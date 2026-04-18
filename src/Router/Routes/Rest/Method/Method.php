@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Route\Rest\Method;
+namespace Hoo\WordPressPluginFramework\Router\Routes\Rest\Method;
 
 enum Method: string
 {

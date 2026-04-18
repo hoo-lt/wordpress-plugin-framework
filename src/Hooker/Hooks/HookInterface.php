@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hook;
+namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 
 interface HookInterface
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Middlewares\CurrentUserCan\Capability;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan\Capability;
 
 interface CapabilityInterface
 {

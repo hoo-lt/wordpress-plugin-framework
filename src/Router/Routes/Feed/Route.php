@@ -1,12 +1,12 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Route\Feed;
+namespace Hoo\WordPressPluginFramework\Router\Routes\Feed;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Route\RouteInterface;
-use Hoo\WordPressPluginFramework\Hook\HookInterface;
-use Hoo\WordPressPluginFramework\Hook\HookFactoryInterface;
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookFactoryInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
 
 readonly class Route implements RouteInterface

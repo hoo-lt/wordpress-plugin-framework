@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hook;
+namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
 
 use Closure;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;

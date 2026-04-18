@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Route;
+namespace Hoo\WordPressPluginFramework\Router\Routes;
 
-use Hoo\WordPressPluginFramework\Hook\HookInterface;
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 
 interface RouteInterface
 {

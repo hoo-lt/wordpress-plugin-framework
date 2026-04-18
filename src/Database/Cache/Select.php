@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Database\Cache;
 
 use Hoo\WordPressPluginFramework\Cache\CacheInterface;
-use Hoo\WordPressPluginFramework\Database\SelectInterface;
+use Hoo\WordPressPluginFramework\Database\Select\SelectInterface;
 use Hoo\WordPressPluginFramework\Database\Queries;
 
 readonly class Select implements SelectInterface

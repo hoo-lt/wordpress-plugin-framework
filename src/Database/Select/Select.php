@@ -1,7 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Database;
+namespace Hoo\WordPressPluginFramework\Database\Select;
 
+use Hoo\WordPressPluginFramework\Database\Queries;
 use wpdb;
 
 readonly class Select implements SelectInterface

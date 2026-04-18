@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Middlewares\CurrentUserCan;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareException;
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 
 readonly class Middleware implements MiddlewareInterface
 {

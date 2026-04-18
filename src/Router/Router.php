@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Router;
 
 use Hoo\WordPressPluginFramework\Hooker\HookerInterface;
-use Hoo\WordPressPluginFramework\Route\RouteInterface;
+use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
 
 readonly class Router implements RouterInterface
 {

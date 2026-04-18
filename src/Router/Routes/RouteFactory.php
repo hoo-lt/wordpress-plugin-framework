@@ -1,11 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Route;
+namespace Hoo\WordPressPluginFramework\Router\Routes;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hook\HookFactoryInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookFactoryInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
-use Hoo\WordPressPluginFramework\Route\Rest\Method\Method;
+use Hoo\WordPressPluginFramework\Router\Routes\Rest\Method\Method;
 
 readonly class RouteFactory implements RouteFactoryInterface
 {

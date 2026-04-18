@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Hooker;
 
-use Hoo\WordPressPluginFramework\Hook\HookInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
 
 readonly class Hooker implements HookerInterface
 {

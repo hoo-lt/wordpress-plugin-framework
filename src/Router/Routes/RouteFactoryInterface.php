@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Route;
+namespace Hoo\WordPressPluginFramework\Router\Routes;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Route\Rest\Method\Method;
+use Hoo\WordPressPluginFramework\Router\Routes\Rest\Method\Method;
 
 interface RouteFactoryInterface
 {

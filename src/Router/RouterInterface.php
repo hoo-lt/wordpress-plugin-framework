@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Hoo\WordPressPluginFramework\Route\RouteInterface;
+use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
 
 interface RouterInterface
 {

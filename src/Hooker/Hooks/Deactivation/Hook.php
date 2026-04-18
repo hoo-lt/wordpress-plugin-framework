@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hook\Deactivation;
+namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Deactivation;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hook\HookInterface;
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
 
 readonly class Hook implements HookInterface

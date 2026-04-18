@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Middlewares;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 
 interface MiddlewareInterface
 {

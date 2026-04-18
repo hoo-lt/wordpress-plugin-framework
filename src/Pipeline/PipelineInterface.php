@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline;
 
-use Hoo\WordPressPluginFramework\Middlewares;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 
 interface PipelineInterface
 {
