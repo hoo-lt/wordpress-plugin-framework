@@ -12,16 +12,17 @@ readonly class RouteFactory implements RouteFactoryInterface
 	public function __construct(
 		protected PipelineInterface $pipeline,
 		protected HookFactoryInterface $hookFactory,
+		protected string $namespace,
 	) {
 	}
 
 	public function feed(string $name, Closure $closure): RouteInterface
 	{
-		return new Feed\Route($this->pipeline, $this->hookFactory, $name, $closure);
+		return new Feed\Route($this->pipeline, $this->hookFactory, "{$this->namespace}-{$name}", $closure);
 	}
 
-	public function rest(string $namespace, string $route, Method $method, Closure $closure): RouteInterface
+	public function rest(string $route, Method $method, Closure $closure): RouteInterface
 	{
-		return new Rest\Route($this->pipeline, $this->hookFactory, $namespace, $route, $method, $closure);
+		return new Rest\Route($this->pipeline, $this->hookFactory, $this->namespace, $route, $method, $closure);
 	}
 }

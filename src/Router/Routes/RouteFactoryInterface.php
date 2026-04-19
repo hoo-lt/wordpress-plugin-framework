@@ -9,5 +9,5 @@ interface RouteFactoryInterface
 {
 	public function feed(string $name, Closure $closure): RouteInterface;
 
-	public function rest(string $namespace, string $route, Method $method, Closure $closure): RouteInterface;
+	public function rest(string $route, Method $method, Closure $closure): RouteInterface;
 }
