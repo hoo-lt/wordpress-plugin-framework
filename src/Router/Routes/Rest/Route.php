@@ -3,12 +3,14 @@
 namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
-use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
 use Hoo\WordPressPluginFramework\Hooker\Hooks\HookFactoryInterface;
+use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Http\Method\Method;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
+use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
+use WP_Error;
 
 readonly class Route implements RouteInterface
 {
@@ -43,9 +45,21 @@ readonly class Route implements RouteInterface
 			$this->route,
 			[
 				'methods' => $this->method->value,
-				'callback' => fn(mixed ...$args) => $this->pipeline
-					->withMiddlewares(...$this->middlewares)
-				(fn() => ($this->closure)(...$args)),
+				'callback' => function (mixed ...$args) {
+					try {
+						return $this->pipeline
+							->withMiddlewares(...$this->middlewares)
+						(fn() => ($this->closure)(...$args));
+					} catch (MiddlewareException $middlewareException) {
+						return new WP_Error(
+							'middleware_exception',
+							$middlewareException->getMessage(),
+							[
+								'status' => 400
+							],
+						);
+					}
+				},
 				'permission_callback' => fn() => true,
 			]
 		));

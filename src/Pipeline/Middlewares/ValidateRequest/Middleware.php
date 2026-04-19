@@ -61,6 +61,13 @@ readonly class Middleware implements MiddlewareInterface
 		);
 	}
 
+	public function bool(): self
+	{
+		return $this->withRules(
+			new Rules\Bool\Rule(),
+		);
+	}
+
 	public function float(): self
 	{
 		return $this->withRules(
