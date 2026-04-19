@@ -18,7 +18,7 @@ readonly class RouteFactory implements RouteFactoryInterface
 
 	public function feed(string $name, Closure $closure): RouteInterface
 	{
-		return new Feed\Route($this->pipeline, $this->hookFactory, "{$this->namespace}-{$name}", $closure);
+		return new Feed\Route($this->pipeline, $this->hookFactory, "{$this->namespace}/{$name}", $closure);
 	}
 
 	public function rest(string $route, Method $method, Closure $closure): RouteInterface
