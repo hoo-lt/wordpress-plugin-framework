@@ -6,7 +6,7 @@ use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
 
 interface RouterInterface
 {
-	public function withRoutes(RouteInterface ...$routes): static;
+	public function withRoutes(RouteInterface ...$routes): RouterInterface;
 
 	public function __invoke(): void;
 

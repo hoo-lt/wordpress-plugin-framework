@@ -28,8 +28,13 @@ readonly class View implements ViewInterface
 		$path = "{$this->path}/views/" . strtr($view, [
 			'.' => '/',
 		]) . '.php';
-		if (!file_exists($path)) {
-			throw new ViewException('view not found');
+
+		$realpath = realpath($path);
+		if (
+			$realpath === false ||
+			!str_starts_with($realpath, realpath("{$this->path}/views/"))
+		) {
+			throw new ViewException('invalid view path');
 		}
 
 		ob_start();

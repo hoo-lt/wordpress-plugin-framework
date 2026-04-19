@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Inpu
 use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface;
 
-readonly class Post implements InputInterface
+readonly class Body implements InputInterface
 {
 	public function __construct(
 		private RequestInterface $request,
@@ -21,7 +21,16 @@ readonly class Post implements InputInterface
 
 	public function value(): mixed
 	{
-		return $this->request->post($this->name);
+		return $this->request->body($this->name);
+	}
+
+	public function entries(): array
+	{
+		if (!str_contains($this->name, '*')) {
+			return [$this->name => $this->value()];
+		}
+
+		return $this->request->bodyValues($this->name);
 	}
 
 	public function rules(): array

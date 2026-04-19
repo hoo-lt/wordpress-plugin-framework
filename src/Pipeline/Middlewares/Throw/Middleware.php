@@ -12,6 +12,6 @@ readonly class Middleware implements MiddlewareInterface
 
 	public function __invoke(callable $callable): mixed
 	{
-		throw new MiddlewareException('just throwing to test pipeline');
+		throw new MiddlewareException('just throwing to test pipeline', 'throw_error');
 	}
 }

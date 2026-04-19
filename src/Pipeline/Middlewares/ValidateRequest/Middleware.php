@@ -30,20 +30,20 @@ readonly class Middleware implements MiddlewareInterface
 		);
 	}
 
-	public function post(string $key): self
+	public function body(string $key): self
 	{
 		return $this->withInput(
-			new Input\Post(
+			new Input\Body(
 				$this->request,
 				$key,
 			),
 		);
 	}
 
-	public function get(string $key): self
+	public function query(string $key): self
 	{
 		return $this->withInput(
-			new Input\Get(
+			new Input\Query(
 				$this->request,
 				$key,
 			),
@@ -94,9 +94,11 @@ readonly class Middleware implements MiddlewareInterface
 		$errors = [];
 
 		foreach ($this->inputs() as $input) {
-			foreach ($input->rules() as $rule) {
-				if (!$rule($input->value())) {
-					$errors[] = "{$input->key()} {$rule->error()}";
+			foreach ($input->entries() as $key => $value) {
+				foreach ($input->rules() as $rule) {
+					if (!$rule($value)) {
+						$errors[$key][] = $rule->error();
+					}
 				}
 			}
 		}

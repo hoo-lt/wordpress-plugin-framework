@@ -13,6 +13,6 @@ readonly class Rule implements RuleInterface
 
 	public function error(): string
 	{
-		return 'must be a number';
+		return 'must be a float';
 	}
 }

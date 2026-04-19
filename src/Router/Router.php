@@ -13,7 +13,7 @@ readonly class Router implements RouterInterface
 	) {
 	}
 
-	public function withRoutes(RouteInterface ...$routes): static
+	public function withRoutes(RouteInterface ...$routes): self
 	{
 		return new self(
 			$this->hooker,

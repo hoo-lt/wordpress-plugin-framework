@@ -13,6 +13,13 @@ readonly class Cache implements CacheInterface
 	{
 		$value = get_transient($key);
 		if ($value !== false) {
+			if (
+				!is_array($value) ||
+				!array_key_exists('value', $value)
+			) {
+				throw new CacheException('corrupted cache value');
+			}
+
 			return $value['value'];
 		}
 

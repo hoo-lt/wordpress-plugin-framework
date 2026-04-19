@@ -8,6 +8,7 @@ use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
 use Hoo\WordPressPluginFramework\Http\Method\Method;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\MiddlewareException as ValidationException;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
 use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
 use WP_Error;
@@ -50,12 +51,21 @@ readonly class Route implements RouteInterface
 						return $this->pipeline
 							->withMiddlewares(...$this->middlewares)
 						(fn() => ($this->closure)(...$args));
+					} catch (ValidationException $validationException) {
+						return new WP_Error(
+							$validationException->getCode(),
+							$validationException->getMessage(),
+							[
+								'status' => 422,
+								'errors' => $validationException->errors(),
+							],
+						);
 					} catch (MiddlewareException $middlewareException) {
 						return new WP_Error(
-							'middleware_exception',
+							$middlewareException->getCode(),
 							$middlewareException->getMessage(),
 							[
-								'status' => 400
+								'status' => 400,
 							],
 						);
 					}
