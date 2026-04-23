@@ -1,8 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Client\Response;
+namespace Hoo\WordPressPluginFramework\Http\Request;
 
-interface ResponseInterface
+use Hoo\WordPressPluginFramework\Http\Method\Method;
+use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
+
+interface RequestInterface
 {
 	public function headers(): array;
 	public function withHeaders(array $headers): static;
@@ -16,6 +19,9 @@ interface ResponseInterface
 	public function withBody(string $body): static;
 	public function withoutBody(): static;
 
-	public function statusCode(): int;
-	public function withStatusCode(int $statusCode): static;
+	public function method(): Method;
+	public function withMethod(Method $method): static;
+
+	public function url(): UrlInterface;
+	public function withUrl(UrlInterface $url): static;
 }

@@ -2,103 +2,122 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
+use Hoo\WordPressPluginFramework\Http\Headers\HeadersInterface;
 use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Http\Request\Body\Parser\ParserInterface;
+use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
 
 readonly class Request implements RequestInterface
 {
+	public function __construct(
+		protected HeadersInterface $headers,
+		protected ?string $body,
+		protected Method $method,
+		protected UrlInterface $url,
+	) {
+	}
 
+	public function headers(): array
+	{
+		return $this->headers->values();
+	}
+
+	public function withHeaders(array $headers): static
+	{
+		return new static(
+			$this->headers->with($headers),
+			$this->body,
+			$this->method,
+			$this->url,
+		);
+	}
+
+	public function withoutHeaders(): static
+	{
+		return new static(
+			$this->headers->without(),
+			$this->body,
+			$this->method,
+			$this->url,
+		);
+	}
+
+	public function header(string $name): ?string
+	{
+		return $this->headers->value($name);
+	}
+
+	public function withHeader(string $name, string $header): static
+	{
+		return new static(
+			$this->headers->withValue($name, $header),
+			$this->body,
+			$this->method,
+			$this->url,
+		);
+	}
+
+	public function withoutHeader(string $name): static
+	{
+		return new static(
+			$this->headers->withoutValue($name),
+			$this->body,
+			$this->method,
+			$this->url,
+		);
+	}
+
+	public function body(): ?string
+	{
+		return $this->body;
+	}
+
+	public function withBody(string $body): static
+	{
+		return new static(
+			$this->headers,
+			$body,
+			$this->method,
+			$this->url,
+		);
+	}
+
+	public function withoutBody(): static
+	{
+		return new static(
+			$this->headers,
+			null,
+			$this->method,
+			$this->url,
+		);
+	}
 
 	public function method(): Method
 	{
-		return Method::from($this->server['REQUEST_METHOD']);
+		return $this->method;
 	}
 
-	public function contentType(): ?string
+	public function withMethod(Method $method): static
 	{
-		return ($this->server['CONTENT_TYPE'] ?? null) ?: null;
+		return new static(
+			$this->headers,
+			$this->body,
+			$method,
+			$this->url,
+		);
 	}
 
-	public function query(?string $key = null): mixed
+	public function url(): UrlInterface
 	{
-		if ($key === null) {
-			return $this->get;
-		}
-
-		return $this->value($key, $this->get);
+		return $this->url;
 	}
 
-	public function body(?string $key = null): mixed
+	public function withUrl(UrlInterface $url): static
 	{
-		if ($key === null) {
-			return $this->parsedBody;
-		}
-
-		if ($this->parsedBody === null) {
-			return null;
-		}
-
-		return $this->value($key, $this->parsedBody);
-	}
-
-	public function bodyValues(string $key): array
-	{
-		if ($this->parsedBody === null) {
-			return [];
-		}
-
-		return $this->resolve(explode('.', $key), $this->parsedBody, '');
-	}
-
-	public function queryValues(string $key): array
-	{
-		return $this->resolve(explode('.', $key), $this->get, '');
-	}
-
-	protected function value(string $key, array $array): mixed
-	{
-		foreach (explode('.', $key) as $key) {
-			if (
-				!is_array($array) ||
-				!array_key_exists($key, $array)
-			) {
-				return null;
-			}
-
-			$array = $array[$key];
-		}
-
-		return $array;
-	}
-
-	protected function resolve(array $segments, mixed $data, string $prefix): array
-	{
-		if (empty($segments)) {
-			return [$prefix => $data];
-		}
-
-		$segment = array_shift($segments);
-
-		if ($segment === '*') {
-			if (!is_array($data)) {
-				return [];
-			}
-
-			$results = [];
-			foreach ($data as $index => $item) {
-				$newPrefix = $prefix === '' ? (string) $index : "{$prefix}.{$index}";
-				$results += $this->resolve($segments, $item, $newPrefix);
-			}
-
-			return $results;
-		}
-
-		if (!is_array($data) || !array_key_exists($segment, $data)) {
-			return [];
-		}
-
-		$newPrefix = $prefix === '' ? $segment : "{$prefix}.{$segment}";
-
-		return $this->resolve($segments, $data[$segment], $newPrefix);
+		return new static(
+			$this->headers,
+			$this->body,
+			$this->method,
+			$url,
+		);
 	}
 }

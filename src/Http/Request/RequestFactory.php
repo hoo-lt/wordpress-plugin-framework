@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Client\Request;
+namespace Hoo\WordPressPluginFramework\Http\Request;
 
 use Hoo\WordPressPluginFramework\Http\Headers\HeadersFactoryInterface;
 use Hoo\WordPressPluginFramework\Http\Method\Method;

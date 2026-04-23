@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Client\Response;
+namespace Hoo\WordPressPluginFramework\Http\Response;
 
 use Hoo\WordPressPluginFramework\Http\Headers\HeadersFactoryInterface;
 use Hoo\WordPressPluginFramework\Http\Headers\HeadersInterface;
