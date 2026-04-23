@@ -15,7 +15,7 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(callable $callable): mixed
+	public function __invoke(Closure $closure): mixed
 	{
 		if (!current_user_can($this->capability->value)) {
 			throw new MiddlewareException('can not', 'current_user_can_error');

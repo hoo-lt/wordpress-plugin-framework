@@ -2,59 +2,39 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
+use Hoo\WordPressPluginFramework\Http\Url\Scheme\Scheme;
+
 readonly class Url implements UrlInterface
 {
-	protected function __construct(
-		protected string $scheme,
-		protected string $host,
-		protected ?int $port,
-		protected string $path,
-		protected ?string $query,
+	protected string $host;
+	protected string $path;
+	protected ?int $port;
+
+	public function __construct(
+		protected Scheme $scheme,
+		string $host,
+		?int $port,
+		string $path,
+		protected array $query,
 	) {
-		if (
-			$scheme !== 'http' &&
-			$scheme !== 'https'
-		) {
-			throw new UrlException('http(s) only supported');
-		}
+		$this->validateHost($host);
+		$this->host = $this->normalizeHost($host);
 
-		if ($host === '') {
-			throw new UrlException('host is mandatory');
-		}
+		$this->validatePort($port);
+		$this->port = $this->normalizePort($port);
 
-		if (
-			$port !== null &&
-			(
-				$port < 1 ||
-				$port > 65535
-			)
-		) {
-			throw new UrlException('port must be within range');
-		}
-
-		if (
-			$path !== '' &&
-			$path[0] !== '/'
-		) {
-			throw new UrlException('Path must be empty or start with "/" when host is present');
-		}
+		$this->validatePath($path);
+		$this->path = $this->normalizePath($path);
 	}
 
-	public static function from(string $url): UrlInterface
-	{
-		return new self(
-			...self::parse($url)
-		);
-	}
-
-	public function scheme(): string
+	public function scheme(): Scheme
 	{
 		return $this->scheme;
 	}
 
-	public function withScheme(string $scheme): UrlInterface
+	public function withScheme(Scheme $scheme): static
 	{
-		return new self(
+		return new static(
 			$scheme,
 			$this->host,
 			$this->port,
@@ -68,9 +48,9 @@ readonly class Url implements UrlInterface
 		return $this->host;
 	}
 
-	public function withHost(string $host): UrlInterface
+	public function withHost(string $host): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$host,
 			$this->port,
@@ -84,9 +64,9 @@ readonly class Url implements UrlInterface
 		return $this->port;
 	}
 
-	public function withPort(int $port): UrlInterface
+	public function withPort(int $port): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$this->host,
 			$port,
@@ -95,9 +75,9 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function withoutPort(): UrlInterface
+	public function withoutPort(): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$this->host,
 			null,
@@ -111,9 +91,9 @@ readonly class Url implements UrlInterface
 		return $this->path;
 	}
 
-	public function withPath(string $path): UrlInterface
+	public function withPath(string $path): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
@@ -122,14 +102,14 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function query(): ?string
+	public function query(): array
 	{
 		return $this->query;
 	}
 
-	public function withQuery(string $query): UrlInterface
+	public function withQuery(array $query): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
@@ -138,57 +118,125 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function withoutQuery(): UrlInterface
+	public function withoutQuery(): static
 	{
-		return new self(
+		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			null,
+			[],
+		);
+	}
+
+	public function withQueryValue(string $key, string $value): static
+	{
+		$query = $this->query;
+		$query = [
+			...$query,
+			$key => $value,
+		];
+
+		return new static(
+			$this->scheme,
+			$this->host,
+			$this->port,
+			$this->path,
+			$query,
+		);
+	}
+
+	public function withoutQueryValue(string $key): static
+	{
+		$query = $this->query;
+		unset($query[$key]);
+
+		return new static(
+			$this->scheme,
+			$this->host,
+			$this->port,
+			$this->path,
+			$query,
 		);
 	}
 
 	public function __toString(): string
 	{
-		$scheme = $this->scheme();
-		$host = $this->host();
-		$port = $this->port();
-		$path = $this->path();
-		$query = $this->query();
+		$url = "{$this->scheme->value}://{$this->host}";
 
-		$url = "{$scheme}://{$host}";
-
-		if ($port !== null) {
-			$url .= ":{$port}";
+		if ($this->port !== null) {
+			$url .= ":{$this->port}";
 		}
 
-		$url .= $path;
+		$url .= $this->path;
 
-		if ($query !== null) {
-			$url .= "?{$query}";
+		if ($this->query !== []) {
+			$url .= '?' . http_build_query($this->query, '', '&', PHP_QUERY_RFC3986);
 		}
 
 		return $url;
 	}
 
-	protected static function parse(string $url): array
+	protected function validateHost(string $host): void
 	{
-		if ($url === '') {
-			throw new UrlException('url cannot be empty string');
+		if ($host === '') {
+			throw new UrlException('host is mandatory');
+		}
+	}
+
+	protected function normalizeHost(string $host): string
+	{
+		return strtolower($host);
+	}
+
+	protected function validatePort(?int $port): void
+	{
+		if (
+			$port !== null && (
+				$port < 1 ||
+				$port > 65535
+			)
+		) {
+			throw new UrlException('port must be within range');
+		}
+	}
+
+	protected function normalizePort(?int $port): ?int
+	{
+		return $port === $this->scheme->port() ? null : $port;
+	}
+
+	protected function validatePath(string $path): void
+	{
+		if (
+			$path !== '' &&
+			$path[0] !== '/'
+		) {
+			throw new UrlException('Path must be empty or start with "/" when host is present');
+		}
+	}
+
+	protected function normalizePath(string $path): string
+	{
+		$resolved = [];
+
+		$segments = explode('/', $path);
+		foreach ($segments as $segment) {
+			if ($segment === '..') {
+				array_pop($resolved);
+			} elseif ($segment !== '.') {
+				$resolved[] = $segment;
+			}
 		}
 
-		$url = parse_url($url);
-		if (!$url) {
-			throw new UrlException('seriously darmaged url');
+		$last = end($segments);
+		if (
+			$last === '..' ||
+			$last === '.'
+		) {
+			$resolved[] = '';
 		}
 
-		return [
-			'scheme' => $url['scheme'] ?? '',
-			'host' => $url['host'] ?? '',
-			'port' => $url['port'] ?? null,
-			'path' => $url['path'] ?? '',
-			'query' => $url['query'] ?? null,
-		];
+		return implode('/', $resolved);
 	}
 }

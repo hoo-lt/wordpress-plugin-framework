@@ -2,6 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Cache;
 
+use Closure;
+
 readonly class Cache implements CacheInterface
 {
 	public function __construct(
@@ -9,27 +11,22 @@ readonly class Cache implements CacheInterface
 	) {
 	}
 
-	public function remember(string $key, callable $callable): mixed
+	public function remember(string $key, Closure $closure): mixed
 	{
-		$value = get_transient($key);
-		if ($value !== false) {
-			if (
-				!is_array($value) ||
-				!array_key_exists('value', $value)
-			) {
+		$cacheDto = get_transient($key);
+		if ($cacheDto !== false) {
+			if (!$cacheDto instanceof CacheDto) {
 				throw new CacheException('corrupted cache value');
 			}
 
-			return $value['value'];
+			return $cacheDto->value;
 		}
 
-		$value = [
-			'value' => $callable(),
-		];
+		$cacheDto = new CacheDto($closure());
 
-		set_transient($key, $value, $this->ttl);
+		set_transient($key, $cacheDto, $this->ttl);
 
-		return $value['value'];
+		return $cacheDto->value;
 	}
 
 	public function forget(string $key): void

@@ -10,7 +10,7 @@ readonly class Middleware implements MiddlewareInterface
 {
 	use MiddlewareTrait;
 
-	public function __invoke(callable $callable): mixed
+	public function __invoke(Closure $closure): mixed
 	{
 		throw new MiddlewareException('just throwing to test pipeline', 'throw_error');
 	}

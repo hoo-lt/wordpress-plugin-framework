@@ -25,9 +25,7 @@ readonly class View implements ViewInterface
 
 	public function __invoke(string $view): string
 	{
-		$path = "{$this->path}/views/" . strtr($view, [
-			'.' => '/',
-		]) . '.php';
+		$path = "{$this->path}/views/" . str_replace('.', '/', $view) . '.php';
 
 		$realpath = realpath($path);
 		if (

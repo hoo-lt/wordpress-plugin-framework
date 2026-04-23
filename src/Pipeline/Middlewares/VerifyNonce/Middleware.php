@@ -19,7 +19,7 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(callable $callable): mixed
+	public function __invoke(Closure $closure): mixed
 	{
 		$nonce = match ($this->request->method()) {
 			Method::Post, Method::Put, Method::Patch => $this->request->body($this->name),

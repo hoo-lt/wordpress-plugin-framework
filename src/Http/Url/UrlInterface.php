@@ -2,19 +2,28 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
+use Hoo\WordPressPluginFramework\Http\Url\Scheme\Scheme;
+
 interface UrlInterface
 {
-	public function scheme(): string;
-	public function withScheme(string $scheme): UrlInterface;
+	public function scheme(): Scheme;
+	public function withScheme(Scheme $scheme): static;
+
 	public function host(): string;
-	public function withHost(string $host): UrlInterface;
+	public function withHost(string $host): static;
+
 	public function port(): ?int;
-	public function withPort(int $port): UrlInterface;
-	public function withoutPort(): UrlInterface;
+	public function withPort(int $port): static;
+	public function withoutPort(): static;
+
 	public function path(): string;
-	public function withPath(string $path): UrlInterface;
-	public function query(): ?string;
-	public function withQuery(string $query): UrlInterface;
-	public function withoutQuery(): UrlInterface;
+	public function withPath(string $path): static;
+
+	public function query(): array;
+	public function withQuery(array $query): static;
+	public function withoutQuery(): static;
+	public function withQueryValue(string $key, string $value): static;
+	public function withoutQueryValue(string $key): static;
+
 	public function __toString(): string;
 }

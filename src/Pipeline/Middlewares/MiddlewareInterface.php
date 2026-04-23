@@ -6,6 +6,6 @@ use Closure;
 
 interface MiddlewareInterface
 {
-	public function __invoke(callable $callable): mixed;
+	public function __invoke(Closure $closure): mixed;
 	public function catch(Closure $closure): MiddlewareInterface;
 }
