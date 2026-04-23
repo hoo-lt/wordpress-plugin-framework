@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
 use Hoo\WordPressPluginFramework\Http\Method\Method;
+use Hoo\WordPressPluginFramework\Http\Request\Body\BodyInterface;
 use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
 
 interface RequestInterface
@@ -15,8 +16,8 @@ interface RequestInterface
 	public function withHeader(string $name, string $header): static;
 	public function withoutHeader(string $name): static;
 
-	public function body(): ?string;
-	public function withBody(string $body): static;
+	public function body(): ?BodyInterface;
+	public function withBody(BodyInterface $body): static;
 	public function withoutBody(): static;
 
 	public function method(): Method;

@@ -22,7 +22,9 @@ interface UrlInterface
 	public function query(): array;
 	public function withQuery(array $query): static;
 	public function withoutQuery(): static;
-	public function withQueryValue(string $key, string $value): static;
+
+	public function queryValue(string $key): mixed;
+	public function withQueryValue(string $key, mixed $value): static;
 	public function withoutQueryValue(string $key): static;
 
 	public function __toString(): string;

@@ -2,7 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http\Url\Scheme\Scheme;
+use Hoo\WordPressPluginFramework\Http\Url\{
+	Query\QueryInterface,
+	Scheme\Scheme,
+};
 
 readonly class Url implements UrlInterface
 {
@@ -15,7 +18,7 @@ readonly class Url implements UrlInterface
 		string $host,
 		?int $port,
 		string $path,
-		protected array $query,
+		protected QueryInterface $query,
 	) {
 		$this->validateHost($host);
 		$this->host = $this->normalizeHost($host);
@@ -104,7 +107,7 @@ readonly class Url implements UrlInterface
 
 	public function query(): array
 	{
-		return $this->query;
+		return $this->query->values();
 	}
 
 	public function withQuery(array $query): static
@@ -114,7 +117,7 @@ readonly class Url implements UrlInterface
 			$this->host,
 			$this->port,
 			$this->path,
-			$query,
+			$this->query->with($query),
 		);
 	}
 
@@ -125,38 +128,34 @@ readonly class Url implements UrlInterface
 			$this->host,
 			$this->port,
 			$this->path,
-			[],
+			$this->query->without(),
 		);
 	}
 
-	public function withQueryValue(string $key, string $value): static
+	public function queryValue(string $key): mixed
 	{
-		$query = $this->query;
-		$query = [
-			...$query,
-			$key => $value,
-		];
+		return $this->query->value($key);
+	}
 
+	public function withQueryValue(string $key, mixed $value): static
+	{
 		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$query,
+			$this->query->withValue($key, $value),
 		);
 	}
 
 	public function withoutQueryValue(string $key): static
 	{
-		$query = $this->query;
-		unset($query[$key]);
-
 		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$query,
+			$this->query->withoutValue($key),
 		);
 	}
 
@@ -170,8 +169,9 @@ readonly class Url implements UrlInterface
 
 		$url .= $this->path;
 
-		if ($this->query !== []) {
-			$url .= '?' . http_build_query($this->query, '', '&', PHP_QUERY_RFC3986);
+		$query = (string) $this->query;
+		if ($query !== '') {
+			$url .= "?$query";
 		}
 
 		return $url;
@@ -208,31 +208,46 @@ readonly class Url implements UrlInterface
 
 	protected function validatePath(string $path): void
 	{
+		// RFC 3986 §3.3: with authority, path must be empty or begin with "/" (path-abempty).
 		if (
 			$path !== '' &&
 			$path[0] !== '/'
 		) {
-			throw new UrlException('Path must be empty or start with "/" when host is present');
+			throw new UrlException('path must be empty or begin with "/" when authority is present');
 		}
 	}
 
 	protected function normalizePath(string $path): string
 	{
-		$resolved = [];
-
-		$segments = explode('/', $path);
-		foreach ($segments as $segment) {
-			if ($segment === '..') {
-				array_pop($resolved);
-			} elseif ($segment !== '.') {
-				$resolved[] = $segment;
-			}
+		// RFC 3986 §5.2.4: remove_dot_segments. Validation guarantees path is '' or starts with '/'.
+		if ($path === '') {
+			return '';
 		}
 
+		$resolved = [];
+		$segments = explode('/', $path);
+
+		foreach ($segments as $segment) {
+			if ($segment === '.') {
+				continue;
+			}
+
+			if ($segment === '..') {
+				// Never pop the leading '' that represents the root '/'.
+				if (count($resolved) > 1) {
+					array_pop($resolved);
+				}
+				continue;
+			}
+
+			$resolved[] = $segment;
+		}
+
+		// Preserve trailing slash when the last segment was '.' or '..'.
 		$last = end($segments);
 		if (
-			$last === '..' ||
-			$last === '.'
+			$last === '.' ||
+			$last === '..'
 		) {
 			$resolved[] = '';
 		}

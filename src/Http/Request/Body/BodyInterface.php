@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Headers;
+namespace Hoo\WordPressPluginFramework\Http\Request\Body;
 
-interface HeadersInterface
+interface BodyInterface
 {
-	public function with(array $headers): static;
+	public function with(array $values): static;
 	public function without(): static;
 
 	public function values(): array;

@@ -2,19 +2,33 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
+use Hoo\WordPressPluginFramework\Helpers;
+
 readonly class Headers implements HeadersInterface
 {
 	protected array $headers;
 
-	public function __construct(array $headers)
+	public function __construct(
+		protected Helpers\Array\HelperInterface $arrayHelper,
+		array $headers
+	) {
+		$this->headers = $this->normalizeHeaders($headers);
+	}
+
+	public function with(array $headers): static
 	{
-		$normalized = [];
+		return new static(
+			$this->arrayHelper,
+			$headers
+		);
+	}
 
-		foreach ($headers as $name => $value) {
-			$normalized[strtolower($name)] = $value;
-		}
-
-		$this->headers = $normalized;
+	public function without(): static
+	{
+		return new static(
+			$this->arrayHelper,
+			[]
+		);
 	}
 
 	public function values(): array
@@ -22,34 +36,35 @@ readonly class Headers implements HeadersInterface
 		return $this->headers;
 	}
 
-	public function value(string $name): ?string
+	public function value(string $key): mixed
 	{
-		return $this->headers[strtolower($name)] ?? null;
+		return $this->arrayHelper->value($this->headers, strtolower($key));
 	}
 
-	public function with(array $headers): static
+	public function withValue(string $key, mixed $value): static
 	{
-		return new static($headers);
+		return new static(
+			$this->arrayHelper,
+			$this->arrayHelper->withValue($this->headers, strtolower($key), $value)
+		);
 	}
 
-	public function without(): static
+	public function withoutValue(string $key): static
 	{
-		return new static([]);
+		return new static(
+			$this->arrayHelper,
+			$this->arrayHelper->withoutValue($this->headers, strtolower($key)),
+		);
 	}
 
-	public function withValue(string $name, string $value): static
+	protected function normalizeHeaders(array $headers): array
 	{
-		return new static([
-			...$this->headers,
-			strtolower($name) => $value,
-		]);
-	}
+		$normalizedHeaders = [];
 
-	public function withoutValue(string $name): static
-	{
-		$headers = $this->headers;
-		unset($headers[strtolower($name)]);
+		foreach ($headers as $key => $value) {
+			$normalizedHeaders[strtolower($key)] = $value;
+		}
 
-		return new static($headers);
+		return $normalizedHeaders;
 	}
 }

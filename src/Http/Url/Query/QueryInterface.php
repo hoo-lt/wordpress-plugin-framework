@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Headers;
+namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
-interface HeadersInterface
+interface QueryInterface
 {
-	public function with(array $headers): static;
+	public function with(array $query): static;
 	public function without(): static;
 
 	public function values(): array;
@@ -12,4 +12,6 @@ interface HeadersInterface
 	public function value(string $key): mixed;
 	public function withValue(string $key, mixed $value): static;
 	public function withoutValue(string $key): static;
+
+	public function __toString(): string;
 }

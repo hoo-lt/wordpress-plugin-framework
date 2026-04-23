@@ -4,13 +4,14 @@ namespace Hoo\WordPressPluginFramework\Http\Request;
 
 use Hoo\WordPressPluginFramework\Http\Headers\HeadersInterface;
 use Hoo\WordPressPluginFramework\Http\Method\Method;
+use Hoo\WordPressPluginFramework\Http\Request\Body\BodyInterface;
 use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
 
 readonly class Request implements RequestInterface
 {
 	public function __construct(
 		protected HeadersInterface $headers,
-		protected ?string $body,
+		protected ?BodyInterface $body,
 		protected Method $method,
 		protected UrlInterface $url,
 	) {
@@ -66,12 +67,12 @@ readonly class Request implements RequestInterface
 		);
 	}
 
-	public function body(): ?string
+	public function body(): ?BodyInterface
 	{
 		return $this->body;
 	}
 
-	public function withBody(string $body): static
+	public function withBody(BodyInterface $body): static
 	{
 		return new static(
 			$this->headers,
