@@ -3,7 +3,6 @@
 namespace Hoo\WordPressPluginFramework\Http\Request\Body;
 
 use Hoo\WordPressPluginFramework\Helpers;
-use Hoo\WordPressPluginFramework\Json\JsonException;
 use Hoo\WordPressPluginFramework\Json\JsonInterface;
 
 readonly class BodyFactory implements BodyFactoryInterface
@@ -23,8 +22,8 @@ readonly class BodyFactory implements BodyFactoryInterface
 			'application/x-www-form-urlencoded' => $this->parseForm($raw),
 			default => throw new BodyFactoryException(
 				$mediaType === ''
-					? 'content-type is required to parse body'
-					: "unsupported content-type \"{$mediaType}\""
+				? 'content-type is required to parse body'
+				: "unsupported content-type \"{$mediaType}\""
 			),
 		};
 
@@ -52,11 +51,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 			return [];
 		}
 
-		try {
-			return $this->json->decode($raw);
-		} catch (JsonException $e) {
-			throw new BodyFactoryException("invalid json body: {$e->getMessage()}", 0, $e);
-		}
+		return $this->json->decode($raw);
 	}
 
 	protected function parseForm(string $raw): array
