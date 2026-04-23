@@ -7,15 +7,7 @@ use Hoo\WordPressPluginFramework\Http\Request\Body\Parser\ParserInterface;
 
 readonly class Request implements RequestInterface
 {
-	protected ?array $parsedBody;
 
-	public function __construct(
-		protected ParserInterface $parser,
-		protected array $server,
-		protected array $get,
-	) {
-		$this->parsedBody = ($this->parser)();
-	}
 
 	public function method(): Method
 	{
