@@ -2,140 +2,187 @@
 
 namespace Hoo\WordPressPluginFramework\Helpers\Array;
 
-readonly class Helper implements HelperInterface
+use InvalidArgumentException;
+
+readonly class Helper
 {
 	public function value(array $array, string $key): mixed
 	{
-		return $this->walkGet($array, explode('.', $key));
+		$keys = $this->keys($key);
+		$values = $this->valuesByKeys($array, $keys, []);
+
+		if (in_array('*', $keys, true)) {
+			return array_values($values);
+		}
+
+		return reset($values);
+	}
+
+	public function values(array $array, string $key): array
+	{
+		$keys = $this->keys($key);
+		$values = $this->valuesByKeys($array, $keys, []);
+
+		return $values;
 	}
 
 	public function withValue(array $array, string $key, mixed $value): array
 	{
-		return $this->walkAdd($array, explode('.', $key), $value);
+		return $this->withValueByKeys($array, $this->keys($key), $value);
 	}
 
 	public function withoutValue(array $array, string $key): array
 	{
-		return $this->walkRemove($array, explode('.', $key));
+		return $this->withoutValueByKeys($array, $this->keys($key));
 	}
 
-	/**
-	 * @param list<string> $keys
-	 */
-	protected function walkGet(mixed $array, array $keys): mixed
+	protected function keys(string $key): array
+	{
+		if ($key === '') {
+			throw new InvalidArgumentException('Key must not be empty.');
+		}
+
+		$keys = explode('.', $key);
+		if (in_array('', $keys, true)) {
+			throw new InvalidArgumentException(
+				sprintf('Key "%s" contains an empty key.', $key)
+			);
+		}
+
+		return $keys;
+	}
+
+	protected function valuesByKeys(mixed $array, array $keys, array $path): array
 	{
 		if ($keys === []) {
-			return $array;
+			return [
+				implode('.', $path) => $array
+			];
 		}
 
 		$key = array_shift($keys);
-		if ($key === '*') {
-			if (!is_array($array)) {
-				return null;
-			}
-
-			$result = [];
-			foreach ($array as $item) {
-				$result[] = $this->walkGet($item, $keys);
-			}
-
-			if (!in_array('*', $keys, true)) {
-				return $result;
-			}
-
-			return array_merge([], ...array_filter($result, 'is_array'));
-		}
-
-		if (!is_array($array) || !array_key_exists($key, $array)) {
-			return null;
-		}
-
-		return $this->walkGet($array[$key], $keys);
+		return $key === '*' ? $this->valuesByWildcardKey($array, $key, $keys, $path) : $this->valuesByKey($array, $key, $keys, $path);
 	}
 
-	/**
-	 * @param list<string> $keys
-	 */
-	protected function walkAdd(mixed $array, array $keys, mixed $value): mixed
+	protected function valuesByWildcardKey(mixed $array, string $key, array $keys, array $path): array
+	{
+		if (!is_array($array)) {
+			return $this->missing($path, $key, $keys);
+		}
+
+		$values = [];
+
+		foreach ($array as $key => $array) {
+			$values += $this->valuesByKeys($array, $keys, [
+				...$path,
+				$key
+			]);
+		}
+
+		return $values;
+	}
+
+	protected function valuesByKey(mixed $array, string $key, array $keys, array $path): array
+	{
+		if (
+			!is_array($array) ||
+			!array_key_exists($key, $array)
+		) {
+			return $this->missing($path, $key, $keys);
+		}
+
+		return $this->valuesByKeys($array[$key], $keys, [
+			...$path,
+			$key
+		]);
+	}
+
+	protected function missing(array $path, string $key, array $keys): array
+	{
+		return [
+			implode('.', [
+				...$path,
+				$key,
+				...$keys
+			]) => null
+		];
+	}
+
+	protected function withValueByKeys(mixed $array, array $keys, mixed $value): mixed
 	{
 		if ($keys === []) {
 			return $value;
 		}
 
 		$key = array_shift($keys);
-		if ($key === '*') {
-			if (!is_array($array)) {
-				return [];
-			}
+		return $key === '*' ? $this->withValueByWildcardKey($array, $keys, $value) : $this->withValueByKey($array, $key, $keys, $value);
+	}
 
-			$result = [];
-			foreach ($array as $index => $item) {
-				if ($keys === []) {
-					$result[$index] = $value;
-					continue;
-				}
-				if (!is_array($item)) {
-					$item = [];
-				}
-				$result[$index] = $this->walkAdd($item, $keys, $value);
-			}
-			return $result;
-		}
-
+	protected function withValueByWildcardKey(mixed $array, array $keys, mixed $value): mixed
+	{
 		if (!is_array($array)) {
-			$array = [];
-		}
-
-		if ($keys === []) {
-			$array[$key] = $value;
 			return $array;
 		}
 
-		$existing = $array[$key] ?? null;
-		if (!is_array($existing)) {
-			$existing = [];
+		$result = [];
+
+		foreach ($array as $key => $child) {
+			$result[$key] = $this->withValueByKeys($child, $keys, $value);
 		}
 
-		$array[$key] = $this->walkAdd($existing, $keys, $value);
-		return $array;
+		return $result;
 	}
 
-	/**
-	 * @param list<string> $keys
-	 */
-	protected function walkRemove(mixed $array, array $keys): mixed
+	protected function withValueByKey(mixed $array, string $key, array $keys, mixed $value): array
+	{
+		$array = is_array($array) ? $array : [];
+
+		return array_replace($array, [
+			$key => $this->withValueByKeys($array[$key] ?? null, $keys, $value)
+		]);
+	}
+
+	protected function withoutValueByKeys(mixed $array, array $keys): mixed
 	{
 		if ($keys === []) {
 			return $array;
 		}
+
+		$key = array_shift($keys);
+		return $key === '*' ? $this->withoutValueByWildcardKey($array, $keys) : $this->withoutValueByKey($array, $key, $keys);
+	}
+
+	protected function withoutValueByWildcardKey(mixed $array, array $keys): mixed
+	{
 		if (!is_array($array)) {
 			return $array;
 		}
 
-		$key = array_shift($keys);
-		if ($key === '*') {
-			$result = [];
-			foreach ($array as $index => $item) {
-				if ($keys === []) {
-					continue;
-				}
-				$result[$index] = is_array($item)
-					? $this->walkRemove($item, $keys)
-					: $item;
-			}
-			return $result;
+		if ($keys === []) {
+			return [];
 		}
 
-		if (!array_key_exists($key, $array)) {
+		$result = [];
+
+		foreach ($array as $key => $child) {
+			$result[$key] = $this->withoutValueByKeys($child, $keys);
+		}
+
+		return $result;
+	}
+
+	protected function withoutValueByKey(mixed $array, string $key, array $keys): mixed
+	{
+		if (!is_array($array) || !array_key_exists($key, $array)) {
 			return $array;
 		}
 
 		if ($keys === []) {
-			unset($array[$key]);
-			return $array;
+			return array_diff_key($array, [$key => null]);
 		}
 
-		$array[$key] = $this->walkRemove($array[$key], $keys);
-		return $array;
+		return array_replace($array, [
+			$key => $this->withoutValueByKeys($array[$key], $keys)
+		]);
 	}
 }

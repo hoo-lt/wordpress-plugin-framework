@@ -21,7 +21,7 @@ readonly class Body implements InputInterface
 
 	public function value(): mixed
 	{
-		return $this->request->body($this->name);
+		return $this->request->body()->value($this->name);
 	}
 
 	public function entries(): array
