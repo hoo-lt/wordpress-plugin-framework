@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Request\Body;
+namespace Hoo\WordPressPluginFramework\Http\Body;
 
 use RuntimeException;
 

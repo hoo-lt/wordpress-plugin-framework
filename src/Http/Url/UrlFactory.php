@@ -14,26 +14,6 @@ readonly class UrlFactory implements UrlFactoryInterface
 	) {
 	}
 
-	public function from(
-		string $scheme,
-		string $host,
-		?int $port,
-		string $path,
-		array $query
-	): UrlInterface {
-		return new Url(
-			Scheme::from(
-				$scheme
-			),
-			$host,
-			$port,
-			$path,
-			$this->queryFactory->from(
-				$query
-			)
-		);
-	}
-
 	public function fromUrl(string $url): UrlInterface
 	{
 		$parsed = parse_url($url);

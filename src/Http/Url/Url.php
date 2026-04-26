@@ -3,8 +3,8 @@
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
 use Hoo\WordPressPluginFramework\Http\Url\{
-	Query\QueryInterface,
 	Scheme\Scheme,
+	Query\QueryInterface
 };
 
 readonly class Url implements UrlInterface
@@ -18,7 +18,7 @@ readonly class Url implements UrlInterface
 		string $host,
 		?int $port,
 		string $path,
-		protected QueryInterface $query,
+		protected ?QueryInterface $query,
 	) {
 		$this->validateHost($host);
 		$this->host = $this->normalizeHost($host);
@@ -105,19 +105,19 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function query(): array
+	public function query(): QueryInterface
 	{
-		return $this->query->values();
+		return $this->query;
 	}
 
-	public function withQuery(array $query): static
+	public function withQuery(QueryInterface $query): static
 	{
 		return new static(
 			$this->scheme,
 			$this->host,
 			$this->port,
 			$this->path,
-			$this->query->with($query),
+			$query,
 		);
 	}
 
@@ -128,7 +128,7 @@ readonly class Url implements UrlInterface
 			$this->host,
 			$this->port,
 			$this->path,
-			$this->query->without(),
+			null,
 		);
 	}
 
@@ -169,9 +169,8 @@ readonly class Url implements UrlInterface
 
 		$url .= $this->path;
 
-		$query = (string) $this->query;
-		if ($query !== '') {
-			$url .= "?$query";
+		if ($this->query !== '') {
+			$url .= "?{$this->query}";
 		}
 
 		return $url;

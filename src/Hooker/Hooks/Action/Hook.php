@@ -4,6 +4,7 @@ namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Action;
 
 use Closure;
 use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
 
@@ -40,7 +41,7 @@ readonly class Hook implements HookInterface
 			$this->name,
 			fn(mixed ...$args) => $this->pipeline
 				->withMiddlewares(...$this->middlewares)
-			(fn() => ($this->closure)(...$args)),
+			(fn(?RequestInterface $request) => ($this->closure)($request, ...$args)),
 			$this->priority,
 			PHP_INT_MAX
 		);

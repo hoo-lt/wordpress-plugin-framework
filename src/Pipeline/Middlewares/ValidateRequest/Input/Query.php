@@ -8,29 +8,19 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\Rule
 readonly class Query implements InputInterface
 {
 	public function __construct(
-		private RequestInterface $request,
-		private string $name,
+		private string $key,
 		private array $rules = [],
 	) {
 	}
 
 	public function key(): string
 	{
-		return $this->name;
+		return $this->key;
 	}
 
-	public function value(): mixed
+	public function values(RequestInterface $request): array
 	{
-		return $this->request->query($this->name);
-	}
-
-	public function entries(): array
-	{
-		if (!str_contains($this->name, '*')) {
-			return [$this->name => $this->value()];
-		}
-
-		return $this->request->queryValues($this->name);
+		return $request->url()->query()->values($this->key);
 	}
 
 	public function rules(): array
@@ -41,8 +31,7 @@ readonly class Query implements InputInterface
 	public function withRules(RuleInterface ...$rules): InputInterface
 	{
 		return new self(
-			$this->request,
-			$this->name,
+			$this->key,
 			[
 				...$this->rules,
 				...$rules

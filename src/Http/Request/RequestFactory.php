@@ -26,15 +26,11 @@ readonly class RequestFactory implements RequestFactoryInterface
 	public function fromServer(array $server, ?string $body): RequestInterface
 	{
 		$headers = $this->headersFactory->fromServer($server);
-
-		$bodyObject = null;
-		if ($body !== null && $body !== '') {
-			$bodyObject = $this->bodyFactory->from($body, $headers->value('content-type'));
-		}
+		$body = $this->bodyFactory->from($body, $headers->value('content-type'));
 
 		return new Request(
 			$headers,
-			$bodyObject,
+			$body,
 			Method::from($server['REQUEST_METHOD']),
 			$this->urlFactory->fromServer($server)
 		);

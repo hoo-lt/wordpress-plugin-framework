@@ -2,6 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 
+use Closure;
 use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\{
 	MiddlewareInterface,
@@ -15,7 +16,6 @@ readonly class Middleware implements MiddlewareInterface
 	use MiddlewareTrait;
 
 	public function __construct(
-		protected RequestInterface $request,
 		protected array $inputs = [],
 		protected ?InputInterface $input = null,
 	) {
@@ -24,7 +24,6 @@ readonly class Middleware implements MiddlewareInterface
 	public function withInput(InputInterface $input): self
 	{
 		return new self(
-			$this->request,
 			$this->inputs(),
 			$input,
 		);
@@ -33,27 +32,20 @@ readonly class Middleware implements MiddlewareInterface
 	public function body(string $key): self
 	{
 		return $this->withInput(
-			new Input\Body(
-				$this->request,
-				$key,
-			),
+			new Input\Body($key),
 		);
 	}
 
 	public function query(string $key): self
 	{
 		return $this->withInput(
-			new Input\Query(
-				$this->request,
-				$key,
-			),
+			new Input\Query($key),
 		);
 	}
 
 	public function withRules(RuleInterface ...$rules): self
 	{
 		return new self(
-			$this->request,
 			$this->inputs,
 			$this->input->withRules(
 				...$rules
@@ -89,12 +81,16 @@ readonly class Middleware implements MiddlewareInterface
 		);
 	}
 
-	public function __invoke(Closure $closure): mixed
+	public function __invoke(?RequestInterface $request, Closure $closure): mixed
 	{
+		if ($request === null) {
+			throw new MiddlewareException();
+		}
+
 		$errors = [];
 
 		foreach ($this->inputs() as $input) {
-			foreach ($input->entries() as $key => $value) {
+			foreach ($input->values($request) as $key => $value) {
 				foreach ($input->rules() as $rule) {
 					if (!$rule($value)) {
 						$errors[$key][] = $rule->error();
@@ -107,14 +103,14 @@ readonly class Middleware implements MiddlewareInterface
 			throw new MiddlewareException($errors);
 		}
 
-		return $callable();
+		return $closure($request);
 	}
 
 	protected function inputs(): array
 	{
 		return $this->input ? [
 			...$this->inputs,
-			$this->input
+			$this->input,
 		] : $this->inputs;
 	}
 }

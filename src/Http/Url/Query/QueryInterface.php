@@ -4,10 +4,7 @@ namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
 interface QueryInterface
 {
-	public function with(array $query): static;
-	public function without(): static;
-
-	public function values(): array;
+	public function values(string $key): array;
 
 	public function value(string $key): mixed;
 	public function withValue(string $key, mixed $value): static;

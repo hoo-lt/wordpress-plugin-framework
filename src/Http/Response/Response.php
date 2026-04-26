@@ -2,17 +2,37 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
-use Hoo\WordPressPluginFramework\Http\Headers\HeadersInterface;
+use Hoo\WordPressPluginFramework\Http\{
+	Body,
+	Headers,
+};
 
 readonly class Response implements ResponseInterface
 {
 	public function __construct(
-		protected HeadersInterface $headers,
-		protected ?string $body,
 		protected int $statusCode,
+		protected Headers\HeadersFactoryInterface $headersFactory,
+		protected ?Headers\HeadersInterface $headers,
+		protected Body\BodyFactoryInterface $bodyFactory,
+		protected ?Body\BodyInterface $body,
 	) {
 		$this->validateStatusCode($statusCode);
 	}
+
+	public function statusCode(): int
+	{
+		return $this->statusCode;
+	}
+
+	public function withStatusCode(int $statusCode): static
+	{
+		return new static(
+			$this->headers,
+			$this->body,
+			$statusCode,
+		);
+	}
+
 
 	public function headers(): array
 	{
@@ -80,20 +100,6 @@ readonly class Response implements ResponseInterface
 			$this->headers,
 			null,
 			$this->statusCode,
-		);
-	}
-
-	public function statusCode(): int
-	{
-		return $this->statusCode;
-	}
-
-	public function withStatusCode(int $statusCode): static
-	{
-		return new static(
-			$this->headers,
-			$this->body,
-			$statusCode,
 		);
 	}
 

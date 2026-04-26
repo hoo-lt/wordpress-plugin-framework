@@ -2,47 +2,46 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
-use Hoo\WordPressPluginFramework\Helpers;
+use Hoo\WordPressPluginFramework\{
+	Helpers,
+	Http,
+};
 
 readonly class Query implements QueryInterface
 {
 	public function __construct(
 		protected Helpers\Array\HelperInterface $arrayHelper,
+		protected Http\Coders\Query\Coder $queryCoder,
 		protected array $query,
 	) {
 	}
 
-	public function with(array $query): static
+	public function values(string $key): array
 	{
-		return new static(
-			$this->arrayHelper,
-			$query
+		return $this->arrayHelper->values(
+			$this->query,
+			$key
 		);
-	}
-
-	public function without(): static
-	{
-		return new static(
-			$this->arrayHelper,
-			[]
-		);
-	}
-
-	public function values(): array
-	{
-		return $this->query;
 	}
 
 	public function value(string $key): mixed
 	{
-		return $this->arrayHelper->value($this->query, $key);
+		return $this->arrayHelper->value(
+			$this->query,
+			$key
+		);
 	}
 
 	public function withValue(string $key, mixed $value): static
 	{
 		return new static(
 			$this->arrayHelper,
-			$this->arrayHelper->withValue($this->query, $key, $value)
+			$this->queryCoder,
+			$this->arrayHelper->withValue(
+				$this->query,
+				$key,
+				$value
+			)
 		);
 	}
 
@@ -50,12 +49,16 @@ readonly class Query implements QueryInterface
 	{
 		return new static(
 			$this->arrayHelper,
-			$this->arrayHelper->withoutValue($this->query, $key)
+			$this->queryCoder,
+			$this->arrayHelper->withoutValue(
+				$this->query,
+				$key
+			)
 		);
 	}
 
 	public function __toString(): string
 	{
-		return http_build_query($this->query, '', '&', PHP_QUERY_RFC3986);
+		return $this->queryCoder->encode($this->query);
 	}
 }

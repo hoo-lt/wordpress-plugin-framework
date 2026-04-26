@@ -8,29 +8,19 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Rules\Rule
 readonly class Body implements InputInterface
 {
 	public function __construct(
-		private RequestInterface $request,
-		private string $name,
+		private string $key,
 		private array $rules = [],
 	) {
 	}
 
 	public function key(): string
 	{
-		return $this->name;
+		return $this->key;
 	}
 
-	public function value(): mixed
+	public function values(RequestInterface $request): array
 	{
-		return $this->request->body()->value($this->name);
-	}
-
-	public function entries(): array
-	{
-		if (!str_contains($this->name, '*')) {
-			return [$this->name => $this->value()];
-		}
-
-		return $this->request->bodyValues($this->name);
+		return $request->body()->value($this->key);
 	}
 
 	public function rules(): array
@@ -38,11 +28,10 @@ readonly class Body implements InputInterface
 		return $this->rules;
 	}
 
-	public function withRules(RuleInterface ...$rules): InputInterface
+	public function withRules(RuleInterface ...$rules): static
 	{
 		return new self(
-			$this->request,
-			$this->name,
+			$this->key,
 			[
 				...$this->rules,
 				...$rules,

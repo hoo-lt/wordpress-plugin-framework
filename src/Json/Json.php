@@ -6,19 +6,19 @@ use Throwable;
 
 readonly class Json implements JsonInterface
 {
-	public function decode(string $json): array
+	public function decode(string $string): mixed
 	{
 		try {
-			return json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+			return json_decode($string, true, 512, JSON_THROW_ON_ERROR);
 		} catch (Throwable $throwable) {
 			throw new JsonException($throwable->getMessage());
 		}
 	}
 
-	public function encode(array $json): string
+	public function encode(mixed $mixed): string
 	{
 		try {
-			return json_encode($json, JSON_THROW_ON_ERROR, 512);
+			return json_encode($mixed, JSON_THROW_ON_ERROR, 512);
 		} catch (Throwable $throwable) {
 			throw new JsonException($throwable->getMessage());
 		}

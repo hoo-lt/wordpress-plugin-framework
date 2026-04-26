@@ -2,6 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\VerifyNonce;
 
+use Closure;
 use Hoo\WordPressPluginFramework\Http\Method\Method;
 use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
@@ -13,17 +14,20 @@ readonly class Middleware implements MiddlewareInterface
 	use MiddlewareTrait;
 
 	public function __construct(
-		protected RequestInterface $request,
 		protected string $name,
 		protected string|int $action,
 	) {
 	}
 
-	public function __invoke(Closure $closure): mixed
+	public function __invoke(?RequestInterface $request, Closure $closure): mixed
 	{
-		$nonce = match ($this->request->method()) {
-			Method::Post, Method::Put, Method::Patch => $this->request->body($this->name),
-			default => $this->request->query($this->name),
+		if ($request === null) {
+			throw new MiddlewareException('no request provided', 500);
+		}
+
+		$nonce = match ($request->method()) {
+			Method::Post, Method::Put, Method::Patch => $request->body()->value($this->name),
+			default => $request->url()->query()->value($this->name),
 		};
 
 		if (!$nonce) {
@@ -34,6 +38,6 @@ readonly class Middleware implements MiddlewareInterface
 			throw new MiddlewareException('error verifying nonce', 'verify_nonce_error');
 		}
 
-		return $callable();
+		return $closure($request);
 	}
 }

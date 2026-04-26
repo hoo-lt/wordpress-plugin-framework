@@ -4,8 +4,16 @@ namespace Hoo\WordPressPluginFramework\Helpers\Array;
 
 use InvalidArgumentException;
 
-readonly class Helper
+readonly class Helper implements HelperInterface
 {
+	public function values(array $array, string $key): array
+	{
+		$keys = $this->keys($key);
+		$values = $this->valuesByKeys($array, $keys, []);
+
+		return $values;
+	}
+
 	public function value(array $array, string $key): mixed
 	{
 		$keys = $this->keys($key);
@@ -16,14 +24,6 @@ readonly class Helper
 		}
 
 		return reset($values);
-	}
-
-	public function values(array $array, string $key): array
-	{
-		$keys = $this->keys($key);
-		$values = $this->valuesByKeys($array, $keys, []);
-
-		return $values;
 	}
 
 	public function withValue(array $array, string $key, mixed $value): array

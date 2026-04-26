@@ -2,7 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http\Url\Scheme\Scheme;
+use Hoo\WordPressPluginFramework\Http\Url\{
+	Scheme\Scheme,
+	Query\QueryInterface
+};
 
 interface UrlInterface
 {
@@ -19,8 +22,8 @@ interface UrlInterface
 	public function path(): string;
 	public function withPath(string $path): static;
 
-	public function query(): array;
-	public function withQuery(array $query): static;
+	public function query(): QueryInterface;
+	public function withQuery(QueryInterface $query): static;
 	public function withoutQuery(): static;
 
 	public function queryValue(string $key): mixed;

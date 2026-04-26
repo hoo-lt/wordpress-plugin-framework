@@ -4,8 +4,7 @@ namespace Hoo\WordPressPluginFramework\Http\Headers;
 
 interface HeadersInterface
 {
-	public function with(array $headers): static;
-	public function without(): static;
+	public function __invoke(): array;
 
 	public function values(): array;
 
