@@ -18,10 +18,12 @@ readonly class QueryFactory implements QueryFactoryInterface
 
 	public function from(string $query): QueryInterface
 	{
+		$decodedQuery = $this->queryCoder->decode($query);
+
 		return new Query(
 			$this->keyValueHelper,
 			$this->queryCoder,
-			$this->queryCoder->decode($query),
+			$decodedQuery,
 		);
 	}
 

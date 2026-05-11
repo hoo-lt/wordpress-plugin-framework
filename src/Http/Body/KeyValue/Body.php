@@ -12,14 +12,14 @@ readonly class Body implements BodyInterface
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
 		protected Http\Coders\EncoderInterface $encoder,
-		protected array $keyValueBody,
+		protected array $body,
 	) {
 	}
 
 	public function values(string $key): array
 	{
 		return $this->keyValueHelper->values(
-			$this->keyValueBody,
+			$this->body,
 			$key,
 		);
 	}
@@ -27,7 +27,7 @@ readonly class Body implements BodyInterface
 	public function value(string $key): mixed
 	{
 		return $this->keyValueHelper->value(
-			$this->keyValueBody,
+			$this->body,
 			$key,
 		);
 	}
@@ -38,7 +38,7 @@ readonly class Body implements BodyInterface
 			$this->keyValueHelper,
 			$this->encoder,
 			$this->keyValueHelper->withValue(
-				$this->keyValueBody,
+				$this->body,
 				$key,
 				$value,
 			),
@@ -51,7 +51,7 @@ readonly class Body implements BodyInterface
 			$this->keyValueHelper,
 			$this->encoder,
 			$this->keyValueHelper->withoutValue(
-				$this->keyValueBody,
+				$this->body,
 				$key,
 			),
 		);
@@ -59,6 +59,6 @@ readonly class Body implements BodyInterface
 
 	public function __toString(): string
 	{
-		return $this->encoder->encode($this->keyValueBody);
+		return $this->encoder->encode($this->body);
 	}
 }

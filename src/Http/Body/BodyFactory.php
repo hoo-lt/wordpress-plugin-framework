@@ -53,12 +53,12 @@ readonly class BodyFactory implements BodyFactoryInterface
 		Http\Coders\EncoderInterface $encoder,
 		string $body,
 	): BodyInterface {
-		$keyValueBody = $decoder->decode($body);
+		$decodedBody = $decoder->decode($body);
 
-		return is_array($keyValueBody) ? new KeyValue\Body(
+		return is_array($decodedBody) ? new KeyValue\Body(
 			$this->keyValueHelper,
 			$encoder,
-			$keyValueBody
+			$decodedBody
 		) : new Body($body);
 	}
 }

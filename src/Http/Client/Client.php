@@ -12,7 +12,7 @@ readonly class Client implements ClientInterface
 	) {
 	}
 
-	public function send(Http\Request\RequestInterface $request): Http\Response\ResponseInterface
+	public function request(Http\Request\RequestInterface $request): Http\Response\ResponseInterface
 	{
 		$response = wp_safe_remote_request(
 			$request->url(),

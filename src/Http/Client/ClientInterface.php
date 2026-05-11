@@ -9,5 +9,5 @@ use Hoo\WordPressPluginFramework\Http\{
 
 interface ClientInterface
 {
-	public function send(RequestInterface $request): ResponseInterface;
+	public function request(RequestInterface $request): ResponseInterface;
 }
