@@ -18,7 +18,7 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(?RequestInterface $request, Closure $closure): mixed
+	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
 		try {
 			return ($this->middleware)($closure)($request);

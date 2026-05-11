@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
+use Hoo\WordPressPluginFramework\Http;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\{
 	MiddlewareInterface,
 	MiddlewareTrait,
@@ -81,10 +81,10 @@ readonly class Middleware implements MiddlewareInterface
 		);
 	}
 
-	public function __invoke(?RequestInterface $request, Closure $closure): mixed
+	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
 	{
-		if ($request === null) {
-			throw new MiddlewareException();
+		if (!$request->body() instanceof Http\Body\KeyValue\BodyInterface) {
+			throw new MiddlewareException([]);
 		}
 
 		$errors = [];

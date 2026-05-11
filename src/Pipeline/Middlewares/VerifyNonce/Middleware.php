@@ -19,14 +19,10 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(?RequestInterface $request, Closure $closure): mixed
+	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
-		if ($request === null) {
-			throw new MiddlewareException('no request provided', 500);
-		}
-
 		$nonce = match ($request->method()) {
-			Method::Post, Method::Put, Method::Patch => $request->body()->value($this->name),
+			Method::Post, Method::Put, Method::Patch => $request->body()->value($this->name), //here do instanceof
 			default => $request->url()->query()->value($this->name),
 		};
 
