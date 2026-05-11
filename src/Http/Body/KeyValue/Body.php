@@ -1,34 +1,34 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Url\Query;
+namespace Hoo\WordPressPluginFramework\Http\Body\KeyValue;
 
 use Hoo\WordPressPluginFramework\{
 	Helpers,
 	Http,
 };
 
-readonly class Query implements QueryInterface
+readonly class Body implements BodyInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
 		protected Http\Coders\EncoderInterface $encoder,
-		protected array $query,
+		protected array $keyValueBody,
 	) {
 	}
 
 	public function values(string $key): array
 	{
 		return $this->keyValueHelper->values(
-			$this->query,
-			$key
+			$this->keyValueBody,
+			$key,
 		);
 	}
 
 	public function value(string $key): mixed
 	{
 		return $this->keyValueHelper->value(
-			$this->query,
-			$key
+			$this->keyValueBody,
+			$key,
 		);
 	}
 
@@ -38,10 +38,10 @@ readonly class Query implements QueryInterface
 			$this->keyValueHelper,
 			$this->encoder,
 			$this->keyValueHelper->withValue(
-				$this->query,
+				$this->keyValueBody,
 				$key,
-				$value
-			)
+				$value,
+			),
 		);
 	}
 
@@ -51,14 +51,14 @@ readonly class Query implements QueryInterface
 			$this->keyValueHelper,
 			$this->encoder,
 			$this->keyValueHelper->withoutValue(
-				$this->query,
-				$key
-			)
+				$this->keyValueBody,
+				$key,
+			),
 		);
 	}
 
 	public function __toString(): string
 	{
-		return $this->encoder->encode($this->query);
+		return $this->encoder->encode($this->keyValueBody);
 	}
 }

@@ -2,10 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Body;
 
+use Hoo\WordPressPluginFramework\Http;
+
 interface BodyFactoryInterface
 {
-	public function formBody(string $body): BodyInterface;
-	public function jsonBody(string $body): BodyInterface;
-
-	public function from(string $body, ?string $contentType): BodyInterface;
+	public function from(?string $contentType, string $body): BodyInterface;
+	public function fromServer(): ?BodyInterface;
 }

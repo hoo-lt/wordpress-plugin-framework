@@ -2,10 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http\Url\{
-	Scheme\Scheme,
-	Query\QueryInterface
-};
+use Hoo\WordPressPluginFramework\Http;
 
 readonly class Url implements UrlInterface
 {
@@ -14,11 +11,11 @@ readonly class Url implements UrlInterface
 	protected ?int $port;
 
 	public function __construct(
-		protected Scheme $scheme,
+		protected Http\Url\Scheme\Scheme $scheme,
 		string $host,
 		?int $port,
 		string $path,
-		protected ?QueryInterface $query,
+		protected ?Http\Url\Query\QueryInterface $query,
 	) {
 		$this->validateHost($host);
 		$this->host = $this->normalizeHost($host);
@@ -30,12 +27,12 @@ readonly class Url implements UrlInterface
 		$this->path = $this->normalizePath($path);
 	}
 
-	public function scheme(): Scheme
+	public function scheme(): Http\Url\Scheme\Scheme
 	{
 		return $this->scheme;
 	}
 
-	public function withScheme(Scheme $scheme): static
+	public function withScheme(Http\Url\Scheme\Scheme $scheme): static
 	{
 		return new static(
 			$scheme,
@@ -105,12 +102,12 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function query(): QueryInterface
+	public function query(): ?Http\Url\Query\QueryInterface
 	{
 		return $this->query;
 	}
 
-	public function withQuery(QueryInterface $query): static
+	public function withQuery(Http\Url\Query\QueryInterface $query): static
 	{
 		return new static(
 			$this->scheme,
@@ -132,33 +129,6 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function queryValue(string $key): mixed
-	{
-		return $this->query->value($key);
-	}
-
-	public function withQueryValue(string $key, mixed $value): static
-	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$this->port,
-			$this->path,
-			$this->query->withValue($key, $value),
-		);
-	}
-
-	public function withoutQueryValue(string $key): static
-	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$this->port,
-			$this->path,
-			$this->query->withoutValue($key),
-		);
-	}
-
 	public function __toString(): string
 	{
 		$url = "{$this->scheme->value}://{$this->host}";
@@ -169,7 +139,7 @@ readonly class Url implements UrlInterface
 
 		$url .= $this->path;
 
-		if ($this->query !== '') {
+		if ($this->query !== null) {
 			$url .= "?{$this->query}";
 		}
 

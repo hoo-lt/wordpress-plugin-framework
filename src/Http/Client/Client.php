@@ -2,25 +2,20 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Client;
 
-use Hoo\WordPressPluginFramework\Http\{
-	Request\RequestInterface,
-	Request\RequestFactoryInterface,
-	Response\ResponseInterface,
-	Response\ResponseFactoryInterface
-};
+use Hoo\WordPressPluginFramework\Http;
 use WP_Error;
 
 readonly class Client implements ClientInterface
 {
 	public function __construct(
-		protected ResponseFactoryInterface $responseFactory,
+		protected Http\Response\ResponseFactoryInterface $responseFactory,
 	) {
 	}
 
-	public function send(RequestInterface $request): ResponseInterface
+	public function send(Http\Request\RequestInterface $request): Http\Response\ResponseInterface
 	{
 		$response = wp_safe_remote_request(
-			(string) $request->url(),
+			$request->url(),
 			[
 				'method' => $request->method()->value,
 				'headers' => $request->headers(),
@@ -32,11 +27,10 @@ readonly class Client implements ClientInterface
 			throw new ClientException($response->get_error_message());
 		}
 
-		return $this->responseFactory->fromArray(
+		return $this->responseFactory->from(
+			$response['response']['code'],
 			$response['headers']->getAll(),
 			$response['body'],
-			$response['response']['code'],
 		);
 	}
 }
-

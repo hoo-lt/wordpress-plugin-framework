@@ -10,17 +10,28 @@ use Hoo\WordPressPluginFramework\{
 readonly class QueryFactory implements QueryFactoryInterface
 {
 	public function __construct(
-		protected Helpers\Array\HelperInterface $arrayHelper,
+		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
 		protected Http\Coders\Query\CoderInterface $queryCoder,
+		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
-	public function fromQuery(string $query): QueryInterface
+	public function from(string $query): QueryInterface
 	{
 		return new Query(
-			$this->arrayHelper,
+			$this->keyValueHelper,
 			$this->queryCoder,
 			$this->queryCoder->decode($query),
 		);
+	}
+
+	public function fromServer(): ?QueryInterface
+	{
+		$query = $this->server->query();
+		if ($query === null) {
+			return null;
+		}
+
+		return $this->from($query);
 	}
 }

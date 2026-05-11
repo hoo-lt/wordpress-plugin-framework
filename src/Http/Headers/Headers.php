@@ -2,67 +2,78 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
-use Hoo\WordPressPluginFramework\Helpers;
+use ArrayIterator;
+use Traversable;
 
 readonly class Headers implements HeadersInterface
 {
 	protected array $headers;
 
 	public function __construct(
-		protected Helpers\Array\HelperInterface $arrayHelper,
-		array $headers
+		array $headers,
 	) {
 		$this->headers = $this->normalizeHeaders($headers);
 	}
 
 	public function with(array $headers): static
 	{
-		return new static(
-			$this->arrayHelper,
-			$headers
-		);
+		return new static($headers);
 	}
 
 	public function without(): static
 	{
-		return new static(
-			$this->arrayHelper,
-			[]
-		);
+		return new static([]);
 	}
 
-	public function values(): array
+	public function header(string $key): mixed
 	{
-		return $this->headers;
+		return $this->headers[strtolower($key)] ?? null;
 	}
 
-	public function value(string $key): mixed
+	public function withHeader(string $key, mixed $header): static
 	{
-		return $this->arrayHelper->value($this->headers, strtolower($key));
+		$headers = [
+			...$this->headers,
+			strtolower($key) => $header
+		];
+
+		return new static($headers);
 	}
 
-	public function withValue(string $key, mixed $value): static
+	public function withoutHeader(string $key): static
 	{
-		return new static(
-			$this->arrayHelper,
-			$this->arrayHelper->withValue($this->headers, strtolower($key), $value)
-		);
+		$headers = $this->headers;
+		unset($headers[strtolower($key)]);
+
+		return new static($headers);
 	}
 
-	public function withoutValue(string $key): static
+	public function contentLength(): ?int
 	{
-		return new static(
-			$this->arrayHelper,
-			$this->arrayHelper->withoutValue($this->headers, strtolower($key)),
-		);
+		return $this->headers['content-length'];
+	}
+
+	public function contentType(): ?string
+	{
+		return $this->headers['content-type'];
+	}
+
+	public function getIterator(): Traversable
+	{
+		return new ArrayIterator(array_headers($this->headers));
+	}
+
+	public function count(): int
+	{
+		return count($this->headers);
 	}
 
 	protected function normalizeHeaders(array $headers): array
 	{
 		$normalizedHeaders = [];
 
-		foreach ($headers as $key => $value) {
-			$normalizedHeaders[strtolower($key)] = $value;
+		foreach ($headers as $key => $header) {
+			$normalizedHeaders[strtolower($key)] = $header;
 		}
 
 		return $normalizedHeaders;

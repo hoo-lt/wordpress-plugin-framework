@@ -9,8 +9,8 @@ enum Scheme: string
 
 	public function port(): int
 	{
-		return match($this) {
-			self::Http  => 80,
+		return match ($this) {
+			self::Http => 80,
 			self::Https => 443,
 		};
 	}

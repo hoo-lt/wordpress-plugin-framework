@@ -2,23 +2,28 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
-use Hoo\WordPressPluginFramework\Http\Headers\HeadersFactoryInterface;
-use Hoo\WordPressPluginFramework\Http\Headers\HeadersInterface;
+use Hoo\WordPressPluginFramework\Http;
 
 readonly class ResponseFactory implements ResponseFactoryInterface
 {
 	public function __construct(
-		protected HeadersFactoryInterface $headersFactory,
+		protected Http\Headers\HeadersFactoryInterface $headersFactory,
+		protected Http\Body\BodyFactoryInterface $bodyFactory,
 	) {
 	}
 
-	public function from(HeadersInterface $headers, ?string $body, int $statusCode): ResponseInterface
+	public function from(int $statusCode, ?array $headers = null, ?string $body = null): ResponseInterface
 	{
-		return new Response($headers, $body, $statusCode);
-	}
+		$headers = $headers ? $this->headersFactory->from($headers) : null;
+		$body = $body ? $this->bodyFactory->from(
+			$headers->contentType(),
+			$body
+		) : null;
 
-	public function fromArray(array $headers, ?string $body, int $statusCode): ResponseInterface
-	{
-		return $this->from($this->headersFactory->from($headers), $body, $statusCode);
+		return new Response(
+			$statusCode,
+			$headers,
+			$body,
+		);
 	}
 }

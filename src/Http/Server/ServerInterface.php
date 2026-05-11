@@ -1,0 +1,21 @@
+<?php
+
+namespace Hoo\WordPressPluginFramework\Http\Server;
+
+interface ServerInterface
+{
+	public function method(): string;
+
+	public function scheme(): string;
+	public function host(): string;
+	public function port(): ?int;
+	public function path(): string;
+	public function query(): ?string;
+
+	public function headers(): ?array;
+
+	public function contentLength(): ?int;
+	public function contentType(): ?string;
+
+	public function body(): ?string;
+}

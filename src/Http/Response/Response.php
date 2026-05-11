@@ -2,19 +2,14 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
-use Hoo\WordPressPluginFramework\Http\{
-	Body,
-	Headers,
-};
+use Hoo\WordPressPluginFramework\Http;
 
 readonly class Response implements ResponseInterface
 {
 	public function __construct(
 		protected int $statusCode,
-		protected Headers\HeadersFactoryInterface $headersFactory,
-		protected ?Headers\HeadersInterface $headers,
-		protected Body\BodyFactoryInterface $bodyFactory,
-		protected ?Body\BodyInterface $body,
+		protected ?Http\Headers\HeadersInterface $headers,
+		protected ?Http\Body\BodyInterface $body,
 	) {
 		$this->validateStatusCode($statusCode);
 	}
@@ -27,85 +22,64 @@ readonly class Response implements ResponseInterface
 	public function withStatusCode(int $statusCode): static
 	{
 		return new static(
-			$this->headers,
-			$this->body,
 			$statusCode,
+			$this->headers(),
+			$this->body,
 		);
 	}
 
-
-	public function headers(): array
+	public function headers(): ?Http\Headers\HeadersInterface
 	{
-		return $this->headers->values();
+		return $this->headers;
 	}
 
-	public function withHeaders(array $headers): static
+	public function withHeaders(Http\Headers\HeadersInterface $headers): static
 	{
 		return new static(
-			$this->headers->with($headers),
-			$this->body,
 			$this->statusCode,
+			$headers,
+			$this->body,
 		);
 	}
 
 	public function withoutHeaders(): static
 	{
 		return new static(
-			$this->headers->without(),
-			$this->body,
 			$this->statusCode,
+			null,
+			$this->body,
 		);
 	}
 
-	public function header(string $name): ?string
-	{
-		return $this->headers->value($name);
-	}
-
-	public function withHeader(string $name, string $header): static
-	{
-		return new static(
-			$this->headers->withValue($name, $header),
-			$this->body,
-			$this->statusCode,
-		);
-	}
-
-	public function withoutHeader(string $name): static
-	{
-		return new static(
-			$this->headers->withoutValue($name),
-			$this->body,
-			$this->statusCode,
-		);
-	}
-
-	public function body(): ?string
+	public function body(): ?Http\Body\BodyInterface
 	{
 		return $this->body;
 	}
 
-	public function withBody(string $body): static
+	public function withBody(Http\Body\BodyInterface $body): static
 	{
 		return new static(
+			$this->statusCode,
 			$this->headers,
 			$body,
-			$this->statusCode,
 		);
 	}
 
 	public function withoutBody(): static
 	{
 		return new static(
+			$this->statusCode,
 			$this->headers,
 			null,
-			$this->statusCode,
 		);
 	}
 
-	private function validateStatusCode(int $statusCode): void
+	protected function validateStatusCode(int $statusCode): void
 	{
-		if ($statusCode < 100 || $statusCode > 599) {
+		if (
+			$statusCode < 100 ||
+			$statusCode > 599
+		) {
 			throw new ResponseException("Invalid HTTP status code: {$statusCode}");
 		}
 	}

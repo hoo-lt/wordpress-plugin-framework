@@ -87,5 +87,4 @@ abstract class AbstractCollection implements IteratorAggregate, Countable
 	{
 		return count($this->items);
 	}
-
 }

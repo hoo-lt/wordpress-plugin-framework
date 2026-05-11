@@ -2,37 +2,46 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
-use Hoo\WordPressPluginFramework\Http\Headers\HeadersFactoryInterface;
-use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Http\Request\Body\BodyFactoryInterface;
-use Hoo\WordPressPluginFramework\Http\Request\Body\BodyInterface;
-use Hoo\WordPressPluginFramework\Http\Url\UrlFactoryInterface;
-use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
+use Hoo\WordPressPluginFramework\Http;
 
-readonly class RequestFactory implements RequestFactoryInterface
+readonly class RequestFactory
 {
 	public function __construct(
-		protected UrlFactoryInterface $urlFactory,
-		protected HeadersFactoryInterface $headersFactory,
-		protected BodyFactoryInterface $bodyFactory,
+		protected Http\Url\UrlFactoryInterface $urlFactory,
+		protected Http\Headers\HeadersFactoryInterface $headersFactory,
+		protected Http\Body\BodyFactoryInterface $bodyFactory,
+		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
-	public function from(array $headers, ?BodyInterface $body, Method $method, UrlInterface $url): RequestInterface
+	public function from(string $method, string $url, ?array $headers, ?string $body): RequestInterface
 	{
-		return new Request($this->headersFactory->from($headers), $body, $method, $url);
-	}
-
-	public function fromServer(array $server, ?string $body): RequestInterface
-	{
-		$headers = $this->headersFactory->fromServer($server);
-		$body = $this->bodyFactory->from($body, $headers->value('content-type'));
+		$url = $this->urlFactory->from($url);
+		$headers = $headers ? $this->headersFactory->from($headers) : null;
+		$body = $body ? $this->bodyFactory->from(
+			$headers->contentType(),
+			$body
+		) : null;
 
 		return new Request(
+			Http\Method\Method::from(
+				$method
+			),
+			$url,
 			$headers,
 			$body,
-			Method::from($server['REQUEST_METHOD']),
-			$this->urlFactory->fromServer($server)
+		);
+	}
+
+	public function fromServer(): RequestInterface
+	{
+		return new Request(
+			Http\Method\Method::from(
+				$this->server->method(),
+			),
+			$this->urlFactory->fromServer(),
+			$this->headersFactory->fromServer(),
+			$this->bodyFactory->fromServer(),
 		);
 	}
 }

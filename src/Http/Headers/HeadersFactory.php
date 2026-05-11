@@ -2,51 +2,27 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
-use Hoo\WordPressPluginFramework\Helpers;
+use Hoo\WordPressPluginFramework\Http;
 
 readonly class HeadersFactory implements HeadersFactoryInterface
 {
 	public function __construct(
-		protected Helpers\Array\HelperInterface $arrayHelper,
+		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
 	public function from(array $headers): HeadersInterface
 	{
-		return new Headers(
-			$this->arrayHelper,
-			$headers
-		);
+		return new Headers($headers);
 	}
 
-	public function fromServer(array $server): HeadersInterface
+	public function fromServer(): ?HeadersInterface
 	{
-		$headers = [];
-
-		foreach ($server as $key => $value) {
-			if (!str_starts_with($key, 'HTTP_')) {
-				continue;
-			}
-
-			$key = strtr($key, [
-				'HTTP_' => '',
-				'_' => '-',
-			]);
-
-			$headers[$key] = $value;
+		$headers = $this->server->headers();
+		if ($headers === null) {
+			return null;
 		}
 
-		if (isset($server['CONTENT_TYPE'])) {
-			$headers['CONTENT-TYPE'] = $server['CONTENT_TYPE'];
-		}
-
-		if (isset($server['CONTENT_LENGTH'])) {
-			$headers['CONTENT-LENGTH'] = $server['CONTENT_LENGTH'];
-		}
-
-		return new Headers(
-			$this->arrayHelper,
-			$headers
-		);
+		return $this->from($headers);
 	}
 }

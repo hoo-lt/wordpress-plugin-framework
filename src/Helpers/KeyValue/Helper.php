@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Helpers\Array;
+namespace Hoo\WordPressPluginFramework\Helpers\KeyValue;
 
 use InvalidArgumentException;
 

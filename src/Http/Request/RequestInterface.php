@@ -2,27 +2,13 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
-use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Http\Request\Body\BodyInterface;
-use Hoo\WordPressPluginFramework\Http\Url\UrlInterface;
+use Hoo\WordPressPluginFramework\Http;
 
-interface RequestInterface
+interface RequestInterface extends Http\Message\MessageInterface
 {
-	public function headers(): array;
-	public function withHeaders(array $headers): static;
-	public function withoutHeaders(): static;
+	public function method(): Http\Method\Method;
+	public function withMethod(Http\Method\Method $method): static;
 
-	public function header(string $name): ?string;
-	public function withHeader(string $name, string $header): static;
-	public function withoutHeader(string $name): static;
-
-	public function body(): ?BodyInterface;
-	public function withBody(BodyInterface $body): static;
-	public function withoutBody(): static;
-
-	public function method(): Method;
-	public function withMethod(Method $method): static;
-
-	public function url(): UrlInterface;
-	public function withUrl(UrlInterface $url): static;
+	public function url(): Http\Url\UrlInterface;
+	public function withUrl(Http\Url\UrlInterface $url): static;
 }

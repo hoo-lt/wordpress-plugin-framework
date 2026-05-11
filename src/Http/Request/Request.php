@@ -2,72 +2,59 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
-use Hoo\WordPressPluginFramework\Http\{
-	Body,
-	Headers,
-	Method,
-	Url,
-};
+use Hoo\WordPressPluginFramework\Http;
 
-readonly class Request
+readonly class Request implements RequestInterface
 {
 	public function __construct(
-		protected Method\Method $method,
-		protected Url\UrlInterface $url,
-		protected Headers\HeadersFactoryInterface $headersFactory,
-		protected ?Headers\HeadersInterface $headers,
-		protected Body\BodyFactoryInterface $bodyFactory,
-		protected ?Body\BodyInterface $body,
+		protected Http\Method\Method $method,
+		protected Http\Url\UrlInterface $url,
+		protected ?Http\Headers\HeadersInterface $headers,
+		protected ?Http\Body\BodyInterface $body,
 	) {
 	}
 
-	public function method(): Method\Method
+	public function method(): Http\Method\Method
 	{
 		return $this->method;
 	}
 
-	public function withMethod(Method\Method $method): static
+	public function withMethod(Http\Method\Method $method): static
 	{
 		return new static(
 			$method,
 			$this->url,
-			$this->headersFactory,
 			$this->headers,
-			$this->bodyFactory,
 			$this->body,
 		);
 	}
 
-	public function url(): Url\UrlInterface
+	public function url(): Http\Url\UrlInterface
 	{
 		return $this->url;
 	}
 
-	public function withUrl(Url\UrlInterface $url): static
+	public function withUrl(Http\Url\UrlInterface $url): static
 	{
 		return new static(
 			$this->method,
 			$url,
-			$this->headersFactory,
 			$this->headers,
-			$this->bodyFactory,
 			$this->body,
 		);
 	}
 
-	public function headers(): ?array
+	public function headers(): ?Http\Headers\HeadersInterface
 	{
-		return $this->headers ? ($this->headers)() : null;
+		return $this->headers;
 	}
 
-	public function withHeaders(array $headers): static
+	public function withHeaders(Http\Headers\HeadersInterface $headers): static
 	{
 		return new static(
 			$this->method,
 			$this->url,
-			$this->headersFactory,
-			$this->headersFactory->from($headers),
-			$this->bodyFactory,
+			$headers,
 			$this->body,
 		);
 	}
@@ -77,85 +64,23 @@ readonly class Request
 		return new static(
 			$this->method,
 			$this->url,
-			$this->headersFactory,
 			null,
-			$this->bodyFactory,
 			$this->body,
 		);
 	}
 
-	public function header(string $name): ?string
-	{
-		return $this->headers->value($name);
-	}
-
-	public function withHeader(string $name, string $header): static
-	{
-		return new static(
-			$this->method,
-			$this->url,
-			$this->headersFactory,
-			$this->headers->withValue($name, $header),
-			$this->bodyFactory,
-			$this->body,
-		);
-	}
-
-	public function withoutHeader(string $name): static
-	{
-		return new static(
-			$this->method,
-			$this->url,
-			$this->headersFactory,
-			$this->headers->withoutValue($name),
-			$this->bodyFactory,
-			$this->body,
-		);
-	}
-
-
-
-
-
-
-	public function body(): ?Body\BodyInterface
+	public function body(): ?Http\Body\BodyInterface
 	{
 		return $this->body;
 	}
 
-	public function withBody(Body\BodyInterface $body): static
+	public function withBody(Http\Body\BodyInterface $body): static
 	{
 		return new static(
 			$this->method,
 			$this->url,
-			$this->headersFactory,
 			$this->headers,
-			$this->bodyFactory,
 			$body,
-		);
-	}
-
-	public function withJsonBody(string $body): static
-	{
-		return new static(
-			$this->method,
-			$this->url,
-			$this->headersFactory,
-			$this->headers,
-			$this->bodyFactory,
-			$this->bodyFactory->jsonBody($body),
-		);
-	}
-
-	public function withFormBody(string $body): static
-	{
-		return new static(
-			$this->method,
-			$this->url,
-			$this->headersFactory,
-			$this->headers,
-			$this->bodyFactory,
-			$this->bodyFactory->formBody($body),
 		);
 	}
 
@@ -164,9 +89,7 @@ readonly class Request
 		return new static(
 			$this->method,
 			$this->url,
-			$this->headersFactory,
 			$this->headers,
-			$this->bodyFactory,
 			null,
 		);
 	}

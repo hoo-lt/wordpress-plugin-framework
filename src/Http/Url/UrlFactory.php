@@ -2,46 +2,44 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http\Url\{
-	Query\QueryFactoryInterface,
-	Scheme\Scheme,
-};
+use Hoo\WordPressPluginFramework\Http;
 
 readonly class UrlFactory implements UrlFactoryInterface
 {
 	public function __construct(
-		protected QueryFactoryInterface $queryFactory
+		protected Http\Server\ServerInterface $server,
+		protected Http\Url\Query\QueryFactoryInterface $queryFactory,
 	) {
 	}
 
-	public function fromUrl(string $url): UrlInterface
+	public function from(string $url): UrlInterface
 	{
-		$parsed = parse_url($url);
-		if ($parsed === false) {
+		$url = parse_url($url);
+		if (!is_array($url)) {
 			throw new UrlFactoryException('seriously damaged url');
 		}
 
 		return new Url(
-			Scheme::from(
-				$parsed['scheme'] ?? '',
+			Scheme\Scheme::from(
+				isset($url['scheme']) ? $url['scheme'] : '',
 			),
-			$parsed['host'] ?? '',
-			$parsed['port'] ?? null,
-			$parsed['path'] ?? '',
-			$this->queryFactory->fromQuery(
-				$parsed['query'] ?? '',
-			),
+			isset($url['host']) ? $url['host'] : '',
+			isset($url['port']) ? $url['port'] : null,
+			isset($url['path']) ? $url['path'] : '',
+			isset($url['query']) ? $this->queryFactory->from($url['query']) : null,
 		);
 	}
 
-	public function fromServer(array $server): UrlInterface
+	public function fromServer(): UrlInterface
 	{
-		$scheme = !empty($server['HTTPS']) && $server['HTTPS'] !== 'off' ? 'https' : 'http';
-		$host = $server['HTTP_HOST'] ?? '';
-		$pathQuery = $server['REQUEST_URI'] ?? '';
-
-		$url = "{$scheme}://{$host}{$pathQuery}";
-
-		return $this->fromUrl($url);
+		return new Url(
+			Scheme\Scheme::from(
+				$this->server->scheme(),
+			),
+			$this->server->host(),
+			$this->server->port(),
+			$this->server->path(),
+			$this->queryFactory->fromServer(),
+		);
 	}
 }
