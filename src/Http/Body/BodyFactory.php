@@ -20,8 +20,16 @@ readonly class BodyFactory implements BodyFactoryInterface
 	public function from(?string $contentType, string $body): BodyInterface
 	{
 		return match ($contentType) {
-			'application/x-www-form-urlencoded' => $this->fromForm($body),
-			'application/json' => $this->fromJson($body),
+			'application/x-www-form-urlencoded' => $this->fromCoder(
+				$this->formCoder,
+				$this->formCoder,
+				$body,
+			),
+			'application/json' => $this->fromCoder(
+				$this->jsonCoder,
+				$this->jsonCoder,
+				$body,
+			),
 			default => new Body($body),
 		};
 	}
@@ -40,24 +48,16 @@ readonly class BodyFactory implements BodyFactoryInterface
 		);
 	}
 
-	protected function fromForm(string $body): BodyInterface
-	{
-		$keyValueBody = $this->formCoder->decode($body);
+	protected function fromCoder(
+		Http\Coders\DecoderInterface $decoder,
+		Http\Coders\EncoderInterface $encoder,
+		string $body,
+	): BodyInterface {
+		$keyValueBody = $decoder->decode($body);
 
 		return is_array($keyValueBody) ? new KeyValue\Body(
 			$this->keyValueHelper,
-			$this->formCoder,
-			$keyValueBody
-		) : new Body($body);
-	}
-
-	protected function fromJson(string $body): BodyInterface
-	{
-		$keyValueBody = $this->jsonCoder->decode($body);
-
-		return is_array($keyValueBody) ? new KeyValue\Body(
-			$this->keyValueHelper,
-			$this->jsonCoder,
+			$encoder,
 			$keyValueBody
 		) : new Body($body);
 	}

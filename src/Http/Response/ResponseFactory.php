@@ -17,7 +17,7 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 		$headers = $headers ? $this->headersFactory->from($headers) : null;
 		$body = $body ? $this->bodyFactory->from(
 			$headers->contentType(),
-			$body
+			$body,
 		) : null;
 
 		return new Response(
