@@ -3,15 +3,14 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\VerifyNonce;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareTrait;
+use Hoo\WordPressPluginFramework\{
+	Http,
+	Pipeline,
+};
 
-readonly class Middleware implements MiddlewareInterface
+readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 {
-	use MiddlewareTrait;
+	use Pipeline\Middlewares\MiddlewareTrait;
 
 	public function __construct(
 		protected string $name,
@@ -19,21 +18,25 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(RequestInterface $request, Closure $closure): mixed
+	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
 	{
-		$nonce = match ($request->method()) {
-			Method::Post, Method::Put, Method::Patch => $request->body()->value($this->name), //here do instanceof
-			default => $request->url()->query()->value($this->name),
-		};
-
+		$nonce = $this->nonce($request);
 		if (!$nonce) {
-			throw new MiddlewareException('nonce is not presented', 'verify_nonce_error');
+			throw new Pipeline\Middlewares\MiddlewareException('nonce is not presented', 'verify_nonce_error');
 		}
 
 		if (!wp_verify_nonce($nonce, $this->action)) {
-			throw new MiddlewareException('error verifying nonce', 'verify_nonce_error');
+			throw new Pipeline\Middlewares\MiddlewareException('error verifying nonce', 'verify_nonce_error');
 		}
 
 		return $closure($request);
+	}
+
+	protected function nonce(Http\Request\RequestInterface $request): mixed
+	{
+		return match ($request->method()) {
+			Http\Method\Method::Post, Http\Method\Method::Put, Http\Method\Method::Patch => $request->body() instanceof Http\KeyValue\KeyValueInterface ? $request->body()->value($this->name) : null,
+			default => $request->url()->query() instanceof Http\KeyValue\KeyValueInterface ? $request->url()->query()->value($this->name) : null,
+		};
 	}
 }

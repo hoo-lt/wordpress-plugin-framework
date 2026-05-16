@@ -3,114 +3,112 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\{
-	MiddlewareInterface,
-	MiddlewareTrait,
-	ValidateRequest\Input\InputInterface,
-	ValidateRequest\Rules\RuleInterface,
+use Hoo\WordPressPluginFramework\{
+	Http,
+	Pipeline,
+	Pipeline\Middlewares\ValidateRequest\Errors\Errors,
 };
+use Throwable;
 
-readonly class Middleware implements MiddlewareInterface
+readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 {
-	use MiddlewareTrait;
+	use Pipeline\Middlewares\MiddlewareTrait;
 
 	public function __construct(
-		protected array $inputs = [],
-		protected ?InputInterface $input = null,
+		protected array $validators = [],
+		protected ?Pipeline\Middlewares\ValidateRequest\Validators\ValidatorInterface $validator = null,
 	) {
 	}
 
-	public function withInput(InputInterface $input): self
+	public function withValidator(Pipeline\Middlewares\ValidateRequest\Validators\ValidatorInterface $validator): static
 	{
 		return new self(
-			$this->inputs(),
-			$input,
+			$this->validators(),
+			$validator,
 		);
 	}
 
-	public function body(string $key): self
+	public function body(string $key): static
 	{
-		return $this->withInput(
-			new Input\Body($key),
+		return $this->withValidator(
+			new Pipeline\Middlewares\ValidateRequest\Validators\Body\Validator($key),
 		);
 	}
 
-	public function query(string $key): self
+	public function query(string $key): static
 	{
-		return $this->withInput(
-			new Input\Query($key),
+		return $this->withValidator(
+			new Pipeline\Middlewares\ValidateRequest\Validators\Query\Validator($key),
 		);
 	}
 
-	public function withRules(RuleInterface ...$rules): self
+	public function withRules(Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface ...$rules): static
 	{
 		return new self(
-			$this->inputs,
-			$this->input->withRules(
+			$this->validators,
+			$this->validator->withRules(
 				...$rules
 			)
 		);
 	}
 
-	public function bool(): self
+	public function bool(): static
 	{
 		return $this->withRules(
-			new Rules\Bool\Rule(),
+			new Pipeline\Middlewares\ValidateRequest\Rules\Bool\Rule(),
 		);
 	}
 
-	public function float(): self
+	public function float(): static
 	{
 		return $this->withRules(
-			new Rules\Float\Rule(),
+			new Pipeline\Middlewares\ValidateRequest\Rules\Float\Rule(),
 		);
 	}
 
-	public function int(): self
+	public function int(): static
 	{
 		return $this->withRules(
-			new Rules\Int\Rule(),
+			new Pipeline\Middlewares\ValidateRequest\Rules\Int\Rule(),
 		);
 	}
 
-	public function string(): self
+	public function string(): static
 	{
 		return $this->withRules(
-			new Rules\String\Rule(),
+			new Pipeline\Middlewares\ValidateRequest\Rules\String\Rule(),
 		);
 	}
 
 	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
 	{
-		if (!$request->body() instanceof Http\Body\KeyValue\BodyInterface) {
-			throw new MiddlewareException([]);
-		}
+		$errors = new Errors();
 
-		$errors = [];
+		foreach ($this->validators() as $validator) {
+			$values = $validator->values($request);
+			if ($values === []) {
+				$errors->add($validator->key(), 'unable to validate');
+			}
 
-		foreach ($this->inputs() as $input) {
-			foreach ($input->values($request) as $key => $value) {
-				foreach ($input->rules() as $rule) {
-					if (!$rule($value)) {
-						$errors[$key][] = $rule->error();
-					}
+			foreach ($values as $key => $value) {
+				foreach ($validator->rules() as $rule) {
+					$rule($value, fn($error) => $errors->add($key, $error));
 				}
 			}
 		}
 
-		if ($errors) {
+		if ($errors->any()) {
 			throw new MiddlewareException($errors);
 		}
 
 		return $closure($request);
 	}
 
-	protected function inputs(): array
+	protected function validators(): array
 	{
-		return $this->input ? [
-			...$this->inputs,
-			$this->input,
-		] : $this->inputs;
+		return $this->validator ? [
+			...$this->validators,
+			$this->validator,
+		] : $this->validators;
 	}
 }
