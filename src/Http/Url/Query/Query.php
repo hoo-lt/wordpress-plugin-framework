@@ -57,6 +57,11 @@ readonly class Query implements QueryInterface
 		);
 	}
 
+	public function toArray(): array
+	{
+		return $this->query;
+	}
+
 	public function __toString(): string
 	{
 		return $this->coder->encode($this->query);

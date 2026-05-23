@@ -57,6 +57,11 @@ readonly class Body implements BodyInterface
 		);
 	}
 
+	public function toArray(): array
+	{
+		return $this->body;
+	}
+
 	public function __toString(): string
 	{
 		return $this->coder->encode($this->body);

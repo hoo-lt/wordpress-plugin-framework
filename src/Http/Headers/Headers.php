@@ -48,6 +48,11 @@ readonly class Headers implements HeadersInterface
 		return new static($headers);
 	}
 
+	public function toArray(): array
+	{
+		return $this->headers;
+	}
+
 	public function accept(): ?string
 	{
 		return $this->headers['accept'] ?? null;
@@ -61,16 +66,6 @@ readonly class Headers implements HeadersInterface
 	public function contentType(): ?string
 	{
 		return $this->headers['content-type'] ?? null;
-	}
-
-	public function getIterator(): Traversable
-	{
-		return new ArrayIterator($this->headers);
-	}
-
-	public function count(): int
-	{
-		return count($this->headers);
 	}
 
 	protected function normalizeHeaders(array $headers): array

@@ -7,6 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookInterface,
 	Hooker\Hooks\HookFactoryInterface,
+	Http\KeyValue\KeyValueInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
 	Json\JsonInterface,
@@ -67,10 +68,14 @@ readonly class Route implements RouteInterface
 						$response,
 					);
 
+					$statusCode = $response->statusCode();
+					$headers = $response->headers();
+					$body = $response->body();
+
 					return new WP_REST_Response(
-						(string) $response->body(),
-						$response->statusCode(),
-						$response->headers(),
+						$body instanceof KeyValueInterface ? $body->toArray() : $body,
+						$statusCode,
+						$headers->toArray(),
 					);
 				},
 				'permission_callback' => fn() => true,
