@@ -25,4 +25,26 @@ readonly class HeadersFactory implements HeadersFactoryInterface
 
 		return $this->from($headers);
 	}
+
+	public function fromException(Http\Exceptions\Exception $exception): ?HeadersInterface
+	{
+		$headers = $contentType === null ? $exception->getHeaders() : [
+			'Content-Type' => $contentType,
+		];
+		$headers = $exception->getHeaders() ?? [];
+
+
+	}
+
+	public function fromThrowable(Throwable $throwable): ?HeadersInterface
+	{
+		return $this->from(
+			500,
+			null,
+			[
+				'message' => $throwable->getMessage(),
+				'code' => $throwable->getCode(),
+			]
+		);
+	}
 }

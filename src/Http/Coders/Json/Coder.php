@@ -2,12 +2,15 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders\Json;
 
-use Hoo\WordPressPluginFramework\Json\JsonInterface;
+use Hoo\WordPressPluginFramework\{
+	Http,
+	Json,
+};
 
-readonly class Coder implements CoderInterface
+readonly class Coder implements Http\Coders\CoderInterface
 {
 	public function __construct(
-		protected JsonInterface $json,
+		protected Json\JsonInterface $json,
 	) {
 	}
 

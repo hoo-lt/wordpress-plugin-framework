@@ -3,72 +3,66 @@
 namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HookFactoryInterface;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
-use Hoo\WordPressPluginFramework\Http\Method\Method;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareException;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\MiddlewareException as ValidationException;
-use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
-use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
-use WP_Error;
+use Hoo\WordPressPluginFramework\{
+	Hooker,
+	Http,
+	Json,
+	Pipeline,
+	Router,
+};
+use WP_REST_Response;
 
-readonly class Route implements RouteInterface
+readonly class Route implements Router\Routes\RouteInterface
 {
 	public function __construct(
-		protected PipelineInterface $pipeline,
-		protected HookFactoryInterface $hookFactory,
+		protected Hooker\Hooks\HookFactoryInterface $hookFactory,
+		protected Http\Response\ResponseFactoryInterface $responseFactory,
+		protected Json\JsonInterface $json,
+		protected Pipeline\PipelineInterface $pipeline,
 		protected string $namespace,
-		protected string $route,
-		protected Method $method,
+		protected string $path,
+		protected array $methods,
 		protected Closure $closure,
 		protected array $middlewares = [],
 	) {
 	}
 
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): RouteInterface
+	public function withMiddlewares(Pipeline\Middlewares\MiddlewareInterface ...$middlewares): Router\Routes\RouteInterface
 	{
 		return new self(
-			$this->pipeline,
 			$this->hookFactory,
+			$this->responseFactory,
+			$this->json,
+			$this->pipeline,
 			$this->namespace,
-			$this->route,
-			$this->method,
+			$this->path,
+			$this->methods,
 			$this->closure,
 			$middlewares
 		);
 	}
 
-	public function hook(): HookInterface
+	public function hook(): Hooker\Hooks\HookInterface
 	{
 		return $this->hookFactory->action('rest_api_init', fn() => register_rest_route(
 			$this->namespace,
-			$this->route,
+			$this->path,
 			[
-				'methods' => $this->method->value,
-				'callback' => function (mixed ...$args) {
-					try {
-						return $this->pipeline
-							->withMiddlewares(...$this->middlewares)
-						(fn() => ($this->closure)(...$args));
-					} catch (ValidationException $validationException) {
-						return new WP_Error(
-							$validationException->getCode(),
-							$validationException->getMessage(),
-							[
-								'status' => 422,
-								'errors' => $validationException->errors(),
-							],
-						);
-					} catch (MiddlewareException $middlewareException) {
-						return new WP_Error(
-							$middlewareException->getCode(),
-							$middlewareException->getMessage(),
-							[
-								'status' => 400,
-							],
-						);
-					}
+				'methods' => $this->methods,
+				'callback' => function () {
+					$response = $this->pipeline
+						->withMiddlewares(...$this->middlewares)
+						->catchException($this->responseFactory->fromException(...))
+						->catchThrowable($this->responseFactory->fromThrowable(...))
+					(($this->closure)(...));
+
+					return new WP_REST_Response(
+						$this->json->decode(
+							$response->body(),
+						),
+						$response->statusCode(),
+						$response->headers(),
+					);
 				},
 				'permission_callback' => fn() => true,
 			]

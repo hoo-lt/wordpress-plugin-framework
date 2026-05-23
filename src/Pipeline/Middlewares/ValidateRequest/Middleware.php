@@ -5,10 +5,9 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http,
+	Collections,
 	Pipeline,
-	Pipeline\Middlewares\ValidateRequest\Errors\Errors,
 };
-use Throwable;
 
 readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 {
@@ -82,23 +81,32 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 
 	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
 	{
-		$errors = new Errors();
+		$messages = new Collections\Message\Collection();
 
 		foreach ($this->validators() as $validator) {
 			$values = $validator->values($request);
 			if ($values === []) {
-				$errors->add($validator->key(), 'unable to validate');
+				throw new Http\Exceptions\BadRequest\Exception(
+					'incorrect request',
+					'',
+					$this->exceptionHeaders($request),
+				);
 			}
 
 			foreach ($values as $key => $value) {
 				foreach ($validator->rules() as $rule) {
-					$rule($value, fn($error) => $errors->add($key, $error));
+					$rule($value, fn($message) => $messages->add($key, $message));
 				}
 			}
 		}
 
-		if ($errors->any()) {
-			throw new MiddlewareException($errors);
+		if ($messages->any()) {
+			throw new Http\Exceptions\UnprocessableContent\Exception(
+				'validation error',
+				'',
+				$this->exceptionHeaders($request),
+				$this->exceptionBody($messages),
+			);
 		}
 
 		return $closure($request);
@@ -110,5 +118,28 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 			...$this->validators,
 			$this->validator,
 		] : $this->validators;
+	}
+
+	protected function exceptionHeaders(Http\Request\RequestInterface $request): ?array
+	{
+		$accept = $request->headers()->accept();
+		if ($accept) {
+			return [
+				'Content-Type' => $accept,
+			];
+		}
+
+		return null;
+	}
+
+	protected function exceptionBody(Collections\Message\Collection $messages): ?array
+	{
+		if ($messages->any()) {
+			return [
+				'messages' => $messages->all()
+			];
+		}
+
+		return null;
 	}
 }

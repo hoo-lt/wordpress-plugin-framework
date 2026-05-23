@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\Http\Method\Method;
 
 interface RouteFactoryInterface
 {
-	public function feed(string $name, Closure $closure): RouteInterface;
+	public function feed(string $path, Closure $closure): RouteInterface;
 
-	public function rest(string $route, Method $method, Closure $closure): RouteInterface;
+	public function rest(string $path, Closure $closure, Method ...$methods): RouteInterface;
 }

@@ -48,19 +48,24 @@ readonly class Headers implements HeadersInterface
 		return new static($headers);
 	}
 
+	public function accept(): ?string
+	{
+		return $this->headers['accept'] ?? null;
+	}
+
 	public function contentLength(): ?int
 	{
-		return $this->headers['content-length'];
+		return $this->headers['content-length'] ?? null;
 	}
 
 	public function contentType(): ?string
 	{
-		return $this->headers['content-type'];
+		return $this->headers['content-type'] ?? null;
 	}
 
 	public function getIterator(): Traversable
 	{
-		return new ArrayIterator(array_headers($this->headers));
+		return new ArrayIterator($this->headers);
 	}
 
 	public function count(): int

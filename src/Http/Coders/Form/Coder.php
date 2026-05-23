@@ -2,7 +2,9 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders\Form;
 
-readonly class Coder implements CoderInterface
+use Hoo\WordPressPluginFramework\Http;
+
+readonly class Coder implements Http\Coders\CoderInterface
 {
 	public function decode(string $string): mixed
 	{

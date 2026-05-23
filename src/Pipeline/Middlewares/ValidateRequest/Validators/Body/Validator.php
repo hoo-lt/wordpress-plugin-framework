@@ -5,7 +5,6 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest\Vali
 use Hoo\WordPressPluginFramework\{
 	Http,
 	Pipeline,
-	Pipeline\Middlewares\ValidateRequest\Errors\Errors,
 };
 
 readonly class Validator implements Pipeline\Middlewares\ValidateRequest\Validators\ValidatorInterface

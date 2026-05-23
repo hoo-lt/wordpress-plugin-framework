@@ -41,7 +41,7 @@ readonly class Hook implements HookInterface
 			$this->name,
 			fn(mixed ...$args) => $this->pipeline
 				->withMiddlewares(...$this->middlewares)
-			(fn(?RequestInterface $request) => ($this->closure)($request, ...$args)),
+			(fn(RequestInterface $request) => ($this->closure)($request, ...$args)),
 			$this->priority,
 			PHP_INT_MAX
 		);

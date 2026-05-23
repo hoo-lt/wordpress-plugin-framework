@@ -6,32 +6,46 @@ use Hoo\WordPressPluginFramework\{
 	Helpers,
 	Http,
 };
+use Throwable;
 
 readonly class BodyFactory implements BodyFactoryInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\Form\CoderInterface $formCoder,
-		protected Http\Coders\Json\CoderInterface $jsonCoder,
+		protected Http\Coders\CoderFactoryInterface $coderFactory,
 		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
-	public function from(?string $contentType, string $body): BodyInterface
+	public function from(?string $contentType, mixed $body): BodyInterface
 	{
-		return match ($contentType) {
-			'application/x-www-form-urlencoded' => $this->fromCoder(
-				$this->formCoder,
-				$this->formCoder,
+		if ($contentType === null) {
+			return new Body($body);
+		}
+
+		$coder = $this->coderFactory->coder($contentType);
+		if ($coder === null) {
+			return new Body($body);
+		}
+
+		if (is_array($body)) {
+			return new KeyValue\Body(
+				$this->keyValueHelper,
+				$coder,
 				$body,
-			),
-			'application/json' => $this->fromCoder(
-				$this->jsonCoder,
-				$this->jsonCoder,
-				$body,
-			),
-			default => new Body($body),
-		};
+			);
+		}
+
+		$decodedBody = $coder->decode($body);
+		if (is_array($decodedBody)) {
+			return new KeyValue\Body(
+				$this->keyValueHelper,
+				$coder,
+				$decodedBody,
+			);
+		}
+
+		return new Body($body);
 	}
 
 	public function fromServer(): ?BodyInterface
@@ -48,17 +62,28 @@ readonly class BodyFactory implements BodyFactoryInterface
 		);
 	}
 
-	protected function fromCoder(
-		Http\Coders\DecoderInterface $decoder,
-		Http\Coders\EncoderInterface $encoder,
-		string $body,
-	): BodyInterface {
-		$decodedBody = $decoder->decode($body);
+	public function fromException(?string $contentType, Http\Exceptions\Exception $exception): BodyInterface
+	{
+		$body = $exception->getBody();
+		if (is_array($body)) {
+			$body['message'] = $exception->getMessage();
+			$body['code'] = $exception->getCode();
+		}
 
-		return is_array($decodedBody) ? new KeyValue\Body(
-			$this->keyValueHelper,
-			$encoder,
-			$decodedBody
-		) : new Body($body);
+		return $this->from(
+			$contentType,
+			$body,
+		);
+	}
+
+	public function fromThrowable(?string $contentType, Throwable $throwable): BodyInterface
+	{
+		return $this->from(
+			$contentType,
+			[
+				'message' => $throwable->getMessage(),
+				'code' => $throwable->getCode(),
+			]
+		);
 	}
 }

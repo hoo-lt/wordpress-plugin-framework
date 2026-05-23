@@ -2,7 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders;
 
-interface DecoderInterface
+interface CoderInterface
 {
 	public function decode(string $string): mixed;
+	public function encode(mixed $mixed): string;
 }
