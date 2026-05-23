@@ -73,7 +73,7 @@ readonly class Route implements RouteInterface
 					$body = $response->body();
 
 					return new WP_REST_Response(
-						$body instanceof KeyValueInterface ? $body->toArray() : $body,
+						$body instanceof KeyValueInterface ? $body->toArray() : (string) $body,
 						$statusCode,
 						$headers->toArray(),
 					);

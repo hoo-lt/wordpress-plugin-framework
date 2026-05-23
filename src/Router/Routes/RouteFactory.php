@@ -33,6 +33,8 @@ readonly class RouteFactory implements RouteFactoryInterface
 
 	public function rest(string $path, Closure $closure, Method ...$methods): RouteInterface
 	{
+		$path = ltrim($path, '/');
+
 		[
 			$routeNamespace,
 			$route,

@@ -36,6 +36,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 			);
 		}
 
+		/*
 		$decodedBody = $coder->decode($body);
 		if (is_array($decodedBody)) {
 			return new KeyValue\Body(
@@ -44,8 +45,9 @@ readonly class BodyFactory implements BodyFactoryInterface
 				$decodedBody,
 			);
 		}
+		*/
 
-		return new Body($body);
+		return new Body($coder->encode($body));
 	}
 
 	public function fromServer(): ?BodyInterface
