@@ -19,10 +19,18 @@ readonly class Server implements ServerInterface
 	public function url(): string
 	{
 		$scheme = $this->server['REQUEST_SCHEME'] ?? '';
+		if ($scheme === '') {
+			return '';
+		}
+
 		$hostPort = $this->server['HTTP_HOST'] ?? '';
+		if ($hostPort === '') {
+			return '';
+		}
+
 		$pathQuery = $this->server['REQUEST_URI'] ?? '';
 
-		return "{$scheme}://{$hostPort}/{$pathQuery}";
+		return "{$scheme}://{$hostPort}{$pathQuery}";
 	}
 
 	public function scheme(): string
@@ -32,7 +40,12 @@ readonly class Server implements ServerInterface
 
 	public function host(): string
 	{
-		$host = parse_url($this->url(), PHP_URL_HOST);
+		$url = $this->url();
+		if ($url === '') {
+			return '';
+		}
+
+		$host = parse_url($url, PHP_URL_HOST);
 		if ($host === false) {
 			//throw
 		}
@@ -46,7 +59,12 @@ readonly class Server implements ServerInterface
 
 	public function port(): ?int
 	{
-		$port = parse_url($this->url(), PHP_URL_PORT);
+		$url = $this->url();
+		if ($url === '') {
+			return null;
+		}
+
+		$port = parse_url($url, PHP_URL_PORT);
 		if ($port === false) {
 			//throw
 		}
@@ -56,7 +74,12 @@ readonly class Server implements ServerInterface
 
 	public function path(): string
 	{
-		$path = parse_url($this->url(), PHP_URL_PATH);
+		$url = $this->url();
+		if ($url === '') {
+			return '';
+		}
+
+		$path = parse_url($url, PHP_URL_PATH);
 		if ($path === false) {
 			//throw
 		}
@@ -70,7 +93,12 @@ readonly class Server implements ServerInterface
 
 	public function query(): ?string
 	{
-		$query = parse_url($this->url(), PHP_URL_QUERY);
+		$url = $this->url();
+		if ($url === '') {
+			return null;
+		}
+
+		$query = parse_url($url, PHP_URL_QUERY);
 		if ($query === false) {
 			//throw
 		}
@@ -119,15 +147,15 @@ readonly class Server implements ServerInterface
 				'-'
 			], $key);
 
-			$headers[$key] = $value;
+			$headers[strtolower($key)] = $value;
 		}
 
 		if (isset($this->server['CONTENT_LENGTH'])) {
-			$headers['Content-Length'] = $this->server['CONTENT_LENGTH'];
+			$headers['content-length'] = $this->server['CONTENT_LENGTH'];
 		}
 
 		if (isset($this->server['CONTENT_TYPE'])) {
-			$headers['Content-Type'] = $this->server['CONTENT_TYPE'];
+			$headers['content-type'] = $this->server['CONTENT_TYPE'];
 		}
 
 		if ($headers === []) {
