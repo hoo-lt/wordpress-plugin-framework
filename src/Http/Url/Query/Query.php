@@ -11,7 +11,7 @@ readonly class Query implements QueryInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\CoderInterface $coder,
+		protected Http\Coders\Query\CoderInterface $coder,
 		protected array $query,
 	) {
 	}

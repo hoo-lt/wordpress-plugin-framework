@@ -11,7 +11,7 @@ readonly class QueryFactory implements QueryFactoryInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\CoderInterface $coder,
+		protected Http\Coders\Query\CoderInterface $coder,
 		protected Http\Server\ServerInterface $server,
 	) {
 	}

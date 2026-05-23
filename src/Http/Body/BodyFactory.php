@@ -23,7 +23,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 			return new Body($body);
 		}
 
-		$coder = $this->coderFactory->coder($contentType);
+		$coder = $this->coderFactory->from($contentType);
 		if ($coder === null) {
 			return new Body($body);
 		}
