@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
 use Hoo\WordPressPluginFramework\Http;
+use Throwable;
 
 readonly class HeadersFactory implements HeadersFactoryInterface
 {
@@ -26,25 +27,35 @@ readonly class HeadersFactory implements HeadersFactoryInterface
 		return $this->from($headers);
 	}
 
-	public function fromException(Http\Exceptions\Exception $exception): ?HeadersInterface
+	public function fromException(Http\Request\RequestInterface $request, Http\Exceptions\Exception $exception): ?HeadersInterface
 	{
-		$headers = $contentType === null ? $exception->getHeaders() : [
-			'Content-Type' => $contentType,
-		];
-		$headers = $exception->getHeaders() ?? [];
+		$headers = $exception->getHeaders();
 
+		$accept = $request->headers()->accept();
+		if ($accept !== null) {
+			$headers['content-type'] = $accept;
+		}
 
+		if ($headers === null) {
+			return null;
+		}
+
+		return $this->from($headers);
 	}
 
-	public function fromThrowable(Throwable $throwable): ?HeadersInterface
+	public function fromThrowable(Http\Request\RequestInterface $request, Throwable $throwable): ?HeadersInterface
 	{
-		return $this->from(
-			500,
-			null,
-			[
-				'message' => $throwable->getMessage(),
-				'code' => $throwable->getCode(),
-			]
-		);
+		$headers = null;
+
+		$accept = $request->headers()->accept();
+		if ($accept !== null) {
+			$headers['content-type'] = $accept;
+		}
+
+		if ($headers === null) {
+			return null;
+		}
+
+		return $this->from($headers);
 	}
 }
