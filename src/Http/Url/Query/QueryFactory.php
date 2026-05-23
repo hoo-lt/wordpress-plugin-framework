@@ -11,18 +11,18 @@ readonly class QueryFactory implements QueryFactoryInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\Query\CoderInterface $queryCoder,
+		protected Http\Coders\CoderInterface $coder,
 		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
 	public function from(string $query): QueryInterface
 	{
-		$decodedQuery = $this->queryCoder->decode($query);
+		$decodedQuery = $this->coder->decode($query);
 
 		return new Query(
 			$this->keyValueHelper,
-			$this->queryCoder,
+			$this->coder,
 			$decodedQuery,
 		);
 	}
