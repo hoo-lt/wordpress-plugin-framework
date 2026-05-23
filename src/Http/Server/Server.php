@@ -16,6 +16,15 @@ readonly class Server implements ServerInterface
 		return $this->server['REQUEST_METHOD'] ?? '';
 	}
 
+	public function url(): string
+	{
+		$scheme = $this->server['REQUEST_SCHEME'] ?? '';
+		$hostPort = $this->server['HTTP_HOST'] ?? '';
+		$pathQuery = $this->server['REQUEST_URI'] ?? '';
+
+		return "{$scheme}://{$hostPort}/{$pathQuery}";
+	}
+
 	public function scheme(): string
 	{
 		return $this->server['REQUEST_SCHEME'] ?? '';
@@ -23,7 +32,7 @@ readonly class Server implements ServerInterface
 
 	public function host(): string
 	{
-		$host = parse_url($this->server['HTTP_HOST'] ?? '', PHP_URL_HOST);
+		$host = parse_url($this->url(), PHP_URL_HOST);
 		if ($host === false) {
 			//throw
 		}
@@ -37,7 +46,7 @@ readonly class Server implements ServerInterface
 
 	public function port(): ?int
 	{
-		$port = parse_url($this->server['HTTP_HOST'] ?? '', PHP_URL_PORT);
+		$port = parse_url($this->url(), PHP_URL_PORT);
 		if ($port === false) {
 			//throw
 		}
@@ -47,7 +56,7 @@ readonly class Server implements ServerInterface
 
 	public function path(): string
 	{
-		$path = parse_url($this->server['REQUEST_URI'] ?? '', PHP_URL_PATH);
+		$path = parse_url($this->url(), PHP_URL_PATH);
 		if ($path === false) {
 			//throw
 		}
@@ -61,7 +70,7 @@ readonly class Server implements ServerInterface
 
 	public function query(): ?string
 	{
-		$query = parse_url($this->server['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+		$query = parse_url($this->url(), PHP_URL_QUERY);
 		if ($query === false) {
 			//throw
 		}

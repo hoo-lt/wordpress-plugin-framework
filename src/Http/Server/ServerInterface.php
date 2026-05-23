@@ -6,6 +6,7 @@ interface ServerInterface
 {
 	public function method(): string;
 
+	public function url(): string;
 	public function scheme(): string;
 	public function host(): string;
 	public function port(): ?int;
