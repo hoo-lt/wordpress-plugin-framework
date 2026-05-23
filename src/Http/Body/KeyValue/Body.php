@@ -11,7 +11,7 @@ readonly class Body implements BodyInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\EncoderInterface $encoder,
+		protected Http\Coders\CoderInterface $coder,
 		protected array $body,
 	) {
 	}
@@ -36,7 +36,7 @@ readonly class Body implements BodyInterface
 	{
 		return new static(
 			$this->keyValueHelper,
-			$this->encoder,
+			$this->coder,
 			$this->keyValueHelper->withValue(
 				$this->body,
 				$key,
@@ -49,7 +49,7 @@ readonly class Body implements BodyInterface
 	{
 		return new static(
 			$this->keyValueHelper,
-			$this->encoder,
+			$this->coder,
 			$this->keyValueHelper->withoutValue(
 				$this->body,
 				$key,
@@ -59,6 +59,6 @@ readonly class Body implements BodyInterface
 
 	public function __toString(): string
 	{
-		return $this->encoder->encode($this->body);
+		return $this->coder->encode($this->body);
 	}
 }

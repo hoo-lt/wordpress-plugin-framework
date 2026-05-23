@@ -62,28 +62,13 @@ readonly class BodyFactory implements BodyFactoryInterface
 		);
 	}
 
-	public function fromException(?string $contentType, Http\Exceptions\Exception $exception): BodyInterface
+	public function fromException(Http\Request\RequestInterface $request, Http\Exceptions\Exception $exception): ?BodyInterface
 	{
-		$body = $exception->getBody();
-		if (is_array($body)) {
-			$body['message'] = $exception->getMessage();
-			$body['code'] = $exception->getCode();
-		}
-
-		return $this->from(
-			$contentType,
-			$body,
-		);
+		return null;
 	}
 
-	public function fromThrowable(?string $contentType, Throwable $throwable): BodyInterface
+	public function fromThrowable(Http\Request\RequestInterface $request, Throwable $throwable): ?BodyInterface
 	{
-		return $this->from(
-			$contentType,
-			[
-				'message' => $throwable->getMessage(),
-				'code' => $throwable->getCode(),
-			]
-		);
+		return null;
 	}
 }
