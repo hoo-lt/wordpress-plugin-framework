@@ -59,7 +59,7 @@ readonly class Route implements RouteInterface
 						->catchThrowable($this->responseFactory->fromThrowable(...))
 					(($this->closure)(...));
 
-					$response = ($response instanceof ResponseInterface) ? $response : new $this->responseFactory->from(
+					$response = ($response instanceof ResponseInterface) ? $response : $this->responseFactory->from(
 						200,
 						[
 							'Content-Type' => 'application/json',
