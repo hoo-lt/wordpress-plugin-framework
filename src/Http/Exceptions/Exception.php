@@ -9,9 +9,9 @@ class Exception extends \Exception
 		string $code,
 		protected int $statusCode,
 		protected ?array $headers = null,
-		protected ?array $body = null,
 	) {
-		parent::__construct($message, $code);
+		$this->message = $message;
+		$this->code = $code;
 	}
 
 	public function getStatusCode(): int
@@ -22,10 +22,5 @@ class Exception extends \Exception
 	public function getHeaders(): ?array
 	{
 		return $this->headers;
-	}
-
-	public function getBody(): ?array
-	{
-		return $this->body;
 	}
 }
