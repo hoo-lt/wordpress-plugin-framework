@@ -11,11 +11,9 @@ readonly class Hooker implements HookerInterface
 	) {
 	}
 
-	public function withHooks(HookInterface ...$hooks): self
+	public function withHooks(HookInterface ...$hooks): static
 	{
-		return new self(
-			$hooks
-		);
+		return new self($hooks);
 	}
 
 	public function __invoke(): void

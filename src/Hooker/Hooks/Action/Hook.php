@@ -3,10 +3,12 @@
 namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Action;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
-use Hoo\WordPressPluginFramework\Pipeline\PipelineInterface;
+use Hoo\WordPressPluginFramework\{
+	Hooker\Hooks\HookInterface,
+	Http\Request\RequestInterface,
+	Pipeline\PipelineInterface,
+	Pipeline\Middlewares\MiddlewareInterface
+};
 
 readonly class Hook implements HookInterface
 {
@@ -19,7 +21,7 @@ readonly class Hook implements HookInterface
 	) {
 	}
 
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): HookInterface
+	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
 		return new self(
 			$this->pipeline,

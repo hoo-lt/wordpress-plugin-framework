@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 
 interface HookInterface
 {
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): HookInterface;
+	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
 	public function closure(): Closure;
 	public function __invoke(): void;
 }

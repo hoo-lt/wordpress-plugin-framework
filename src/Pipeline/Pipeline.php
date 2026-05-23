@@ -3,9 +3,11 @@
 namespace Hoo\WordPressPluginFramework\Pipeline;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Exceptions\Exception,
+	Http\Request\RequestInterface,
+	Pipeline\Middlewares\MiddlewareInterface,
+};
 use Throwable;
 
 readonly class Pipeline implements PipelineInterface
@@ -13,8 +15,8 @@ readonly class Pipeline implements PipelineInterface
 	public function __construct(
 		protected RequestInterface $request,
 		protected array $middlewares = [],
-		protected ?Closure $catchExceptionClosure = null,
-		protected ?Closure $catchThrowableClosure = null,
+		protected ?Closure $catchException = null,
+		protected ?Closure $catchThrowable = null,
 	) {
 	}
 
@@ -23,28 +25,28 @@ readonly class Pipeline implements PipelineInterface
 		return new self(
 			$this->request,
 			$middlewares,
-			$this->catchExceptionClosure,
-			$this->catchThrowableClosure,
+			$this->catchException,
+			$this->catchThrowable,
 		);
 	}
 
-	public function catchException(Closure $catchExceptionClosure): static
+	public function catchException(Closure $closure): static
 	{
 		return new self(
 			$this->request,
 			$this->middlewares,
-			$catchExceptionClosure,
-			$this->catchThrowableClosure,
+			$closure,
+			$this->catchThrowable,
 		);
 	}
 
-	public function catchThrowable(Closure $catchThrowableClosure): static
+	public function catchThrowable(Closure $closure): static
 	{
 		return new self(
 			$this->request,
 			$this->middlewares,
-			$this->catchExceptionClosure,
-			$catchThrowableClosure,
+			$this->catchException,
+			$closure,
 		);
 	}
 
@@ -56,36 +58,36 @@ readonly class Pipeline implements PipelineInterface
 				return function (RequestInterface $request) use ($middleware, $closure) {
 					try {
 						return $middleware($request, $closure);
-					} catch (Http\Exceptions\Exception $exception) {
-						if ($this->catchExceptionClosure === null) {
+					} catch (Exception $exception) {
+						if ($this->catchException === null) {
 							throw $exception;
 						}
 
-						return ($this->catchExceptionClosure)($request, $exception);
+						return ($this->catchException)($request, $exception);
 					} catch (Throwable $throwable) {
-						if ($this->catchThrowableClosure === null) {
+						if ($this->catchThrowable === null) {
 							throw $throwable;
 						}
 
-						return ($this->catchThrowableClosure)($request, $throwable);
+						return ($this->catchThrowable)($request, $throwable);
 					}
 				};
 			},
 			function (RequestInterface $request) use ($closure) {
 				try {
 					return $closure($request);
-				} catch (Http\Exceptions\Exception $exception) {
-					if ($this->catchExceptionClosure === null) {
+				} catch (Exception $exception) {
+					if ($this->catchException === null) {
 						throw $exception;
 					}
 
-					return ($this->catchExceptionClosure)($request, $exception);
+					return ($this->catchException)($request, $exception);
 				} catch (Throwable $throwable) {
-					if ($this->catchThrowableClosure === null) {
+					if ($this->catchThrowable === null) {
 						throw $throwable;
 					}
 
-					return ($this->catchThrowableClosure)($request, $throwable);
+					return ($this->catchThrowable)($request, $throwable);
 				}
 			},
 		)($this->request);
