@@ -4,19 +4,20 @@ namespace Hoo\WordPressPluginFramework\Router\Routes;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Hooker,
-	Http,
-	Json,
-	Pipeline,
+	Hooker\Hooks\HookFactoryInterface,
+	Http\Method\Method,
+	Http\Response\ResponseFactoryInterface,
+	Json\JsonInterface,
+	Pipeline\PipelineInterface,
 };
 
 readonly class RouteFactory implements RouteFactoryInterface
 {
 	public function __construct(
-		protected Hooker\Hooks\HookFactoryInterface $hookFactory,
-		protected Json\JsonInterface $json,
-		protected Pipeline\PipelineInterface $pipeline,
-		protected string $namespace,
+		protected HookFactoryInterface $hookFactory,
+		protected ResponseFactoryInterface $responseFactory,
+		protected JsonInterface $json,
+		protected PipelineInterface $pipeline,
 	) {
 	}
 
@@ -25,21 +26,27 @@ readonly class RouteFactory implements RouteFactoryInterface
 		return new Feed\Route(
 			$this->pipeline,
 			$this->hookFactory,
-			"{$this->namespace}/{$path}",
+			$path,
 			$closure
 		);
 	}
 
-	public function rest(string $path, Closure $closure, Http\Method\Method ...$methods): RouteInterface
+	public function rest(string $path, Closure $closure, Method ...$methods): RouteInterface
 	{
+		[
+			$routeNamespace,
+			$route,
+		] = explode('/', $path, 2);
+
 		return new Rest\Route(
 			$this->hookFactory,
-			$this->pipeline,
+			$this->responseFactory,
 			$this->json,
-			$this->namespace,
-			$name,
+			$this->pipeline,
+			$routeNamespace,
+			$route,
+			$closure,
 			$methods,
-			$closure
 		);
 	}
 }

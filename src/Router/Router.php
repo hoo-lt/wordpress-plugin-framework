@@ -2,8 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Hoo\WordPressPluginFramework\Hooker\HookerInterface;
-use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
+use Hoo\WordPressPluginFramework\{
+	Router\Routes\RouteInterface,
+	Hooker\HookerInterface,
+};
 
 readonly class Router implements RouterInterface
 {
@@ -13,7 +15,7 @@ readonly class Router implements RouterInterface
 	) {
 	}
 
-	public function withRoutes(RouteInterface ...$routes): self
+	public function withRoutes(RouteInterface ...$routes): static
 	{
 		return new self(
 			$this->hooker,
