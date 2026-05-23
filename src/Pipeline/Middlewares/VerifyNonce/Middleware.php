@@ -26,11 +26,11 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 		};
 
 		if (!$nonce) {
-			throw new Http\Exceptions\Forbidden('nonce is not presented', 'verify_nonce_error');
+			throw new Http\Exceptions\Forbidden\Exception('nonce is not presented', 'verify_nonce_error');
 		}
 
 		if (!wp_verify_nonce($nonce, $this->action)) {
-			throw new Http\Exceptions\Forbidden('error verifying nonce', 'verify_nonce_error');
+			throw new Http\Exceptions\Forbidden\Exception('error verifying nonce', 'verify_nonce_error');
 		}
 
 		return $closure($request);
