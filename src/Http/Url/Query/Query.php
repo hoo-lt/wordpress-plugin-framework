@@ -11,7 +11,7 @@ readonly class Query implements QueryInterface
 {
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\EncoderInterface $encoder,
+		protected Http\Coders\CoderInterface $coder,
 		protected array $query,
 	) {
 	}
@@ -36,7 +36,7 @@ readonly class Query implements QueryInterface
 	{
 		return new static(
 			$this->keyValueHelper,
-			$this->encoder,
+			$this->coder,
 			$this->keyValueHelper->withValue(
 				$this->query,
 				$key,
@@ -49,7 +49,7 @@ readonly class Query implements QueryInterface
 	{
 		return new static(
 			$this->keyValueHelper,
-			$this->encoder,
+			$this->coder,
 			$this->keyValueHelper->withoutValue(
 				$this->query,
 				$key
@@ -59,6 +59,6 @@ readonly class Query implements QueryInterface
 
 	public function __toString(): string
 	{
-		return $this->encoder->encode($this->query);
+		return $this->coder->encode($this->query);
 	}
 }

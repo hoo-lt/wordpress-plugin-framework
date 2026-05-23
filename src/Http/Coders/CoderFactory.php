@@ -14,7 +14,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 	) {
 	}
 
-	public function coder(string $mediaType): ?CoderInterface
+	public function from(string $mediaType): ?CoderInterface
 	{
 		return match ($mediaType) {
 			'application/x-www-form-urlencoded' => new Http\Coders\Form\Coder(),

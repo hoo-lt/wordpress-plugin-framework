@@ -4,5 +4,5 @@ namespace Hoo\WordPressPluginFramework\Http\Coders;
 
 interface CoderFactoryInterface
 {
-	public function coder(string $mediaType): ?CoderInterface;
+	public function from(string $mediaType): ?CoderInterface;
 }
