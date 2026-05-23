@@ -47,7 +47,7 @@ readonly class Server implements ServerInterface
 
 		$host = parse_url($url, PHP_URL_HOST);
 		if ($host === false) {
-			//throw
+			throw new ServerException('an error occured while parsing url');
 		}
 
 		if ($host === null) {
@@ -66,7 +66,7 @@ readonly class Server implements ServerInterface
 
 		$port = parse_url($url, PHP_URL_PORT);
 		if ($port === false) {
-			//throw
+			throw new ServerException('an error occured while parsing url');
 		}
 
 		return $port;
@@ -81,7 +81,7 @@ readonly class Server implements ServerInterface
 
 		$path = parse_url($url, PHP_URL_PATH);
 		if ($path === false) {
-			//throw
+			throw new ServerException('an error occured while parsing url');
 		}
 
 		if ($path === null) {
@@ -100,7 +100,7 @@ readonly class Server implements ServerInterface
 
 		$query = parse_url($url, PHP_URL_QUERY);
 		if ($query === false) {
-			//throw
+			throw new ServerException('an error occured while parsing url');
 		}
 
 		return $query;
@@ -120,7 +120,7 @@ readonly class Server implements ServerInterface
 	{
 		$body = file_get_contents('php://input');
 		if ($body === false) {
-			//throw
+			throw new ServerException('an error occured while reading input stream');
 		}
 
 		if ($body === '') {
