@@ -68,9 +68,7 @@ readonly class Route implements RouteInterface
 					);
 
 					return new WP_REST_Response(
-						$this->json->decode(
-							$response->body(),
-						),
+						$response->body(),
 						$response->statusCode(),
 						$response->headers(),
 					);
