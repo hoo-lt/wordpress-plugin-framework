@@ -51,7 +51,7 @@ readonly class Route implements RouteInterface
 			$this->routeNamespace,
 			$this->route,
 			[
-				'methods' => $this->methods,
+				'methods' => array_map(fn($method) => $method->value, $this->methods),
 				'callback' => function () {
 					$response = $this->pipeline
 						->withMiddlewares(...$this->middlewares)
