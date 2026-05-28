@@ -3,11 +3,8 @@
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Request\RequestInterface,
 	Http\Headers\HeadersFactoryInterface,
 	Http\Body\BodyFactoryInterface,
-	Exceptions\HasStatusCodeInterface,
-	Exceptions\HasMessagesInterface,
 };
 
 use Throwable;
@@ -30,34 +27,5 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 		);
 
 		return new Response($statusCode, $headers, $body);
-	}
-
-	public function fromThrowable(RequestInterface $request, Throwable $throwable): ResponseInterface
-	{
-		$accept = $request->headers()?->accept();
-		if (!$accept) {
-			throw new ResponseFactoryException('cant create response from throwable w/o accept header');
-		}
-
-		$statusCode = $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
-
-		$headers = [
-			'content-type' => $accept,
-		];
-
-		$body = [
-			'message' => $throwable->getMessage(),
-			'code' => $throwable->getCode(),
-		];
-
-		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
-		if ($messages !== null) {
-			$body = [
-				...$body,
-				'messages' => $messages->toArray(),
-			];
-		}
-
-		return $this->from($statusCode, $headers, $body);
 	}
 }

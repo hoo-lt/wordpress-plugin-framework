@@ -8,12 +8,15 @@ use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookInterface,
 	Hooker\Hooks\HookFactoryInterface,
 	Http\KeyValue\KeyValueInterface,
+	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
-	Json\JsonInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
+	Exceptions\HasStatusCodeInterface,
+	Exceptions\HasMessagesInterface,
 };
+use Throwable;
 use WP_REST_Response;
 
 readonly class Route implements RouteInterface
@@ -54,7 +57,28 @@ readonly class Route implements RouteInterface
 				'callback' => function () {
 					$response = $this->pipeline
 						->withMiddlewares(...$this->middlewares)
-						->catch($this->responseFactory->fromThrowable(...))
+						->catch(function (RequestInterface $request, Throwable $throwable): ResponseInterface {
+							$statusCode = $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
+
+							$headers = [
+								'Content-Type' => 'application/json',
+							];
+
+							$body = [
+								'message' => $throwable->getMessage(),
+								'code' => $throwable->getCode(),
+							];
+
+							$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
+							if ($messages !== null) {
+								$body = [
+									...$body,
+									'messages' => $messages->toArray(),
+								];
+							}
+
+							return $this->responseFactory->from($statusCode, $headers, $body);
+						})
 					(($this->closure)(...));
 
 					$response = ($response instanceof ResponseInterface) ? $response : $this->responseFactory->from(
