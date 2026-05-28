@@ -7,7 +7,6 @@ use Hoo\WordPressPluginFramework\Http;
 readonly class UrlFactory implements UrlFactoryInterface
 {
 	public function __construct(
-		protected Http\Server\ServerInterface $server,
 		protected Http\Url\Query\QueryFactoryInterface $queryFactory,
 	) {
 	}
@@ -27,19 +26,6 @@ readonly class UrlFactory implements UrlFactoryInterface
 			isset($url['port']) ? $url['port'] : null,
 			isset($url['path']) ? $url['path'] : '',
 			isset($url['query']) ? $this->queryFactory->from($url['query']) : null,
-		);
-	}
-
-	public function fromServer(): UrlInterface
-	{
-		return new Url(
-			Scheme\Scheme::from(
-				$this->server->scheme(),
-			),
-			$this->server->host(),
-			$this->server->port(),
-			$this->server->path(),
-			$this->queryFactory->fromServer(),
 		);
 	}
 }

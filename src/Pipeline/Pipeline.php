@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Pipeline;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Exceptions\Exception,
 	Http\Request\RequestInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 };
@@ -15,8 +14,7 @@ readonly class Pipeline implements PipelineInterface
 	public function __construct(
 		protected RequestInterface $request,
 		protected array $middlewares = [],
-		protected ?Closure $catchException = null,
-		protected ?Closure $catchThrowable = null,
+		protected ?Closure $catchClosure = null,
 	) {
 	}
 
@@ -25,27 +23,15 @@ readonly class Pipeline implements PipelineInterface
 		return new self(
 			$this->request,
 			$middlewares,
-			$this->catchException,
-			$this->catchThrowable,
+			$this->catchClosure,
 		);
 	}
 
-	public function catchException(Closure $closure): static
+	public function catch(Closure $closure): static
 	{
 		return new self(
 			$this->request,
 			$this->middlewares,
-			$closure,
-			$this->catchThrowable,
-		);
-	}
-
-	public function catchThrowable(Closure $closure): static
-	{
-		return new self(
-			$this->request,
-			$this->middlewares,
-			$this->catchException,
 			$closure,
 		);
 	}
@@ -58,36 +44,24 @@ readonly class Pipeline implements PipelineInterface
 				return function (RequestInterface $request) use ($middleware, $closure) {
 					try {
 						return $middleware($request, $closure);
-					} catch (Exception $exception) {
-						if ($this->catchException === null) {
-							throw $exception;
-						}
-
-						return ($this->catchException)($request, $exception);
 					} catch (Throwable $throwable) {
-						if ($this->catchThrowable === null) {
+						if ($this->catchClosure === null) {
 							throw $throwable;
 						}
 
-						return ($this->catchThrowable)($request, $throwable);
+						return ($this->catchClosure)($request, $throwable);
 					}
 				};
 			},
 			function (RequestInterface $request) use ($closure) {
 				try {
 					return $closure($request);
-				} catch (Exception $exception) {
-					if ($this->catchException === null) {
-						throw $exception;
-					}
-
-					return ($this->catchException)($request, $exception);
 				} catch (Throwable $throwable) {
-					if ($this->catchThrowable === null) {
+					if ($this->catchClosure === null) {
 						throw $throwable;
 					}
 
-					return ($this->catchThrowable)($request, $throwable);
+					return ($this->catchClosure)($request, $throwable);
 				}
 			},
 		)($this->request);

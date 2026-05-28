@@ -8,7 +8,6 @@ class Exception extends \Exception
 		string $message,
 		string $code,
 		protected int $statusCode,
-		protected ?array $headers = null,
 	) {
 		$this->message = $message;
 		$this->code = $code;
@@ -17,10 +16,5 @@ class Exception extends \Exception
 	public function getStatusCode(): int
 	{
 		return $this->statusCode;
-	}
-
-	public function getHeaders(): ?array
-	{
-		return $this->headers;
 	}
 }

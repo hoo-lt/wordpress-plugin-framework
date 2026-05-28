@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Json;
 
 interface JsonInterface
 {
-	public function decode(string $json): mixed;
-	public function encode(mixed $json): string;
+	public function decode(string $string): mixed;
+	public function encode(mixed $mixed): string;
 }

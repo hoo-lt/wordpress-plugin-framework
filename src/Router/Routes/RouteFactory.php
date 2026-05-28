@@ -7,7 +7,6 @@ use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookFactoryInterface,
 	Http\Method\Method,
 	Http\Response\ResponseFactoryInterface,
-	Json\JsonInterface,
 	Pipeline\PipelineInterface,
 };
 
@@ -16,7 +15,6 @@ readonly class RouteFactory implements RouteFactoryInterface
 	public function __construct(
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
-		protected JsonInterface $json,
 		protected PipelineInterface $pipeline,
 	) {
 	}
@@ -43,7 +41,6 @@ readonly class RouteFactory implements RouteFactoryInterface
 		return new Rest\Route(
 			$this->hookFactory,
 			$this->responseFactory,
-			$this->json,
 			$this->pipeline,
 			$routeNamespace,
 			$route,

@@ -21,7 +21,6 @@ readonly class Route implements RouteInterface
 	public function __construct(
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
-		protected JsonInterface $json,
 		protected PipelineInterface $pipeline,
 		protected string $routeNamespace,
 		protected string $route,
@@ -36,7 +35,6 @@ readonly class Route implements RouteInterface
 		return new self(
 			$this->hookFactory,
 			$this->responseFactory,
-			$this->json,
 			$this->pipeline,
 			$this->routeNamespace,
 			$this->route,
@@ -56,8 +54,7 @@ readonly class Route implements RouteInterface
 				'callback' => function () {
 					$response = $this->pipeline
 						->withMiddlewares(...$this->middlewares)
-						->catchException($this->responseFactory->fromException(...))
-						->catchThrowable($this->responseFactory->fromThrowable(...))
+						->catch($this->responseFactory->fromThrowable(...))
 					(($this->closure)(...));
 
 					$response = ($response instanceof ResponseInterface) ? $response : $this->responseFactory->from(

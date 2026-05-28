@@ -14,14 +14,14 @@ readonly class RequestFactory
 	) {
 	}
 
-	public function from(string $method, string $url, ?array $headers, ?string $body): RequestInterface
+	public function from(string $method, string $url, ?array $headers, array|string|null $body): RequestInterface
 	{
 		$url = $this->urlFactory->from($url);
-		$headers = $headers ? $this->headersFactory->from($headers) : null;
-		$body = $body ? $this->bodyFactory->from(
+		$headers = $this->headersFactory->tryFrom($headers);
+		$body = $this->bodyFactory->tryFrom(
+			$body,
 			$headers->contentType(),
-			$body
-		) : null;
+		);
 
 		return new Request(
 			Http\Method\Method::from(
@@ -35,13 +35,23 @@ readonly class RequestFactory
 
 	public function fromServer(): RequestInterface
 	{
-		return new Request(
-			Http\Method\Method::from(
-				$this->server->method(),
-			),
-			$this->urlFactory->fromServer(),
-			$this->headersFactory->fromServer(),
-			$this->bodyFactory->fromServer(),
+		$url = $this->urlFactory->from(
+			$this->server->url(),
 		);
+
+		$method = Http\Method\Method::from(
+			$this->server->method(),
+		);
+
+		$headers = $this->headersFactory->tryFrom(
+			$this->server->headers(),
+		);
+
+		$body = $this->bodyFactory->tryFrom(
+			$this->server->body(),
+			$headers->contentType(),
+		);
+
+		return new Request($method, $url, $headers, $body);
 	}
 }

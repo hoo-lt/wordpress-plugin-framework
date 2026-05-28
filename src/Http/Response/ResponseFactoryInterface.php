@@ -7,8 +7,7 @@ use Throwable;
 
 interface ResponseFactoryInterface
 {
-	public function from(int $statusCode, ?array $headers = null, mixed $body = null): ResponseInterface;
+	public function from(int $statusCode, ?array $headers = null, array|string|null $body = null): ResponseInterface;
 
-	public function fromException(Http\Exceptions\Exception $exception): ResponseInterface;
-	public function fromThrowable(Throwable $throwable): ResponseInterface;
+	public function fromThrowable(Http\Request\RequestInterface $request, Throwable $throwable): ResponseInterface;
 }

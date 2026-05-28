@@ -9,8 +9,7 @@ interface PipelineInterface
 {
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
 
-	public function catchException(Closure $closure): static;
-	public function catchThrowable(Closure $closure): static;
+	public function catch(Closure $closure): static;
 
 	public function __invoke(Closure $closure): mixed;
 }

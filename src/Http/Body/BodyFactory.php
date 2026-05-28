@@ -13,64 +13,45 @@ readonly class BodyFactory implements BodyFactoryInterface
 	public function __construct(
 		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
 		protected Http\Coders\CoderFactoryInterface $coderFactory,
-		protected Http\Server\ServerInterface $server,
 	) {
 	}
 
-	public function from(?string $contentType, mixed $body): BodyInterface
+	public function from(array|string $body, ?string $contentType = null): BodyInterface
 	{
 		if ($contentType === null) {
+			if (is_array($body)) {
+				throw new BodyFactoryException('cant use array w/o media type');
+			}
+
 			return new Body($body);
 		}
 
-		$coder = $this->coderFactory->from($contentType);
+		$coder = $this->coderFactory->tryFrom($contentType);
 		if ($coder === null) {
+			if (is_array($body)) {
+				throw new BodyFactoryException('cant use array w/o coder');
+			}
+
 			return new Body($body);
 		}
 
-		if (is_array($body)) {
-			return new KeyValue\Body(
-				$this->keyValueHelper,
-				$coder,
-				$body,
-			);
+		if (is_string($body)) {
+			$body = $coder->decode($body);
 		}
 
-		/*
-		$decodedBody = $coder->decode($body);
-		if (is_array($decodedBody)) {
-			return new KeyValue\Body(
-				$this->keyValueHelper,
-				$coder,
-				$decodedBody,
-			);
-		}
-		*/
-
-		return new Body($coder->encode($body));
-	}
-
-	public function fromServer(): ?BodyInterface
-	{
-		$body = $this->server->body();
-		if ($body === null) {
-			return null;
-		}
-
-		$contentType = $this->server->contentType();
-		return $this->from(
-			$contentType,
+		return new KeyValue\Body(
+			$this->keyValueHelper,
+			$coder,
 			$body,
 		);
 	}
 
-	public function fromException(Http\Request\RequestInterface $request, Http\Exceptions\Exception $exception): ?BodyInterface
+	public function tryFrom(array|string|null $body, ?string $contentType = null): ?BodyInterface
 	{
-		return null;
-	}
+		if ($body === null) {
+			return null;
+		}
 
-	public function fromThrowable(Http\Request\RequestInterface $request, Throwable $throwable): ?BodyInterface
-	{
-		return null;
+		return $this->from($body, $contentType);
 	}
 }
