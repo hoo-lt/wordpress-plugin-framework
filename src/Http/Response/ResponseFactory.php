@@ -2,14 +2,21 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Request\RequestInterface,
+	Http\Headers\HeadersFactoryInterface,
+	Http\Body\BodyFactoryInterface,
+	Exceptions\HasStatusCodeInterface,
+	Exceptions\HasMessagesInterface,
+};
+
 use Throwable;
 
 readonly class ResponseFactory implements ResponseFactoryInterface
 {
 	public function __construct(
-		protected Http\Headers\HeadersFactoryInterface $headersFactory,
-		protected Http\Body\BodyFactoryInterface $bodyFactory,
+		protected HeadersFactoryInterface $headersFactory,
+		protected BodyFactoryInterface $bodyFactory,
 	) {
 	}
 
@@ -25,14 +32,14 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 		return new Response($statusCode, $headers, $body);
 	}
 
-	public function fromThrowable(Http\Request\RequestInterface $request, Throwable $throwable): ResponseInterface
+	public function fromThrowable(RequestInterface $request, Throwable $throwable): ResponseInterface
 	{
 		$accept = $request->headers()?->accept();
 		if (!$accept) {
 			throw new ResponseFactoryException('cant create response from throwable w/o accept header');
 		}
 
-		$statusCode = $throwable instanceof Http\Exceptions\HasStatusCode ? $throwable->getStatusCode() : 500;
+		$statusCode = $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
 
 		$headers = [
 			'content-type' => $accept,
@@ -43,7 +50,7 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 			'code' => $throwable->getCode(),
 		];
 
-		$messages = $throwable instanceof Http\Exceptions\HasMessages ? $throwable->getMessages() : null;
+		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 		if ($messages !== null) {
 			$body = [
 				...$body,
