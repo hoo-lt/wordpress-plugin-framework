@@ -26,7 +26,9 @@ readonly class Router implements RouterInterface
 	public function __invoke(): void
 	{
 		foreach ($this->routes as $route) {
-			$hooker = $this->hooker->withHooks($route->hook());
+			$hooks = $route->hooks();
+
+			$hooker = $this->hooker->withHooks(...$hooks);
 			$hooker();
 		}
 	}
@@ -34,8 +36,11 @@ readonly class Router implements RouterInterface
 	public function up(): void
 	{
 		foreach ($this->routes as $route) {
-			$closure = $route->hook()->closure();
-			$closure();
+			$hooks = $route->hooks();
+			foreach ($hooks as $hook) {
+				$closure = $hook->closure();
+				$closure();
+			}
 		}
 
 		flush_rewrite_rules();

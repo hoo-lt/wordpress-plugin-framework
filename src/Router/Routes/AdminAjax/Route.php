@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
+namespace Hoo\WordPressPluginFramework\Router\Routes\AdminAjax;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
@@ -17,7 +17,6 @@ use Hoo\WordPressPluginFramework\{
 	Exceptions\HasMessagesInterface,
 };
 use Throwable;
-use WP_REST_Response;
 
 readonly class Route implements RouteInterface
 {
@@ -29,10 +28,8 @@ readonly class Route implements RouteInterface
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
-		protected string $routeNamespace,
-		protected string $route,
+		protected string $action, // Название экшена, например: 'my_custom_action'
 		protected Closure $closure,
-		protected array $methods,
 		protected array $middlewares = [],
 	) {
 	}
@@ -43,39 +40,30 @@ readonly class Route implements RouteInterface
 			$this->hookFactory,
 			$this->responseFactory,
 			$this->pipeline,
-			$this->routeNamespace,
-			$this->route,
+			$this->action,
 			$this->closure,
-			$this->methods,
 			$middlewares
 		);
 	}
 
 	public function hooks(): array
 	{
-		$hook = $this->hookFactory->action('rest_api_init', fn() => register_rest_route(
-			$this->routeNamespace,
-			$this->route,
-			[
-				'methods' => array_map(fn($method) => $method->value, $this->methods),
-				'callback' => function () {
-					$response = $this->pipeline
-						->withMiddlewares(...$this->middlewares)
-						->catch($this->catch(...))
-					(($this->closure)(...));
+		$callback = function () {
+			$response = $this->pipeline
+				->withMiddlewares(...$this->middlewares)
+				->catch($this->catch(...))
+				->handle(($this->closure)(...)); // Предполагаю, что у пайплайна есть метод handle или аналогичный вызов
 
-					if (!$response instanceof ResponseInterface) {
-						$response = $this->adaptToResponse($response);
-					}
+			if (!$response instanceof ResponseInterface) {
+				$response = $this->adaptToResponse($response);
+			}
 
-					return $this->adaptToWpRestResponse($response);
-				},
-				'permission_callback' => fn() => true,
-			]
-		));
+			$this->sendAjaxResponse($response);
+		};
 
 		return [
-			$hook,
+			$this->hookFactory->action("wp_ajax_{$this->action}", $callback),
+			$this->hookFactory->action("wp_ajax_nopriv_{$this->action}", $callback),
 		];
 	}
 
@@ -83,51 +71,73 @@ readonly class Route implements RouteInterface
 	{
 		if (!is_array($body)) {
 			return $this->responseFactory->from(500, self::HEADERS, [
-				'message' => 'Incorrect controller response body.',
-				'code' => 'invalid_controller_result'
+				'success' => false,
+				'data' => [
+					'message' => 'Incorrect controller response body.',
+					'code' => 'invalid_controller_result'
+				]
 			]);
 		}
 
 		return $this->responseFactory->from(200, self::HEADERS, $body);
 	}
 
-	protected function adaptToWpRestResponse(ResponseInterface $response): WP_REST_Response
+	/**
+	 * Отправляет ответ клиенту в формате WordPress Ajax и прерывает выполнение.
+	 */
+	protected function sendAjaxResponse(ResponseInterface $response): void
 	{
 		$statusCode = $response->statusCode();
 		$headers = $response->headers();
 		$body = $response->body();
-		if (!$body instanceof KeyValueInterface) {
-			return new WP_REST_Response(
-				[
-					'message' => 'incorrect body',
-					'code' => 'wp_boundary_error'
-				],
-				500,
-			);
+
+		// Отправляем HTTP заголовки
+		if (function_exists('status_header')) {
+			status_header($statusCode);
 		}
 
-		return new WP_REST_Response(
-			$body->toArray(),
-			$statusCode,
-			$headers->toArray(),
-		);
+		foreach ($headers->toArray() as $key => $value) {
+			header("{$key}: {$value}");
+		}
+
+		if (!$body instanceof KeyValueInterface) {
+			echo json_encode([
+				'success' => false,
+				'data' => [
+					'message' => 'incorrect body',
+					'code' => 'wp_boundary_error'
+				]
+			]);
+			wp_die('', '', ['response' => $statusCode]);
+		}
+
+		// Выводим тело ответа
+		echo json_encode($body->toArray());
+
+		// В WordPress Ajax обязательно нужно вызывать wp_die()
+		wp_die('', '', ['response' => $statusCode]);
 	}
 
 	protected function catch(RequestInterface $request, Throwable $throwable): ResponseInterface
 	{
+		$accept = $request->headers()?->accept();
+		if ($accept !== 'application/json') {
+			throw $throwable;
+		}
+
 		$statusCode = $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
 
 		$body = [
-			'message' => $throwable->getMessage(),
-			'code' => $throwable->getCode(),
+			'success' => false,
+			'data' => [
+				'message' => $throwable->getMessage(),
+				'code' => $throwable->getCode(),
+			]
 		];
 
 		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 		if ($messages !== null) {
-			$body = [
-				...$body,
-				'messages' => $messages->toArray(),
-			];
+			$body['data']['messages'] = $messages->toArray();
 		}
 
 		return $this->responseFactory->from($statusCode, self::HEADERS, $body);
