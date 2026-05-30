@@ -6,6 +6,7 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookFactoryInterface,
+	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -59,7 +60,11 @@ readonly class Route implements RouteInterface
 						$response = $this->pipeline
 							->withMiddlewares(...$this->middlewares)
 							->catch($this->handler->handle(...))
-						(($this->closure)(...));
+						(function (RequestInterface $request) {
+							// Вызываем контроллер напрямую.
+							// Теперь он выполнится строго в контексте try-catch пайплайна
+							return ($this->closure)($request);
+						});
 
 						if (!$response instanceof ResponseInterface) {
 							$response = $this->response($response);
