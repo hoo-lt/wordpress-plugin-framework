@@ -28,7 +28,7 @@ readonly class Handler implements HandlerInterface
 	protected function html(Throwable $throwable): ResponseInterface
 	{
 		if (!$this->view->has('exception')) {
-			//throw $throwable;
+			throw $throwable;
 		}
 
 		return $this->responseFactory->from(

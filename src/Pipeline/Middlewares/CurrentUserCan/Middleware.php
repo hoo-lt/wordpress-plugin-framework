@@ -23,22 +23,9 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 			throw new Http\Exceptions\Forbidden\Exception(
 				'can not',
 				'current_user_can_error',
-				$this->exceptionHeaders($request),
 			);
 		}
 
 		return $closure($request);
-	}
-
-	protected function exceptionHeaders(Http\Request\RequestInterface $request): ?array
-	{
-		$accept = $request->accept();
-		if (!$accept) {
-			return null;
-		}
-
-		return [
-			'Content-Type' => $accept,
-		];
 	}
 }
