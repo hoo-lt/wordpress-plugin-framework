@@ -2,7 +2,9 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Exceptions;
 
-class Exception extends \Exception
+use Hoo\WordPressPluginFramework\Exceptions\Interfaces\HasStatusCodeInterface;
+
+class Exception extends \Exception implements HasStatusCodeInterface
 {
 	public function __construct(
 		string $message,
