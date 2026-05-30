@@ -23,7 +23,7 @@ readonly class Hook implements HookInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new self(
+		return new static(
 			$this->pipeline,
 			$this->name,
 			$this->closure,

@@ -89,7 +89,6 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 				throw new Http\Exceptions\BadRequest\Exception(
 					'incorrect request',
 					'',
-					$this->exceptionHeaders($request),
 				);
 			}
 
@@ -104,8 +103,6 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 			throw new Http\Exceptions\UnprocessableContent\Exception(
 				'validation error',
 				'',
-				$this->exceptionHeaders($request),
-				$this->exceptionBody($messages),
 			);
 		}
 
@@ -118,28 +115,5 @@ readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
 			...$this->validators,
 			$this->validator,
 		] : $this->validators;
-	}
-
-	protected function exceptionHeaders(Http\Request\RequestInterface $request): ?array
-	{
-		$accept = $request->headers()->accept();
-		if ($accept) {
-			return [
-				'Content-Type' => $accept,
-			];
-		}
-
-		return null;
-	}
-
-	protected function exceptionBody(Collections\Message\Collection $messages): ?array
-	{
-		if ($messages->any()) {
-			return [
-				'messages' => $messages->all()
-			];
-		}
-
-		return null;
 	}
 }

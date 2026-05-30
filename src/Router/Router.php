@@ -17,7 +17,7 @@ readonly class Router implements RouterInterface
 
 	public function withRoutes(RouteInterface ...$routes): static
 	{
-		return new self(
+		return new static(
 			$this->hooker,
 			$routes
 		);
