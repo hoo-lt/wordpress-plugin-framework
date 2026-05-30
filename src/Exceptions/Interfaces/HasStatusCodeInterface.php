@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Exceptions;
+namespace Hoo\WordPressPluginFramework\Exceptions\Interfaces;
 
 interface HasStatusCodeInterface
 {

@@ -5,30 +5,26 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HookInterface,
 	Hooker\Hooks\HookFactoryInterface,
 	Http\KeyValue\KeyValueInterface,
-	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
-	Exceptions\HasStatusCodeInterface,
-	Exceptions\HasMessagesInterface,
+	Exceptions\Handler\HandlerInterface,
 };
-use Throwable;
+use WP_HTTP_Response;
+use WP_REST_Request;
 use WP_REST_Response;
+use WP_REST_Server;
 
 readonly class Route implements RouteInterface
 {
-	protected const HEADERS = [
-		'Content-Type' => 'application/json'
-	];
-
 	public function __construct(
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
+		protected HandlerInterface $handler,
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
@@ -43,6 +39,7 @@ readonly class Route implements RouteInterface
 			$this->hookFactory,
 			$this->responseFactory,
 			$this->pipeline,
+			$this->handler,
 			$this->routeNamespace,
 			$this->route,
 			$this->closure,
@@ -53,83 +50,64 @@ readonly class Route implements RouteInterface
 
 	public function hooks(): array
 	{
-		$hook = $this->hookFactory->action('rest_api_init', fn() => register_rest_route(
-			$this->routeNamespace,
-			$this->route,
-			[
-				'methods' => array_map(fn($method) => $method->value, $this->methods),
-				'callback' => function () {
-					$response = $this->pipeline
-						->withMiddlewares(...$this->middlewares)
-						->catch($this->catch(...))
-					(($this->closure)(...));
-
-					if (!$response instanceof ResponseInterface) {
-						$response = $this->adaptToResponse($response);
-					}
-
-					return $this->adaptToWpRestResponse($response);
-				},
-				'permission_callback' => fn() => true,
-			]
-		));
-
 		return [
-			$hook,
-		];
-	}
-
-	protected function adaptToResponse(mixed $body): ResponseInterface
-	{
-		if (!is_array($body)) {
-			return $this->responseFactory->from(500, self::HEADERS, [
-				'message' => 'Incorrect controller response body.',
-				'code' => 'invalid_controller_result'
-			]);
-		}
-
-		return $this->responseFactory->from(200, self::HEADERS, $body);
-	}
-
-	protected function adaptToWpRestResponse(ResponseInterface $response): WP_REST_Response
-	{
-		$statusCode = $response->statusCode();
-		$headers = $response->headers();
-		$body = $response->body();
-		if (!$body instanceof KeyValueInterface) {
-			return new WP_REST_Response(
+			$this->hookFactory->action('rest_api_init', fn() => register_rest_route(
+				$this->routeNamespace,
+				$this->route,
 				[
-					'message' => 'incorrect body',
-					'code' => 'wp_boundary_error'
-				],
-				500,
-			);
-		}
+					'methods' => array_map(fn($method) => $method->value, $this->methods),
+					'callback' => function (): WP_REST_Response {
+						$response = $this->pipeline
+							->withMiddlewares(...$this->middlewares)
+							->catch($this->handler->handle(...))
+						(($this->closure)(...));
 
-		return new WP_REST_Response(
-			$body->toArray(),
-			$statusCode,
-			$headers->toArray(),
-		);
+						if (!$response instanceof ResponseInterface) {
+							$response = $this->response($response);
+						}
+
+						$statusCode = $response->statusCode();
+						$headers = $response->headers();
+						$body = $response->body();
+
+						return new WP_REST_Response(
+							(string) $body,
+							$statusCode,
+							$headers,
+						);
+					},
+					'permission_callback' => fn() => true,
+				]
+			)),
+			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_HTTP_Response $result, WP_REST_Request $request, WP_REST_Server $server): bool {
+				if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
+					return $served;
+				}
+
+				status_header(
+					$result->get_status(),
+				);
+
+				$headers = $result->get_headers();
+				foreach ($headers as $key => $header) {
+					$server->send_header($key, $header);
+				}
+
+				echo $result->get_data();
+
+				return true;
+			}),
+		];
 	}
 
-	protected function catch(RequestInterface $request, Throwable $throwable): ResponseInterface
+	protected function response(array|string|null $body): ResponseInterface
 	{
-		$statusCode = $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
-
-		$body = [
-			'message' => $throwable->getMessage(),
-			'code' => $throwable->getCode(),
-		];
-
-		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
-		if ($messages !== null) {
-			$body = [
-				...$body,
-				'messages' => $messages->toArray(),
-			];
-		}
-
-		return $this->responseFactory->from($statusCode, self::HEADERS, $body);
+		return $this->responseFactory->from(
+			200,
+			[
+				'Content-Type' => 'application/json',
+			],
+			$body,
+		);
 	}
 }

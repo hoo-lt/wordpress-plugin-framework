@@ -12,37 +12,68 @@ readonly class View implements ViewInterface
 	) {
 	}
 
-	public function withValue(string $key, mixed $value): ViewInterface
+	public function withValues(array $values): static
 	{
-		return new self(
-			$this->path,
-			[
-				...$this->values,
-				$key => $value,
-			]
-		);
+		return new static($this->path, $values);
 	}
 
-	public function __invoke(string $view): string
+	public function withoutValues(): static
 	{
-		$path = "{$this->path}/views/" . str_replace('.', '/', $view) . '.php';
+		return new static($this->path, []);
+	}
 
-		$realpath = realpath($path);
+	public function withValue(string $key, mixed $value): static
+	{
+		$values = [
+			...$this->values,
+			$key => $value,
+		];
+
+		return new static($this->path, $values);
+	}
+
+	public function withoutValue(string $key): static
+	{
+		$values = $this->values;
+		unset($values[$key]);
+
+		return new static($this->path, $values);
+	}
+
+	public function has(string $view): bool
+	{
+		$viewPath = $this->viewPath($view);
+		$viewsPath = $this->viewsPath();
+
+		$viewRealpath = realpath($viewPath);
+		$viewsRealpath = realpath($viewsPath);
+
 		if (
-			$realpath === false ||
-			!str_starts_with($realpath, realpath("{$this->path}/views/"))
+			$viewRealpath === false ||
+			$viewsRealpath === false
 		) {
+			return false;
+		}
+
+		return str_starts_with($viewRealpath, $viewsRealpath);
+	}
+
+	public function get(string $view): string
+	{
+		if (!$this->has($view)) {
 			throw new ViewException('invalid view path');
 		}
+
+		$viewPath = $this->viewPath($view);
 
 		ob_start();
 
 		try {
-			(static function ($path, $values) {
+			(static function ($viewPath, $values) {
 				extract($values, EXTR_SKIP);
 
-				require($path);
-			})($path, $this->values);
+				require($viewPath);
+			})($viewPath, $this->values);
 		} catch (Throwable $throwable) {
 			ob_end_clean();
 
@@ -55,5 +86,15 @@ readonly class View implements ViewInterface
 		}
 
 		return $ob;
+	}
+
+	protected function viewPath(string $view): string
+	{
+		return $this->viewsPath() . str_replace('.', '/', $view) . '.php';
+	}
+
+	protected function viewsPath(): string
+	{
+		return "{$this->path}/views/";
 	}
 }

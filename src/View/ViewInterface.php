@@ -4,6 +4,12 @@ namespace Hoo\WordPressPluginFramework\View;
 
 interface ViewInterface
 {
-	public function withValue(string $key, mixed $value): ViewInterface;
-	public function __invoke(string $view): string;
+	public function withValues(array $values): static;
+	public function withoutValues(): static;
+
+	public function withValue(string $key, mixed $value): static;
+	public function withoutValue(string $key): static;
+
+	public function has(string $view): bool;
+	public function get(string $view): string;
 }
