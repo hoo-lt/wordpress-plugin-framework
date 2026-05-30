@@ -45,9 +45,7 @@ readonly class Pipeline implements PipelineInterface
 					try {
 						return $middleware($request, $closure);
 					} catch (Throwable $throwable) {
-						if ($this->catchClosure === null) {
-							throw $throwable;
-						}
+
 
 						return ($this->catchClosure)($request, $throwable);
 					}
@@ -57,9 +55,7 @@ readonly class Pipeline implements PipelineInterface
 				try {
 					return $closure($request);
 				} catch (Throwable $throwable) {
-					if ($this->catchClosure === null) {
-						throw $throwable;
-					}
+
 
 					return ($this->catchClosure)($request, $throwable);
 				}
