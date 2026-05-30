@@ -2,10 +2,12 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
+use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Helpers,
 	Http,
 };
+use Traversable;
 
 readonly class Query implements QueryInterface
 {
@@ -60,6 +62,16 @@ readonly class Query implements QueryInterface
 	public function toArray(): array
 	{
 		return $this->query;
+	}
+
+	public function getIterator(): Traversable
+	{
+		return new ArrayIterator($this->query);
+	}
+
+	public function count(): int
+	{
+		return count($this->query);
 	}
 
 	public function __toString(): string

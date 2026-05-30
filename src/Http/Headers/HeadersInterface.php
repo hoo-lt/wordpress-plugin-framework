@@ -2,7 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
-interface HeadersInterface
+use Countable;
+use IteratorAggregate;
+
+interface HeadersInterface extends IteratorAggregate, Countable
 {
 	public function header(string $key): mixed;
 	public function withHeader(string $key, mixed $header): static;

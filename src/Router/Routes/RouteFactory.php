@@ -8,6 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Method\Method,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
+	Exceptions\Handler\HandlerInterface,
 };
 
 readonly class RouteFactory implements RouteFactoryInterface
@@ -16,7 +17,20 @@ readonly class RouteFactory implements RouteFactoryInterface
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
+		protected HandlerInterface $handler,
 	) {
+	}
+
+	public function adminAjax(string $action, Closure $closure): RouteInterface
+	{
+		return new AdminAjax\Route(
+			$this->hookFactory,
+			$this->responseFactory,
+			$this->pipeline,
+			$this->handler,
+			$action,
+			$closure,
+		);
 	}
 
 	public function feed(string $path, Closure $closure): RouteInterface
@@ -42,6 +56,7 @@ readonly class RouteFactory implements RouteFactoryInterface
 			$this->hookFactory,
 			$this->responseFactory,
 			$this->pipeline,
+			$this->handler,
 			$routeNamespace,
 			$route,
 			$closure,

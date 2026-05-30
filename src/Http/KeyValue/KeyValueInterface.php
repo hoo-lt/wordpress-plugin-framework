@@ -2,7 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\KeyValue;
 
-interface KeyValueInterface
+use Countable;
+use IteratorAggregate;
+
+interface KeyValueInterface extends IteratorAggregate, Countable
 {
 	public function values(string $key): array;
 

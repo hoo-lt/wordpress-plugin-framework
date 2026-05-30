@@ -6,7 +6,6 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookFactoryInterface,
-	Http\KeyValue\KeyValueInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -82,15 +81,6 @@ readonly class Route implements RouteInterface
 			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_HTTP_Response $result, WP_REST_Request $request, WP_REST_Server $server): bool {
 				if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
 					return $served;
-				}
-
-				status_header(
-					$result->get_status(),
-				);
-
-				$headers = $result->get_headers();
-				foreach ($headers as $key => $header) {
-					$server->send_header($key, $header);
 				}
 
 				echo $result->get_data();

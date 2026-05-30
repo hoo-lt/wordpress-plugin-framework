@@ -2,10 +2,12 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Body\KeyValue;
 
+use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Helpers,
 	Http,
 };
+use Traversable;
 
 readonly class Body implements BodyInterface
 {
@@ -60,6 +62,16 @@ readonly class Body implements BodyInterface
 	public function toArray(): array
 	{
 		return $this->body;
+	}
+
+	public function getIterator(): Traversable
+	{
+		return new ArrayIterator($this->body);
+	}
+
+	public function count(): int
+	{
+		return count($this->body);
 	}
 
 	public function __toString(): string

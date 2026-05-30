@@ -53,6 +53,16 @@ readonly class Headers implements HeadersInterface
 		return $this->headers;
 	}
 
+	public function getIterator(): Traversable
+	{
+		return new ArrayIterator($this->headers);
+	}
+
+	public function count(): int
+	{
+		return count($this->headers);
+	}
+
 	public function accept(): ?string
 	{
 		return $this->headers['accept'] ?? null;
