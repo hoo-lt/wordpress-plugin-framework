@@ -20,7 +20,7 @@ readonly class Pipeline implements PipelineInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new self(
+		return new static(
 			$this->request,
 			$middlewares,
 			$this->catchClosure,
@@ -29,7 +29,7 @@ readonly class Pipeline implements PipelineInterface
 
 	public function catch(Closure $closure): static
 	{
-		return new self(
+		return new static(
 			$this->request,
 			$this->middlewares,
 			$closure,
@@ -45,7 +45,9 @@ readonly class Pipeline implements PipelineInterface
 					try {
 						return $middleware($request, $closure);
 					} catch (Throwable $throwable) {
-
+						if ($this->catchClosure === null) {
+							throw $throwable;
+						}
 
 						return ($this->catchClosure)($request, $throwable);
 					}
@@ -55,7 +57,9 @@ readonly class Pipeline implements PipelineInterface
 				try {
 					return $closure($request);
 				} catch (Throwable $throwable) {
-
+					if ($this->catchClosure === null) {
+						throw $throwable;
+					}
 
 					return ($this->catchClosure)($request, $throwable);
 				}
