@@ -14,7 +14,6 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\MiddlewareInterface,
 	Exceptions\Handler\HandlerInterface,
 };
-use WP_HTTP_Response;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -88,12 +87,12 @@ readonly class Route implements RouteInterface
 					'permission_callback' => fn() => true,
 				]
 			)),
-			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_HTTP_Response $result, WP_REST_Request $request, WP_REST_Server $server): bool {
+			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_REST_Response $response, WP_REST_Request $request, WP_REST_Server $server): bool {
 				if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
 					return $served;
 				}
 
-				echo $result->get_data();
+				echo $response->get_data();
 
 				return true;
 			}),
