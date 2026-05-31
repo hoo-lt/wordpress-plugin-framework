@@ -59,11 +59,6 @@ readonly class Query implements QueryInterface
 		);
 	}
 
-	public function toArray(): array
-	{
-		return $this->query;
-	}
-
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->query);

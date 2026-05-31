@@ -59,11 +59,6 @@ readonly class Body implements BodyInterface
 		);
 	}
 
-	public function toArray(): array
-	{
-		return $this->body;
-	}
-
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->body);

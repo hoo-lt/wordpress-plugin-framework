@@ -35,11 +35,6 @@ readonly class Routes implements RoutesInterface
 		return new static($routes);
 	}
 
-	public function toArray(): array
-	{
-		return $this->routes;
-	}
-
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->routes);

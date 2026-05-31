@@ -12,6 +12,4 @@ interface KeyValueInterface extends IteratorAggregate, Countable
 	public function value(string $key): mixed;
 	public function withValue(string $key, mixed $value): static;
 	public function withoutValue(string $key): static;
-
-	public function toArray(): array;
 }

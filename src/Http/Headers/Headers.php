@@ -38,11 +38,6 @@ readonly class Headers implements HeadersInterface
 		return new static($headers);
 	}
 
-	public function toArray(): array
-	{
-		return $this->headers;
-	}
-
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->headers);
