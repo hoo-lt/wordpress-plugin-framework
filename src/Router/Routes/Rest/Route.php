@@ -23,10 +23,10 @@ readonly class Route implements RouteInterface
 	public function __construct(
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
-		protected RequestInterface $request,
-		protected RoutesFactoryInterface $routesFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
+		protected RequestInterface $request,
+		protected RoutesFactoryInterface $routesFactory,
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
@@ -37,18 +37,18 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new self(
+		return new static(
 			$this->hookFactory,
 			$this->responseFactory,
-			$this->request,
-			$this->routesFactory,
 			$this->pipeline,
 			$this->handler,
+			$this->request,
+			$this->routesFactory,
 			$this->routeNamespace,
 			$this->route,
 			$this->closure,
 			$this->methods,
-			$middlewares
+			$middlewares,
 		);
 	}
 
@@ -66,7 +66,7 @@ readonly class Route implements RouteInterface
 								$this->request->withRoutes(
 									$this->routesFactory->from(
 										$request->get_url_params(),
-									)
+									),
 								),
 							)
 							->withMiddlewares(...$this->middlewares)

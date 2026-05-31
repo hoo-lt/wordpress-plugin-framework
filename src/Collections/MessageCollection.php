@@ -43,9 +43,4 @@ class MessageCollection implements IteratorAggregate, Countable
 	{
 		return count($this->messages, COUNT_RECURSIVE) - count($this->messages);
 	}
-
-	public function toArray(): array
-	{
-		return $this->messages;
-	}
 }

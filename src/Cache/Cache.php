@@ -7,26 +7,26 @@ use Closure;
 readonly class Cache implements CacheInterface
 {
 	public function __construct(
-		protected int $ttl = 86400,
+		protected int $ttl,
 	) {
 	}
 
-	public function remember(string $key, Closure $closure): mixed
+	public function remember(string $key, Closure $closure, ?int $ttl = null): mixed
 	{
-		$cacheDto = get_transient($key);
-		if ($cacheDto !== false) {
-			if (!$cacheDto instanceof CacheDto) {
+		$value = get_transient($key);
+		if ($value !== false) {
+			if (!$value instanceof Value\Value) {
 				throw new CacheException('corrupted cache value');
 			}
 
-			return $cacheDto->value;
+			return $value();
 		}
 
-		$cacheDto = new CacheDto($closure());
+		$value = new Value\Value($closure());
 
-		set_transient($key, $cacheDto, $this->ttl);
+		set_transient($key, $value, $ttl ?? $this->ttl);
 
-		return $cacheDto->value;
+		return $value();
 	}
 
 	public function forget(string $key): void

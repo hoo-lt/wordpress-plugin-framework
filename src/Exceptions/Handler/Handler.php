@@ -73,7 +73,9 @@ readonly class Handler implements HandlerInterface
 
 		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 		if ($messages !== null) {
-			$values['messages'] = $messages->toArray();
+			if ($messages->any()) {
+				$values['messages'] = $messages->all();
+			}
 		}
 
 		if ($this->isDebug()) {

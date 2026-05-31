@@ -2,15 +2,19 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
+use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
+	Router\Routes\RouteFactoryInterface,
 	Hooker\HookerInterface,
+	Http\Method\Method,
 };
 
 readonly class Router implements RouterInterface
 {
 	public function __construct(
 		protected HookerInterface $hooker,
+		protected RouteFactoryInterface $routeFactory,
 		protected array $routes = [],
 	) {
 	}
@@ -19,7 +23,29 @@ readonly class Router implements RouterInterface
 	{
 		return new static(
 			$this->hooker,
-			$routes
+			$this->routeFactory,
+			$routes,
+		);
+	}
+
+	public function withAdminAjaxRoute(string $action, Closure $closure): static
+	{
+		return $this->withRoutes(
+			$this->routeFactory->adminAjax($action, $closure),
+		);
+	}
+
+	public function withFeedRoute(string $name, Closure $closure): static
+	{
+		return $this->withRoutes(
+			$this->routeFactory->feed($name, $closure),
+		);
+	}
+
+	public function withRestRoute(string $routeNamespace, string $route, Closure $closure, Method ...$methods): static
+	{
+		return $this->withRoutes(
+			$this->routeFactory->rest($routeNamespace, $route, $closure, ...$methods),
 		);
 	}
 

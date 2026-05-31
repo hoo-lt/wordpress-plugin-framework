@@ -16,7 +16,7 @@ readonly class Hook implements HookInterface
 		protected PipelineInterface $pipeline,
 		protected string $name,
 		protected Closure $closure,
-		protected int $priority = PHP_INT_MAX,
+		protected int $priority,
 		protected array $middlewares = [],
 	) {
 	}

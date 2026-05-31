@@ -6,6 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookFactoryInterface,
 	Http\Method\Method,
+	Http\Request\RequestInterface,
+	Http\Request\Routes\RoutesFactoryInterface,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Exceptions\Handler\HandlerInterface,
@@ -18,6 +20,8 @@ readonly class RouteFactory implements RouteFactoryInterface
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
+		protected RequestInterface $request,
+		protected RoutesFactoryInterface $routesFactory,
 	) {
 	}
 
@@ -33,30 +37,27 @@ readonly class RouteFactory implements RouteFactoryInterface
 		);
 	}
 
-	public function feed(string $path, Closure $closure): RouteInterface
+	public function feed(string $name, Closure $closure): RouteInterface
 	{
 		return new Feed\Route(
-			$this->pipeline,
 			$this->hookFactory,
-			$path,
+			$this->responseFactory,
+			$this->pipeline,
+			$this->handler,
+			$name,
 			$closure
 		);
 	}
 
-	public function rest(string $path, Closure $closure, Method ...$methods): RouteInterface
+	public function rest(string $routeNamespace, string $route, Closure $closure, Method ...$methods): RouteInterface
 	{
-		$path = ltrim($path, '/');
-
-		[
-			$routeNamespace,
-			$route,
-		] = explode('/', $path, 2);
-
 		return new Rest\Route(
 			$this->hookFactory,
 			$this->responseFactory,
 			$this->pipeline,
 			$this->handler,
+			$this->request,
+			$this->routesFactory,
 			$routeNamespace,
 			$route,
 			$closure,

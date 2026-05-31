@@ -28,7 +28,7 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new self(
+		return new static(
 			$this->hookFactory,
 			$this->responseFactory,
 			$this->pipeline,
@@ -51,20 +51,11 @@ readonly class Route implements RouteInterface
 				$response = $this->response($response);
 			}
 
-			http_response_code(
-				$response->statusCode(),
-			);
+			$this->statusCode($response);
+			$this->headers($response);
+			$this->body($response);
 
-			$headers = $response->headers();
-			if ($headers !== null) {
-				foreach ($headers as $key => $header) {
-					header("{$key}: {$header}");
-				}
-			}
-
-			echo (string) $response->body();
-
-			wp_die();
+			exit();
 		};
 
 		return [
@@ -82,5 +73,29 @@ readonly class Route implements RouteInterface
 			] : null,
 			$body
 		);
+	}
+
+	protected function statusCode(ResponseInterface $response): void
+	{
+		http_response_code(
+			$response->statusCode(),
+		);
+	}
+
+	protected function headers(ResponseInterface $response): void
+	{
+		$headers = $response->headers();
+		if ($headers === null) {
+			return;
+		}
+
+		foreach ($headers as $key => $header) {
+			header("{$key}: {$header}");
+		}
+	}
+
+	protected function body(ResponseInterface $response): void
+	{
+		echo (string) $response->body();
 	}
 }
