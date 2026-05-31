@@ -22,10 +22,8 @@ readonly class Headers implements HeadersInterface
 
 	public function withHeader(string $key, mixed $header): static
 	{
-		$headers = [
-			...$this->headers,
-			strtolower($key) => $header
-		];
+		$headers = $this->headers;
+		$headers[strtolower($key)] = $header;
 
 		return new static($headers);
 	}
@@ -50,17 +48,20 @@ readonly class Headers implements HeadersInterface
 
 	public function accept(): ?string
 	{
-		return $this->headers['accept'] ?? null;
+		$accept = $this->headers['accept'] ?? null;
+		return $accept;
 	}
 
 	public function contentLength(): ?int
 	{
-		return $this->headers['content-length'] ?? null;
+		$contentLength = $this->headers['content-length'] ?? null;
+		return $contentLength;
 	}
 
 	public function contentType(): ?string
 	{
-		return $this->headers['content-type'] ?? null;
+		$contentType = $this->headers['content-type'] ?? null;
+		return $contentType;
 	}
 
 	protected function normalizeHeaders(array $headers): array

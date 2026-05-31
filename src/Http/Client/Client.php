@@ -2,17 +2,21 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Client;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\Http\{
+	Request\RequestInterface,
+	Response\ResponseInterface,
+	Response\ResponseFactoryInterface,
+};
 use WP_Error;
 
 readonly class Client implements ClientInterface
 {
 	public function __construct(
-		protected Http\Response\ResponseFactoryInterface $responseFactory,
+		protected ResponseFactoryInterface $responseFactory,
 	) {
 	}
 
-	public function request(Http\Request\RequestInterface $request): Http\Response\ResponseInterface
+	public function request(RequestInterface $request): ResponseInterface
 	{
 		$response = wp_safe_remote_request(
 			$request->url(),

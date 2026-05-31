@@ -3,16 +3,15 @@
 namespace Hoo\WordPressPluginFramework\Http\Body;
 
 use Hoo\WordPressPluginFramework\{
-	Helpers,
-	Http,
+	Helpers\KeyValue\HelperInterface,
+	Http\Coders\CoderFactoryInterface,
 };
-use Throwable;
 
 readonly class BodyFactory implements BodyFactoryInterface
 {
 	public function __construct(
-		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\CoderFactoryInterface $coderFactory,
+		protected HelperInterface $helper,
+		protected CoderFactoryInterface $coderFactory,
 	) {
 	}
 
@@ -40,7 +39,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 		}
 
 		return new KeyValue\Body(
-			$this->keyValueHelper,
+			$this->helper,
 			$coder,
 			$body,
 		);

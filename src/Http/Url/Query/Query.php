@@ -4,58 +4,46 @@ namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
 use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
-	Helpers,
-	Http,
+	Helpers\KeyValue\HelperInterface,
+	Http\Coders\CoderInterface,
+	Http\KeyValue\KeyValueInterface,
 };
 use Traversable;
 
-readonly class Query implements QueryInterface
+readonly class Query implements QueryInterface, KeyValueInterface
 {
 	public function __construct(
-		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\Query\CoderInterface $coder,
+		protected HelperInterface $helper,
+		protected CoderInterface $coder,
 		protected array $query,
 	) {
 	}
 
 	public function values(string $key): array
 	{
-		return $this->keyValueHelper->values(
-			$this->query,
-			$key
-		);
+		return $this->helper->values($this->query, $key);
 	}
 
 	public function value(string $key): mixed
 	{
-		return $this->keyValueHelper->value(
-			$this->query,
-			$key
-		);
+		return $this->helper->value($this->query, $key);
 	}
 
 	public function withValue(string $key, mixed $value): static
 	{
 		return new static(
-			$this->keyValueHelper,
+			$this->helper,
 			$this->coder,
-			$this->keyValueHelper->withValue(
-				$this->query,
-				$key,
-				$value
-			)
+			$this->helper->withValue($this->query, $key, $value)
 		);
 	}
 
 	public function withoutValue(string $key): static
 	{
 		return new static(
-			$this->keyValueHelper,
+			$this->helper,
 			$this->coder,
-			$this->keyValueHelper->withoutValue(
-				$this->query,
-				$key
-			)
+			$this->helper->withoutValue($this->query, $key)
 		);
 	}
 

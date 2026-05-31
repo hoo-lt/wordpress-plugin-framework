@@ -3,27 +3,37 @@
 namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
 use Hoo\WordPressPluginFramework\{
-	Helpers,
-	Http,
+	Helpers\KeyValue\HelperInterface,
+	Http\Coders\Query\CoderInterface,
 };
 
 readonly class QueryFactory implements QueryFactoryInterface
 {
 	public function __construct(
-		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\Query\CoderInterface $coder,
-		protected Http\Server\ServerInterface $server,
+		protected HelperInterface $helper,
+		protected CoderInterface $coder,
 	) {
 	}
 
-	public function from(string $query): QueryInterface
+	public function from(array|string $query): QueryInterface
 	{
-		$decodedQuery = $this->coder->decode($query);
+		if (is_string($query)) {
+			$query = $this->coder->decode($query);
+		}
 
 		return new Query(
-			$this->keyValueHelper,
+			$this->helper,
 			$this->coder,
-			$decodedQuery,
+			$query,
 		);
+	}
+
+	public function tryFrom(array|string|null $query): ?QueryInterface
+	{
+		if ($query === null) {
+			return null;
+		}
+
+		return $this->from($query);
 	}
 }

@@ -2,15 +2,23 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Body\BodyInterface,
+	Http\Headers\HeadersInterface,
+};
 
 interface MessageInterface
 {
-	public function headers(): ?Http\Headers\HeadersInterface;
-	public function withHeaders(Http\Headers\HeadersInterface $headers): static;
+	public function headers(): ?HeadersInterface;
+	public function withHeaders(HeadersInterface $headers): static;
 	public function withoutHeaders(): static;
 
-	public function body(): ?Http\Body\BodyInterface;
-	public function withBody(Http\Body\BodyInterface $body): static;
+	public function header(string $key): mixed;
+
+	public function body(): ?BodyInterface;
+	public function withBody(BodyInterface $body): static;
 	public function withoutBody(): static;
+
+	public function bodyValues(string $key): array;
+	public function bodyValue(string $key): mixed;
 }

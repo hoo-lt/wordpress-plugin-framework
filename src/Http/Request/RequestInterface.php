@@ -2,18 +2,30 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Message\MessageInterface,
+	Http\Method\Method,
+	Http\Url\UrlInterface,
+	Http\Request\Routes\RoutesInterface
+};
 
-interface RequestInterface extends Http\Message\MessageInterface
+interface RequestInterface extends MessageInterface
 {
-	public function method(): Http\Method\Method;
-	public function withMethod(Http\Method\Method $method): static;
+	public function method(): Method;
+	public function withMethod(Method $method): static;
 
-	public function url(): Http\Url\UrlInterface;
-	public function withUrl(Http\Url\UrlInterface $url): static;
+	public function url(): UrlInterface;
+	public function withUrl(UrlInterface $url): static;
 
+	public function urlQueryValues(string $key): array;
+	public function urlQueryValue(string $key): mixed;
 
-	public function routes(): ?Routes\RoutesInterface;
-	public function withRoutes(Routes\RoutesInterface $routes): static;
+	public function routes(): ?RoutesInterface;
+	public function withRoutes(RoutesInterface $routes): static;
 	public function withoutRoutes(): static;
+
+	public function route(string $key): mixed;
+
+	public function values(string $key): array;
+	public function value(string $key): mixed;
 }

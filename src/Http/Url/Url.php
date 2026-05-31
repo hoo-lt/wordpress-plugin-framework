@@ -2,7 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Url\Scheme\Scheme,
+	Http\Url\Query\QueryInterface,
+};
 
 readonly class Url implements UrlInterface
 {
@@ -11,11 +14,11 @@ readonly class Url implements UrlInterface
 	protected ?int $port;
 
 	public function __construct(
-		protected Http\Url\Scheme\Scheme $scheme,
+		protected Scheme $scheme,
 		string $host,
 		?int $port,
 		string $path,
-		protected ?Http\Url\Query\QueryInterface $query,
+		protected ?QueryInterface $query,
 	) {
 		$this->validateHost($host);
 		$this->host = $this->normalizeHost($host);
@@ -27,12 +30,12 @@ readonly class Url implements UrlInterface
 		$this->path = $this->normalizePath($path);
 	}
 
-	public function scheme(): Http\Url\Scheme\Scheme
+	public function scheme(): Scheme
 	{
 		return $this->scheme;
 	}
 
-	public function withScheme(Http\Url\Scheme\Scheme $scheme): static
+	public function withScheme(Scheme $scheme): static
 	{
 		return new static(
 			$scheme,
@@ -102,12 +105,12 @@ readonly class Url implements UrlInterface
 		);
 	}
 
-	public function query(): ?Http\Url\Query\QueryInterface
+	public function query(): ?QueryInterface
 	{
 		return $this->query;
 	}
 
-	public function withQuery(Http\Url\Query\QueryInterface $query): static
+	public function withQuery(QueryInterface $query): static
 	{
 		return new static(
 			$this->scheme,

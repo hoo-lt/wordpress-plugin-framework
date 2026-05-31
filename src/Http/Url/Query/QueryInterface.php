@@ -2,9 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
-use Hoo\WordPressPluginFramework\Http;
-
-interface QueryInterface extends Http\KeyValue\KeyValueInterface
+interface QueryInterface
 {
 	public function __toString(): string;
 }

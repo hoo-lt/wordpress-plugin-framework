@@ -19,10 +19,8 @@ readonly class Routes implements RoutesInterface
 
 	public function withRoute(string $key, mixed $route): static
 	{
-		$routes = [
-			...$this->routes,
-			$key => $route
-		];
+		$routes = $this->routes;
+		$routes[$key] = $route;
 
 		return new static($routes);
 	}

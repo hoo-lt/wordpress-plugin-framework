@@ -4,58 +4,47 @@ namespace Hoo\WordPressPluginFramework\Http\Body\KeyValue;
 
 use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
-	Helpers,
-	Http,
+	Helpers\KeyValue\HelperInterface,
+	Http\Body\BodyInterface,
+	Http\Coders\CoderInterface,
+	Http\KeyValue\KeyValueInterface,
 };
 use Traversable;
 
-readonly class Body implements BodyInterface
+readonly class Body implements BodyInterface, KeyValueInterface
 {
 	public function __construct(
-		protected Helpers\KeyValue\HelperInterface $keyValueHelper,
-		protected Http\Coders\CoderInterface $coder,
+		protected HelperInterface $helper,
+		protected CoderInterface $coder,
 		protected array $body,
 	) {
 	}
 
 	public function values(string $key): array
 	{
-		return $this->keyValueHelper->values(
-			$this->body,
-			$key,
-		);
+		return $this->helper->values($this->body, $key);
 	}
 
 	public function value(string $key): mixed
 	{
-		return $this->keyValueHelper->value(
-			$this->body,
-			$key,
-		);
+		return $this->helper->value($this->body, $key);
 	}
 
 	public function withValue(string $key, mixed $value): static
 	{
 		return new static(
-			$this->keyValueHelper,
+			$this->helper,
 			$this->coder,
-			$this->keyValueHelper->withValue(
-				$this->body,
-				$key,
-				$value,
-			),
+			$this->helper->withValue($this->body, $key, $value),
 		);
 	}
 
 	public function withoutValue(string $key): static
 	{
 		return new static(
-			$this->keyValueHelper,
+			$this->helper,
 			$this->coder,
-			$this->keyValueHelper->withoutValue(
-				$this->body,
-				$key,
-			),
+			$this->helper->withoutValue($this->body, $key),
 		);
 	}
 

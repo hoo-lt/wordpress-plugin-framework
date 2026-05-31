@@ -19,13 +19,11 @@ readonly class UrlFactory implements UrlFactoryInterface
 		}
 
 		return new Url(
-			Scheme\Scheme::from(
-				isset($url['scheme']) ? $url['scheme'] : '',
-			),
-			isset($url['host']) ? $url['host'] : '',
-			isset($url['port']) ? $url['port'] : null,
-			isset($url['path']) ? $url['path'] : '',
-			isset($url['query']) ? $this->queryFactory->from($url['query']) : null,
+			Scheme\Scheme::from($url['scheme'] ?? ''),
+			$url['host'] ?? '',
+			$url['port'] ?? null,
+			$url['path'] ?? '',
+			$this->queryFactory->tryFrom($url['query'] ?? null),
 		);
 	}
 }

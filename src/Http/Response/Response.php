@@ -2,14 +2,18 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Response;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Body\BodyInterface,
+	Http\Headers\HeadersInterface,
+	Http\KeyValue\KeyValueInterface,
+};
 
 readonly class Response implements ResponseInterface
 {
 	public function __construct(
 		protected int $statusCode,
-		protected ?Http\Headers\HeadersInterface $headers,
-		protected ?Http\Body\BodyInterface $body,
+		protected ?HeadersInterface $headers,
+		protected ?BodyInterface $body,
 	) {
 		$this->validateStatusCode($statusCode);
 	}
@@ -28,12 +32,12 @@ readonly class Response implements ResponseInterface
 		);
 	}
 
-	public function headers(): ?Http\Headers\HeadersInterface
+	public function headers(): ?HeadersInterface
 	{
 		return $this->headers;
 	}
 
-	public function withHeaders(Http\Headers\HeadersInterface $headers): static
+	public function withHeaders(HeadersInterface $headers): static
 	{
 		return new static(
 			$this->statusCode,
@@ -51,12 +55,18 @@ readonly class Response implements ResponseInterface
 		);
 	}
 
-	public function body(): ?Http\Body\BodyInterface
+	public function header(string $key): mixed
+	{
+		return $this->headers()?->header($key);
+
+	}
+
+	public function body(): ?BodyInterface
 	{
 		return $this->body;
 	}
 
-	public function withBody(Http\Body\BodyInterface $body): static
+	public function withBody(BodyInterface $body): static
 	{
 		return new static(
 			$this->statusCode,
@@ -72,6 +82,38 @@ readonly class Response implements ResponseInterface
 			$this->headers,
 			null,
 		);
+	}
+
+	public function bodyValues(string $key): array
+	{
+		$body = $this->body();
+		return $body instanceof KeyValueInterface ? $body->values($key) : [];
+	}
+
+	public function bodyValue(string $key): mixed
+	{
+		$body = $this->body();
+		return $body instanceof KeyValueInterface ? $body->value($key) : null;
+	}
+
+	public function values(string $key): array
+	{
+		$bodyValues = $this->bodyValues($key);
+		if ($bodyValues !== []) {
+			return $bodyValues;
+		}
+
+		return [];
+	}
+
+	public function value(string $key): mixed
+	{
+		$bodyValue = $this->bodyValue($key);
+		if ($bodyValue !== null) {
+			return $bodyValue;
+		}
+
+		return null;
 	}
 
 	protected function validateStatusCode(int $statusCode): void

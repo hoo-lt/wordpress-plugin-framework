@@ -2,20 +2,27 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\{
+	Http\Body\BodyFactoryInterface,
+	Http\Headers\HeadersFactoryInterface,
+	Http\Method\Method,
+	Http\Server\ServerInterface,
+	Http\Url\UrlFactoryInterface,
+};
 
 readonly class RequestFactory
 {
 	public function __construct(
-		protected Http\Url\UrlFactoryInterface $urlFactory,
-		protected Http\Headers\HeadersFactoryInterface $headersFactory,
-		protected Http\Body\BodyFactoryInterface $bodyFactory,
-		protected Http\Server\ServerInterface $server,
+		protected UrlFactoryInterface $urlFactory,
+		protected HeadersFactoryInterface $headersFactory,
+		protected BodyFactoryInterface $bodyFactory,
+		protected ServerInterface $server,
 	) {
 	}
 
-	public function from(string $method, string $url, ?array $headers, array|string|null $body): RequestInterface
+	public function from(string $method, string $url, ?array $headers = null, array|string|null $body = null): RequestInterface
 	{
+		$method = Method::from($method);
 		$url = $this->urlFactory->from($url);
 		$headers = $this->headersFactory->tryFrom($headers);
 		$body = $this->bodyFactory->tryFrom(
@@ -23,35 +30,16 @@ readonly class RequestFactory
 			$headers->contentType(),
 		);
 
-		return new Request(
-			Http\Method\Method::from(
-				$method
-			),
-			$url,
-			$headers,
-			$body,
-		);
+		return new Request($method, $url, $headers, $body);
 	}
 
 	public function fromServer(): RequestInterface
 	{
-		$url = $this->urlFactory->from(
-			$this->server->url(),
-		);
-
-		$method = Http\Method\Method::from(
+		return $this->from(
 			$this->server->method(),
-		);
-
-		$headers = $this->headersFactory->tryFrom(
+			$this->server->url(),
 			$this->server->headers(),
-		);
-
-		$body = $this->bodyFactory->tryFrom(
 			$this->server->body(),
-			$headers->contentType(),
 		);
-
-		return new Request($method, $url, $headers, $body);
 	}
 }

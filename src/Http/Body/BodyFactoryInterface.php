@@ -2,8 +2,6 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Body;
 
-use Throwable;
-
 interface BodyFactoryInterface
 {
 	public function from(array|string $body, ?string $contentType = null): BodyInterface;
