@@ -56,7 +56,7 @@ readonly class Route implements RouteInterface
 	public function hooks(): array
 	{
 		return [
-			$this->hookFactory->action('rest_api_init', fn(WP_REST_Server $server) => register_rest_route(
+			$this->hookFactory->action('rest_api_init', fn(WP_REST_Server $server): bool => register_rest_route(
 				$this->routeNamespace,
 				$this->route,
 				[
