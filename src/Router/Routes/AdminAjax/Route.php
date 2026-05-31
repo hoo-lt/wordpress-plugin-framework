@@ -56,7 +56,7 @@ readonly class Route implements RouteInterface
 			);
 
 			$headers = $response->headers();
-			if ($headers) {
+			if ($headers !== null) {
 				foreach ($headers as $key => $header) {
 					header("{$key}: {$header}");
 				}
@@ -75,16 +75,12 @@ readonly class Route implements RouteInterface
 
 	protected function response(array|string|null $body): ResponseInterface
 	{
-		$headers = null;
-
-		if (is_array($body)) {
-			$headers['Content-Type'] = 'application/json';
-		}
-
-		if (is_string($body)) {
-			$headers['Content-Type'] = 'text/html';
-		}
-
-		return $this->responseFactory->from(200, $headers, $body);
+		return $this->responseFactory->from(
+			200,
+			is_array($body) ? [
+				'Content-Type' => 'application/json',
+			] : null,
+			$body
+		);
 	}
 }

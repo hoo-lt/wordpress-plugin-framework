@@ -9,8 +9,9 @@ readonly class Request implements RequestInterface
 	public function __construct(
 		protected Http\Method\Method $method,
 		protected Http\Url\UrlInterface $url,
-		protected ?Http\Headers\HeadersInterface $headers,
-		protected ?Http\Body\BodyInterface $body,
+		protected ?Http\Headers\HeadersInterface $headers = null,
+		protected ?Http\Body\BodyInterface $body = null,
+		protected ?Routes\RoutesInterface $routes = null,
 	) {
 	}
 
@@ -26,6 +27,7 @@ readonly class Request implements RequestInterface
 			$this->url,
 			$this->headers,
 			$this->body,
+			$this->routes
 		);
 	}
 
@@ -41,6 +43,7 @@ readonly class Request implements RequestInterface
 			$url,
 			$this->headers,
 			$this->body,
+			$this->routes
 		);
 	}
 
@@ -56,6 +59,7 @@ readonly class Request implements RequestInterface
 			$this->url,
 			$headers,
 			$this->body,
+			$this->routes
 		);
 	}
 
@@ -66,6 +70,7 @@ readonly class Request implements RequestInterface
 			$this->url,
 			null,
 			$this->body,
+			$this->routes
 		);
 	}
 
@@ -81,6 +86,7 @@ readonly class Request implements RequestInterface
 			$this->url,
 			$this->headers,
 			$body,
+			$this->routes
 		);
 	}
 
@@ -90,6 +96,34 @@ readonly class Request implements RequestInterface
 			$this->method,
 			$this->url,
 			$this->headers,
+			null,
+			$this->routes
+		);
+	}
+
+	public function routes(): ?Routes\RoutesInterface
+	{
+		return $this->routes;
+	}
+
+	public function withRoutes(Routes\RoutesInterface $routes): static
+	{
+		return new static(
+			$this->method,
+			$this->url,
+			$this->headers,
+			$this->body,
+			$routes,
+		);
+	}
+
+	public function withoutRoutes(): static
+	{
+		return new static(
+			$this->method,
+			$this->url,
+			$this->headers,
+			$this->body,
 			null,
 		);
 	}

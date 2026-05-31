@@ -6,6 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookFactoryInterface,
+	Http\Request\RequestInterface,
+	Http\Request\Routes\RoutesFactoryInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -22,6 +24,8 @@ readonly class Route implements RouteInterface
 	public function __construct(
 		protected HookFactoryInterface $hookFactory,
 		protected ResponseFactoryInterface $responseFactory,
+		protected RequestInterface $request,
+		protected RoutesFactoryInterface $routesFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
 		protected string $routeNamespace,
@@ -37,6 +41,8 @@ readonly class Route implements RouteInterface
 		return new self(
 			$this->hookFactory,
 			$this->responseFactory,
+			$this->request,
+			$this->routesFactory,
 			$this->pipeline,
 			$this->handler,
 			$this->routeNamespace,
@@ -50,13 +56,21 @@ readonly class Route implements RouteInterface
 	public function hooks(): array
 	{
 		return [
-			$this->hookFactory->action('rest_api_init', fn() => register_rest_route(
+			$this->hookFactory->action('rest_api_init', fn(WP_REST_Server $server) => register_rest_route(
 				$this->routeNamespace,
 				$this->route,
 				[
 					'methods' => array_map(fn($method) => $method->value, $this->methods),
-					'callback' => function (): WP_REST_Response {
+					'callback' => function (WP_REST_Request $request): WP_REST_Response {
+
 						$response = $this->pipeline
+							->withRequest(
+								$this->request->withRoutes(
+									$this->routesFactory->from(
+										$request->get_url_params(),
+									)
+								),
+							)
 							->withMiddlewares(...$this->middlewares)
 							->catch($this->handler->handle(...))
 						(($this->closure)(...));
@@ -65,14 +79,10 @@ readonly class Route implements RouteInterface
 							$response = $this->response($response);
 						}
 
-						$statusCode = $response->statusCode();
-						$headers = $response->headers();
-						$body = $response->body();
-
 						return new WP_REST_Response(
-							(string) $body,
-							$statusCode,
-							$headers,
+							(string) $response->body(),
+							$response->statusCode(),
+							$response->headers(),
 						);
 					},
 					'permission_callback' => fn() => true,

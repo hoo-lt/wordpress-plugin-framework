@@ -2,8 +2,6 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Headers;
 
-use Hoo\WordPressPluginFramework\Http;
-
 readonly class HeadersFactory implements HeadersFactoryInterface
 {
 	public function from(array $headers): HeadersInterface

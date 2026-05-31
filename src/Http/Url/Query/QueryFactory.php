@@ -26,14 +26,4 @@ readonly class QueryFactory implements QueryFactoryInterface
 			$decodedQuery,
 		);
 	}
-
-	public function fromServer(): ?QueryInterface
-	{
-		$query = $this->server->query();
-		if ($query === null) {
-			return null;
-		}
-
-		return $this->from($query);
-	}
 }

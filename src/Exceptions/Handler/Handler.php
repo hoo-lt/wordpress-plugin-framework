@@ -22,7 +22,11 @@ readonly class Handler implements HandlerInterface
 
 	public function handle(RequestInterface $request, Throwable $throwable): ResponseInterface
 	{
-		return $request->headers()?->accept() === 'application/json' ? $this->json($throwable) : $this->html($throwable);
+		$accept = $request->headers()?->accept();
+		return match ($accept) {
+			'application/json' => $this->json($throwable),
+			default => $this->html($throwable),
+		};
 	}
 
 	protected function html(Throwable $throwable): ResponseInterface

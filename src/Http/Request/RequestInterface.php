@@ -11,4 +11,9 @@ interface RequestInterface extends Http\Message\MessageInterface
 
 	public function url(): Http\Url\UrlInterface;
 	public function withUrl(Http\Url\UrlInterface $url): static;
+
+
+	public function routes(): ?Routes\RoutesInterface;
+	public function withRoutes(Routes\RoutesInterface $routes): static;
+	public function withoutRoutes(): static;
 }

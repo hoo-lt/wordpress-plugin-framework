@@ -15,16 +15,6 @@ readonly class Headers implements HeadersInterface
 		$this->headers = $this->normalizeHeaders($headers);
 	}
 
-	public function with(array $headers): static
-	{
-		return new static($headers);
-	}
-
-	public function without(): static
-	{
-		return new static([]);
-	}
-
 	public function header(string $key): mixed
 	{
 		return $this->headers[strtolower($key)] ?? null;
