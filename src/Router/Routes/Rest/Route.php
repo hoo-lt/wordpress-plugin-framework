@@ -61,7 +61,6 @@ readonly class Route implements RouteInterface
 				[
 					'methods' => array_map(fn($method) => $method->value, $this->methods),
 					'callback' => function (WP_REST_Request $request): WP_REST_Response {
-
 						$response = $this->pipeline
 							->withRequest(
 								$this->request->withRoutes(
