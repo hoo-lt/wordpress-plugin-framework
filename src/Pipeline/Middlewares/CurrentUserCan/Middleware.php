@@ -4,26 +4,23 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http,
-	Pipeline,
+	Http\Exceptions\Forbidden\Exception as ForbiddenException,
+	Http\Request\RequestInterface,
+	Pipeline\Middlewares\MiddlewareInterface,
+	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 };
 
-readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
+readonly class Middleware implements MiddlewareInterface
 {
-	use Pipeline\Middlewares\MiddlewareTrait;
-
 	public function __construct(
-		protected Capability\Capability $capability,
+		protected Capability $capability,
 	) {
 	}
 
-	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
+	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
 		if (!current_user_can($this->capability->value)) {
-			throw new Http\Exceptions\Forbidden\Exception(
-				'can not',
-				'current_user_can_error',
-			);
+			throw new ForbiddenException('can not', 'current_user_can_error');
 		}
 
 		return $closure($request);
