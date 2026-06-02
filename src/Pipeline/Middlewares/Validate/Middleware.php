@@ -55,7 +55,7 @@ readonly class Middleware implements MiddlewareInterface
 		foreach ($this->valuesRules as $valuesRules) {
 			$values = $valuesRules->values($request);
 			if ($values === []) {
-				throw new Http\Exceptions\BadRequest\Exception('incorrect request', '');
+				throw new Exceptions\BadRequest\Exception('incorrect request', '');
 			}
 
 			$rules = $valuesRules->rules();
@@ -68,7 +68,7 @@ readonly class Middleware implements MiddlewareInterface
 		}
 
 		if ($messages->isNotEmpty()) {
-			throw new Http\Exceptions\UnprocessableContent\Exception('validation error', '');
+			throw new Exceptions\UnprocessableContent\Exception('validation error', '', $messages);
 		}
 
 		return $closure($request);

@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 
 use Closure;
 
-readonly class MiddlewaresBuilder
+readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 {
 	public function __construct(
 		protected CurrentUserCan\MiddlewareFactoryInterface $currentUserCanMiddlewareFactory,

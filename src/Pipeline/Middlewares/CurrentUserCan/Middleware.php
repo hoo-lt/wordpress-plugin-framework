@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Exceptions\Forbidden\Exception as ForbiddenException,
 	Http\Request\RequestInterface,
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 	Collections\Message\Collection as MessageCollection,
@@ -43,7 +42,7 @@ readonly class Middleware implements MiddlewareInterface
 		}
 
 		if ($messages->isNotEmpty()) {
-			throw new ForbiddenException('can not', 'current_user_can_error');
+			throw new Exceptions\Forbidden\Exception('can not', 'current_user_can_error', $messages);
 		}
 
 		return $closure($request);
