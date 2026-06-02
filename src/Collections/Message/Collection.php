@@ -1,13 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Collections;
+namespace Hoo\WordPressPluginFramework\Collections\Message;
 
 use ArrayIterator;
-use Countable;
-use IteratorAggregate;
 use Traversable;
 
-class MessageCollection implements IteratorAggregate, Countable
+class Collection implements CollectionInterface
 {
 	public function __construct(
 		protected array $messages = []
@@ -29,9 +27,14 @@ class MessageCollection implements IteratorAggregate, Countable
 		return $this->messages;
 	}
 
-	public function any(): bool
+	public function isEmpty(): bool
 	{
 		return $this->count() > 0;
+	}
+
+	public function isNotEmpty(): bool
+	{
+		return !$this->isEmpty();
 	}
 
 	public function getIterator(): Traversable

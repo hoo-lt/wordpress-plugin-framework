@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
+	Collections\Message\CollectionInterface,
 	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
@@ -59,11 +60,6 @@ readonly class Handler implements HandlerInterface
 		);
 	}
 
-	protected function statusCode(Throwable $throwable): int
-	{
-		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
-	}
-
 	protected function values(Throwable $throwable): array
 	{
 		$values = [
@@ -71,9 +67,9 @@ readonly class Handler implements HandlerInterface
 			'code' => $throwable->getCode(),
 		];
 
-		$messages = $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
+		$messages = $this->messages($throwable);
 		if ($messages !== null) {
-			if ($messages->any()) {
+			if ($messages->isNotEmpty()) {
 				$values['messages'] = $messages->all();
 			}
 		}
@@ -85,6 +81,16 @@ readonly class Handler implements HandlerInterface
 		}
 
 		return $values;
+	}
+
+	protected function statusCode(Throwable $throwable): int
+	{
+		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
+	}
+
+	protected function messages(Throwable $throwable): ?CollectionInterface
+	{
+		return $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 	}
 
 	protected function isDebug(): bool

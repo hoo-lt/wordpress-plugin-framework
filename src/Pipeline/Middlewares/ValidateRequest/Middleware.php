@@ -4,116 +4,63 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\ValidateRequest;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http,
-	Collections,
-	Pipeline,
+	Http\Request\RequestInterface,
+	Collections\Message\Collection as MessageCollection,
+	Pipeline\Middlewares\MiddlewareInterface,
+	Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface,
+	Pipeline\Middlewares\ValidateRequest\ValuesRules\ValuesRulesInterface,
+	Pipeline\Middlewares\ValidateRequest\ValuesRules\ValuesRules as ValuesRules,
+	Pipeline\Middlewares\ValidateRequest\ValuesRules\Body\ValuesRules as BodyValuesRules,
+	Pipeline\Middlewares\ValidateRequest\ValuesRules\Query\ValuesRules as QueryValuesRules,
+	Pipeline\Middlewares\ValidateRequest\Rules\Bool\Rule as BoolRule,
+	Pipeline\Middlewares\ValidateRequest\Rules\Float\Rule as FloatRule,
+	Pipeline\Middlewares\ValidateRequest\Rules\Int\Rule as IntRule,
+	Pipeline\Middlewares\ValidateRequest\Rules\String\Rule as StringRule,
+	Pipeline\Middlewares\ValidateRequest\ValuesRules\ValuesRulesFactory
 };
 
-readonly class Middleware implements Pipeline\Middlewares\MiddlewareInterface
+readonly class Middleware implements MiddlewareInterface
 {
-	use Pipeline\Middlewares\MiddlewareTrait;
-
 	public function __construct(
-		protected array $validators = [],
-		protected ?Pipeline\Middlewares\ValidateRequest\Validators\ValidatorInterface $validator = null,
+		protected ValuesRulesFactory $valuesRulesFactory,
+		protected array $valuesRules = [],
 	) {
 	}
 
-	public function withValidator(Pipeline\Middlewares\ValidateRequest\Validators\ValidatorInterface $validator): static
+	public function body(string $key, Closure $closure): static
 	{
-		return new self(
-			$this->validators(),
-			$validator,
+		return new static(
+			$this->valuesRulesFactory,
+			[
+				...$this->valuesRules,
+				$this->valuesRulesFactory->body($key, $closure),
+			]
 		);
 	}
 
-	public function body(string $key): static
+	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
-		return $this->withValidator(
-			new Pipeline\Middlewares\ValidateRequest\Validators\Body\Validator($key),
-		);
-	}
+		$messages = new MessageCollection();
 
-	public function query(string $key): static
-	{
-		return $this->withValidator(
-			new Pipeline\Middlewares\ValidateRequest\Validators\Query\Validator($key),
-		);
-	}
-
-	public function withRules(Pipeline\Middlewares\ValidateRequest\Rules\RuleInterface ...$rules): static
-	{
-		return new self(
-			$this->validators,
-			$this->validator->withRules(
-				...$rules
-			)
-		);
-	}
-
-	public function bool(): static
-	{
-		return $this->withRules(
-			new Pipeline\Middlewares\ValidateRequest\Rules\Bool\Rule(),
-		);
-	}
-
-	public function float(): static
-	{
-		return $this->withRules(
-			new Pipeline\Middlewares\ValidateRequest\Rules\Float\Rule(),
-		);
-	}
-
-	public function int(): static
-	{
-		return $this->withRules(
-			new Pipeline\Middlewares\ValidateRequest\Rules\Int\Rule(),
-		);
-	}
-
-	public function string(): static
-	{
-		return $this->withRules(
-			new Pipeline\Middlewares\ValidateRequest\Rules\String\Rule(),
-		);
-	}
-
-	public function __invoke(Http\Request\RequestInterface $request, Closure $closure): mixed
-	{
-		$messages = new Collections\Message\Collection();
-
-		foreach ($this->validators() as $validator) {
-			$values = $validator->values($request);
+		foreach ($this->valuesRules as $valuesRules) {
+			$values = $valuesRules->values($request);
 			if ($values === []) {
-				throw new Http\Exceptions\BadRequest\Exception(
-					'incorrect request',
-					'',
-				);
+				throw new Http\Exceptions\BadRequest\Exception('incorrect request', '');
 			}
 
+			$rules = $valuesRules->rules();
+
 			foreach ($values as $key => $value) {
-				foreach ($validator->rules() as $rule) {
+				foreach ($rules as $rule) {
 					$rule($value, fn($message) => $messages->add($key, $message));
 				}
 			}
 		}
 
-		if ($messages->any()) {
-			throw new Http\Exceptions\UnprocessableContent\Exception(
-				'validation error',
-				'',
-			);
+		if ($messages->isNotEmpty()) {
+			throw new Http\Exceptions\UnprocessableContent\Exception('validation error', '');
 		}
 
 		return $closure($request);
-	}
-
-	protected function validators(): array
-	{
-		return $this->validator ? [
-			...$this->validators,
-			$this->validator,
-		] : $this->validators;
 	}
 }

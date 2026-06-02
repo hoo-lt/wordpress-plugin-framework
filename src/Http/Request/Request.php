@@ -42,13 +42,13 @@ readonly class Request implements RequestInterface
 		return new static($this->method, $url, $this->headers, $this->body, $this->routes);
 	}
 
-	public function urlQueryValues(string $key): array
+	public function queryValues(string $key): array
 	{
 		$query = $this->url()->query();
 		return $query instanceof KeyValueInterface ? $query->values($key) : [];
 	}
 
-	public function urlQueryValue(string $key): mixed
+	public function queryValue(string $key): mixed
 	{
 		$query = $this->url()->query();
 		return $query instanceof KeyValueInterface ? $query->value($key) : null;
@@ -128,9 +128,9 @@ readonly class Request implements RequestInterface
 			return $bodyValues;
 		}
 
-		$urlQueryValues = $this->urlQueryValues($key);
-		if ($urlQueryValues !== []) {
-			return $urlQueryValues;
+		$queryValues = $this->queryValues($key);
+		if ($queryValues !== []) {
+			return $queryValues;
 		}
 
 		return [];
@@ -143,9 +143,9 @@ readonly class Request implements RequestInterface
 			return $bodyValue;
 		}
 
-		$urlQueryValue = $this->urlQueryValue($key);
-		if ($urlQueryValue !== null) {
-			return $urlQueryValue;
+		$queryValue = $this->queryValue($key);
+		if ($queryValue !== null) {
+			return $queryValue;
 		}
 
 		return null;

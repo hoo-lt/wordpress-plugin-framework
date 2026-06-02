@@ -13,7 +13,7 @@ readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
 		protected string $name,
-		protected string|int $action,
+		protected string|int $action = -1,
 	) {
 	}
 

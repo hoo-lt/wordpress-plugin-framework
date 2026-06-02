@@ -2,9 +2,9 @@
 
 namespace Hoo\WordPressPluginFramework\Exceptions\Interfaces;
 
-use Hoo\WordPressPluginFramework\Collections\MessageCollection;
+use Hoo\WordPressPluginFramework\Collections\Message\CollectionInterface;
 
 interface HasMessagesInterface
 {
-	public function getMessages(): MessageCollection;
+	public function getMessages(): CollectionInterface;
 }
