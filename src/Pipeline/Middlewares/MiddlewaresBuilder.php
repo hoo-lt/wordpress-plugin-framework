@@ -8,16 +8,13 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 {
 	public function __construct(
 		protected Validate\MiddlewareFactoryInterface $validateMiddlewareFactory,
-		protected array $middlewares = []
+		protected array $middlewares = [],
 	) {
 	}
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static(
-			$this->validateMiddlewareFactory,
-			$middlewares
-		);
+		return new static($this->validateMiddlewareFactory, $middlewares);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
