@@ -8,4 +8,7 @@ interface ValuesRulesFactoryInterface
 {
 	public function body(string $key, Closure $closure): ValuesRulesInterface;
 	public function query(string $key, Closure $closure): ValuesRulesInterface;
+
+	public function header(string $key, Closure $closure): ValuesRulesInterface;
+	public function route(string $key, Closure $closure): ValuesRulesInterface;
 }

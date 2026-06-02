@@ -5,13 +5,15 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\ValuesRules
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Rules\RulesBuilderInterface,
-	Pipeline\Middlewares\Validate\Values\ValuesFactoryInterface,
+	Pipeline\Middlewares\Validate\Values\Body\Values as BodyValues,
+	Pipeline\Middlewares\Validate\Values\Query\Values as QueryValues,
+	Pipeline\Middlewares\Validate\Values\Header\Values as HeaderValues,
+	Pipeline\Middlewares\Validate\Values\Route\Values as RouteValues,
 };
 
 readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
 {
 	public function __construct(
-		protected ValuesFactoryInterface $valuesFactory,
 		protected RulesBuilderInterface $rulesBuilder,
 	) {
 	}
@@ -19,7 +21,7 @@ readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
 	public function body(string $key, Closure $closure): ValuesRulesInterface
 	{
 		return new ValuesRules(
-			$this->valuesFactory->body($key),
+			new BodyValues($key),
 			$this->rules($closure),
 		);
 	}
@@ -27,7 +29,23 @@ readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
 	public function query(string $key, Closure $closure): ValuesRulesInterface
 	{
 		return new ValuesRules(
-			$this->valuesFactory->query($key),
+			new QueryValues($key),
+			$this->rules($closure),
+		);
+	}
+
+	public function header(string $key, Closure $closure): ValuesRulesInterface
+	{
+		return new ValuesRules(
+			new HeaderValues($key),
+			$this->rules($closure),
+		);
+	}
+
+	public function route(string $key, Closure $closure): ValuesRulesInterface
+	{
+		return new ValuesRules(
+			new RouteValues($key),
 			$this->rules($closure),
 		);
 	}

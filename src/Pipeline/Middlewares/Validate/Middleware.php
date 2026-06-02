@@ -44,6 +44,20 @@ readonly class Middleware implements MiddlewareInterface
 		);
 	}
 
+	public function header(string $key, Closure $closure): static
+	{
+		return $this->withValuesRule(
+			$this->valuesRulesFactory->header($key, $closure)
+		);
+	}
+
+	public function route(string $key, Closure $closure): static
+	{
+		return $this->withValuesRule(
+			$this->valuesRulesFactory->route($key, $closure)
+		);
+	}
+
 	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
 		if ($this->valuesRules === []) {
