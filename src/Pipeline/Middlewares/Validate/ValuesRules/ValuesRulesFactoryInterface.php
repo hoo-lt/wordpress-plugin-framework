@@ -7,5 +7,5 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Values\ValuesInte
 
 interface ValuesRulesFactoryInterface
 {
-	public function create(ValuesInterface $values, Closure $closure): ValuesRulesInterface;
+	public function create(ValuesInterface $values, Closure $rulesBuilderClosure): ValuesRulesInterface;
 }

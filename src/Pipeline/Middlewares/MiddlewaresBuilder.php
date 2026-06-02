@@ -54,7 +54,7 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 		$validateMiddleware = $closure(
 			$this->validateMiddlewareFactory->create(),
 		);
-		if (!$validateMiddleware instanceof Validate\Middleware) {
+		if (!$validateMiddleware instanceof Validate\MiddlewareInterface) {
 			throw new MiddlewaresBuilderException('must return validate middleware instance');
 		}
 

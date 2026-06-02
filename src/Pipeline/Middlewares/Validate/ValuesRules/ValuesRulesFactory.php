@@ -15,17 +15,17 @@ readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
 	) {
 	}
 
-	public function create(ValuesInterface $values, Closure $closure): ValuesRulesInterface
+	public function create(ValuesInterface $values, Closure $rulesBuilderClosure): ValuesRulesInterface
 	{
 		return new ValuesRules(
 			$values,
-			$this->rules($closure),
+			$this->rules($rulesBuilderClosure),
 		);
 	}
 
-	protected function rules(Closure $closures): array
+	protected function rules(Closure $rulesBuilderClosure): array
 	{
-		$rulesBuilder = $closures($this->rulesBuilder);
+		$rulesBuilder = $rulesBuilderClosure($this->rulesBuilder);
 		if (!$rulesBuilder instanceof RulesBuilderInterface) {
 			throw new ValuesRulesFactoryException('closure must return rules builder instance');
 		}

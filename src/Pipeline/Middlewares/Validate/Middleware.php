@@ -7,7 +7,6 @@ use Hoo\WordPressPluginFramework\{
 	Http\Request\RequestInterface,
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,
-	Pipeline\Middlewares\MiddlewareInterface,
 	Pipeline\Middlewares\Validate\Values\ValuesInterface,
 	Pipeline\Middlewares\Validate\ValuesRules\ValuesRulesFactoryInterface,
 	Pipeline\Middlewares\Validate\Values\Body\Values as BodyValues,
@@ -24,46 +23,46 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function withValuesRules(ValuesInterface $values, Closure $closure): static
+	public function withValuesRules(ValuesInterface $values, Closure $rulesBuilderClosure): static
 	{
 		return new static(
 			$this->valuesRulesFactory,
 			[
 				...$this->valuesRules,
-				$this->valuesRulesFactory->create($values, $closure),
+				$this->valuesRulesFactory->create($values, $rulesBuilderClosure),
 			],
 		);
 	}
 
-	public function body(string $key, Closure $closure): static
+	public function body(string $key, Closure $rulesBuilderClosure): static
 	{
 		return $this->withValuesRules(
 			new BodyValues($key),
-			$closure,
+			$rulesBuilderClosure,
 		);
 	}
 
-	public function query(string $key, Closure $closure): static
+	public function query(string $key, Closure $rulesBuilderClosure): static
 	{
 		return $this->withValuesRules(
 			new QueryValues($key),
-			$closure,
+			$rulesBuilderClosure,
 		);
 	}
 
-	public function header(string $key, Closure $closure): static
+	public function header(string $key, Closure $rulesBuilderClosure): static
 	{
 		return $this->withValuesRules(
 			new HeaderValues($key),
-			$closure,
+			$rulesBuilderClosure,
 		);
 	}
 
-	public function route(string $key, Closure $closure): static
+	public function route(string $key, Closure $rulesBuilderClosure): static
 	{
 		return $this->withValuesRules(
 			new RouteValues($key),
-			$closure,
+			$rulesBuilderClosure,
 		);
 	}
 
