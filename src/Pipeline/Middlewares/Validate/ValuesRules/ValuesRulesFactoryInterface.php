@@ -3,12 +3,9 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\ValuesRules;
 
 use Closure;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Values\ValuesInterface;
 
 interface ValuesRulesFactoryInterface
 {
-	public function body(string $key, Closure $closure): ValuesRulesInterface;
-	public function query(string $key, Closure $closure): ValuesRulesInterface;
-
-	public function header(string $key, Closure $closure): ValuesRulesInterface;
-	public function route(string $key, Closure $closure): ValuesRulesInterface;
+	public function create(ValuesInterface $values, Closure $closure): ValuesRulesInterface;
 }

@@ -8,8 +8,12 @@ use Hoo\WordPressPluginFramework\{
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,
 	Pipeline\Middlewares\MiddlewareInterface,
-	Pipeline\Middlewares\Validate\ValuesRules\ValuesRulesInterface,
-	Pipeline\Middlewares\Validate\ValuesRules\ValuesRulesFactoryInterface
+	Pipeline\Middlewares\Validate\Values\ValuesInterface,
+	Pipeline\Middlewares\Validate\ValuesRules\ValuesRulesFactoryInterface,
+	Pipeline\Middlewares\Validate\Values\Body\Values as BodyValues,
+	Pipeline\Middlewares\Validate\Values\Query\Values as QueryValues,
+	Pipeline\Middlewares\Validate\Values\Header\Values as HeaderValues,
+	Pipeline\Middlewares\Validate\Values\Route\Values as RouteValues,
 };
 
 readonly class Middleware implements MiddlewareInterface
@@ -20,41 +24,46 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function withValuesRules(ValuesRulesInterface ...$valuesRules): static
+	public function withValuesRules(ValuesInterface $values, Closure $closure): static
 	{
-		return new static($this->valuesRulesFactory, $valuesRules);
-	}
-
-	public function withValuesRule(ValuesRulesInterface $valuesRules): static
-	{
-		return $this->withValuesRules(...$this->valuesRules, $valuesRules);
+		return new static(
+			$this->valuesRulesFactory,
+			[
+				...$this->valuesRules,
+				$this->valuesRulesFactory->create($values, $closure),
+			],
+		);
 	}
 
 	public function body(string $key, Closure $closure): static
 	{
-		return $this->withValuesRule(
-			$this->valuesRulesFactory->body($key, $closure)
+		return $this->withValuesRules(
+			new BodyValues($key),
+			$closure,
 		);
 	}
 
 	public function query(string $key, Closure $closure): static
 	{
-		return $this->withValuesRule(
-			$this->valuesRulesFactory->query($key, $closure)
+		return $this->withValuesRules(
+			new QueryValues($key),
+			$closure,
 		);
 	}
 
 	public function header(string $key, Closure $closure): static
 	{
-		return $this->withValuesRule(
-			$this->valuesRulesFactory->header($key, $closure)
+		return $this->withValuesRules(
+			new HeaderValues($key),
+			$closure,
 		);
 	}
 
 	public function route(string $key, Closure $closure): static
 	{
-		return $this->withValuesRule(
-			$this->valuesRulesFactory->route($key, $closure)
+		return $this->withValuesRules(
+			new RouteValues($key),
+			$closure,
 		);
 	}
 

@@ -7,8 +7,6 @@ use Closure;
 readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 {
 	public function __construct(
-		protected CurrentUserCan\MiddlewareFactoryInterface $currentUserCanMiddlewareFactory,
-		protected VerifyNonce\MiddlewareFactoryInterface $verifyNonceMiddlewareFactory,
 		protected Validate\MiddlewareFactoryInterface $validateMiddlewareFactory,
 		protected array $middlewares = []
 	) {
@@ -17,8 +15,6 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
 		return new static(
-			$this->currentUserCanMiddlewareFactory,
-			$this->verifyNonceMiddlewareFactory,
 			$this->validateMiddlewareFactory,
 			$middlewares
 		);
@@ -32,7 +28,7 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	public function currentUserCan(Closure $closure): static
 	{
 		$currentUserCanMiddleware = $closure(
-			$this->currentUserCanMiddlewareFactory->create(),
+			new CurrentUserCan\Middleware(),
 		);
 		if (!$currentUserCanMiddleware instanceof CurrentUserCan\MiddlewareInterface) {
 			throw new MiddlewaresBuilderException('must return current user can middleware instance');
@@ -44,7 +40,7 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	public function verifyNonce(Closure $closure): static
 	{
 		$verifyNonceMiddleware = $closure(
-			$this->verifyNonceMiddlewareFactory->create(),
+			new VerifyNonce\Middleware(),
 		);
 		if (!$verifyNonceMiddleware instanceof VerifyNonce\MiddlewareInterface) {
 			throw new MiddlewaresBuilderException('must return verify nonce middleware instance');
