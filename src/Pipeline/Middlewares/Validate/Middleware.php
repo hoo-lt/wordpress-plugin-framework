@@ -7,86 +7,85 @@ use Hoo\WordPressPluginFramework\{
 	Http\Request\RequestInterface,
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,
-	Pipeline\Middlewares\Validate\Values\ValuesInterface,
-	Pipeline\Middlewares\Validate\ValuesRules\ValuesRulesFactoryInterface,
-	Pipeline\Middlewares\Validate\Values\Body\Values as BodyValues,
-	Pipeline\Middlewares\Validate\Values\Query\Values as QueryValues,
-	Pipeline\Middlewares\Validate\Values\Header\Values as HeaderValues,
-	Pipeline\Middlewares\Validate\Values\Route\Values as RouteValues,
+	Pipeline\Middlewares\Validate\Validator\ValidatorInterface,
+	Pipeline\Middlewares\Validate\Validator\ValidatorFactoryInterface,
+	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as BodyKeyValue,
+	Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as QueryKeyValue,
+	Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as HeaderKeyValue,
+	Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as RouteKeyValue,
 };
 
 readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
-		protected ValuesRulesFactoryInterface $valuesRulesFactory,
-		protected array $valuesRules = [],
+		protected ValidatorFactoryInterface $validatorFactory,
+		protected array $validators = [],
 	) {
 	}
 
-	public function withValuesRules(ValuesInterface $values, Closure $rulesBuilderClosure): static
+	public function withValidators(ValidatorInterface ...$validators): static
 	{
-		return new static(
-			$this->valuesRulesFactory,
-			[
-				...$this->valuesRules,
-				$this->valuesRulesFactory->create($values, $rulesBuilderClosure),
-			],
+		return new static($this->validatorFactory, $validators);
+	}
+
+	public function withValidator(ValidatorInterface $validator): static
+	{
+		return $this->withValidators(...$this->validators, $validator);
+	}
+
+	public function withFactoryCreatedValidator(KeyValueInterface $keyValue, Closure $rulesBuilderClosure): static
+	{
+		return $this->withValidator(
+			$this->validatorFactory->create($keyValue, $rulesBuilderClosure),
 		);
 	}
 
 	public function body(string $key, Closure $rulesBuilderClosure): static
 	{
-		return $this->withValuesRules(
-			new BodyValues($key),
+		return $this->withFactoryCreatedValidator(
+			new BodyKeyValue($key),
 			$rulesBuilderClosure,
 		);
 	}
 
 	public function query(string $key, Closure $rulesBuilderClosure): static
 	{
-		return $this->withValuesRules(
-			new QueryValues($key),
+		return $this->withFactoryCreatedValidator(
+			new QueryKeyValue($key),
 			$rulesBuilderClosure,
 		);
 	}
 
 	public function header(string $key, Closure $rulesBuilderClosure): static
 	{
-		return $this->withValuesRules(
-			new HeaderValues($key),
+		return $this->withFactoryCreatedValidator(
+			new HeaderKeyValue($key),
 			$rulesBuilderClosure,
 		);
 	}
 
 	public function route(string $key, Closure $rulesBuilderClosure): static
 	{
-		return $this->withValuesRules(
-			new RouteValues($key),
+		return $this->withFactoryCreatedValidator(
+			new RouteKeyValue($key),
 			$rulesBuilderClosure,
 		);
 	}
 
 	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
-		if ($this->valuesRules === []) {
+		if ($this->validators === []) {
 			throw new MiddlewareException('middleware misconfigured');
 		}
 
 		$messages = new MessageCollection();
 
-		foreach ($this->valuesRules as $valuesRules) {
-			$values = $valuesRules->values($request);
-			if ($values === null) {
-				throw new Exceptions\BadRequest\Exception('incorrect request', '');
-			}
-
-			$rules = $valuesRules->rules();
-
-			foreach ($values as $key => $value) {
-				foreach ($rules as $rule) {
-					$rule($value, fn($message) => $messages->add($key, $message));
-				}
-			}
+		foreach ($this->validators as $validator) {
+			$validator->validate(
+				$request,
+				$messages->add(...),
+			);
 		}
 
 		if ($messages->isNotEmpty()) {

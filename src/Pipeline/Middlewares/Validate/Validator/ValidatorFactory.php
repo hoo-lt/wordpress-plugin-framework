@@ -1,24 +1,24 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\ValuesRules;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Rules\RulesBuilderInterface,
-	Pipeline\Middlewares\Validate\Values\ValuesInterface,
+	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
 };
 
-readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
+readonly class ValidatorFactory implements ValidatorFactoryInterface
 {
 	public function __construct(
 		protected RulesBuilderInterface $rulesBuilder,
 	) {
 	}
 
-	public function create(ValuesInterface $values, Closure $rulesBuilderClosure): ValuesRulesInterface
+	public function create(KeyValueInterface $keyValue, Closure $rulesBuilderClosure): ValidatorInterface
 	{
-		return new ValuesRules(
-			$values,
+		return new Validator(
+			$keyValue,
 			$this->rules($rulesBuilderClosure),
 		);
 	}
@@ -27,7 +27,7 @@ readonly class ValuesRulesFactory implements ValuesRulesFactoryInterface
 	{
 		$rulesBuilder = $rulesBuilderClosure($this->rulesBuilder);
 		if (!$rulesBuilder instanceof RulesBuilderInterface) {
-			throw new ValuesRulesFactoryException('closure must return rules builder instance');
+			throw new ValidatorFactoryException('closure must return rules builder instance');
 		}
 
 		return $rulesBuilder->build();

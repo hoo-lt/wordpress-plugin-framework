@@ -5,12 +5,16 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares,
-	Pipeline\Middlewares\Validate\Values\ValuesInterface,
+	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\Validator\ValidatorInterface,
 };
 
 interface MiddlewareInterface extends Middlewares\MiddlewareInterface
 {
-	public function withValuesRules(ValuesInterface $values, Closure $closure): static;
+	public function withValidators(ValidatorInterface ...$validators): static;
+	public function withValidator(ValidatorInterface $validator): static;
+
+	public function withFactoryCreatedValidator(KeyValueInterface $keyValue, Closure $rulesBuilderClosure): static;
 
 	public function body(string $key, Closure $closure): static;
 	public function query(string $key, Closure $closure): static;
