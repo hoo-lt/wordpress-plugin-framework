@@ -33,7 +33,7 @@ readonly class Middleware implements MiddlewareInterface
 			throw new MiddlewareException('middleware misconfigured');
 		}
 
-		$nonce = $request->value($this->name);
+		$nonce = $request->bodyQueryValue($this->name);
 		if ($nonce === null) {
 			throw new ForbiddenException('nonce is not presented', 'verify_nonce_error');
 		}

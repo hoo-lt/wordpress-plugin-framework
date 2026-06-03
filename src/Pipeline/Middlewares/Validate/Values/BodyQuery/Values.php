@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Values\Body;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Values\BodyQuery;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Request\RequestInterface,
@@ -16,6 +16,6 @@ readonly class Values implements ValuesInterface
 
 	public function __invoke(RequestInterface $request): ?array
 	{
-		return $request->bodyValues($this->key);
+		return $request->bodyQueryValues($this->key);
 	}
 }

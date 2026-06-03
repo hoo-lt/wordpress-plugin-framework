@@ -42,10 +42,10 @@ readonly class Request implements RequestInterface
 		return new static($this->method, $url, $this->headers, $this->body, $this->routes);
 	}
 
-	public function queryValues(string $key): array
+	public function queryValues(string $key): ?array
 	{
 		$query = $this->url()->query();
-		return $query instanceof KeyValueInterface ? $query->values($key) : [];
+		return $query instanceof KeyValueInterface ? $query->values($key) : null;
 	}
 
 	public function queryValue(string $key): mixed
@@ -89,10 +89,10 @@ readonly class Request implements RequestInterface
 		return new static($this->method, $this->url, $this->headers, null, $this->routes);
 	}
 
-	public function bodyValues(string $key): array
+	public function bodyValues(string $key): ?array
 	{
 		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->values($key) : [];
+		return $body instanceof KeyValueInterface ? $body->values($key) : null;
 	}
 
 	public function bodyValue(string $key): mixed
@@ -121,22 +121,22 @@ readonly class Request implements RequestInterface
 		return $this->routes()?->route($key);
 	}
 
-	public function values(string $key): array
+	public function bodyQueryValues(string $key): ?array
 	{
 		$bodyValues = $this->bodyValues($key);
-		if ($bodyValues !== []) {
+		if ($bodyValues !== null) {
 			return $bodyValues;
 		}
 
 		$queryValues = $this->queryValues($key);
-		if ($queryValues !== []) {
+		if ($queryValues !== null) {
 			return $queryValues;
 		}
 
-		return [];
+		return null;
 	}
 
-	public function value(string $key): mixed
+	public function bodyQueryValue(string $key): mixed
 	{
 		$bodyValue = $this->bodyValue($key);
 		if ($bodyValue !== null) {

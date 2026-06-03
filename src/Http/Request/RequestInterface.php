@@ -17,7 +17,7 @@ interface RequestInterface extends MessageInterface
 	public function url(): UrlInterface;
 	public function withUrl(UrlInterface $url): static;
 
-	public function queryValues(string $key): array;
+	public function queryValues(string $key): ?array;
 	public function queryValue(string $key): mixed;
 
 	public function routes(): ?RoutesInterface;
@@ -26,6 +26,6 @@ interface RequestInterface extends MessageInterface
 
 	public function route(string $key): mixed;
 
-	public function values(string $key): array;
-	public function value(string $key): mixed;
+	public function bodyQueryValues(string $key): ?array;
+	public function bodyQueryValue(string $key): mixed;
 }

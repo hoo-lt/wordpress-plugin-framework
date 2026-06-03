@@ -19,6 +19,6 @@ interface MessageInterface
 	public function withBody(BodyInterface $body): static;
 	public function withoutBody(): static;
 
-	public function bodyValues(string $key): array;
+	public function bodyValues(string $key): ?array;
 	public function bodyValue(string $key): mixed;
 }

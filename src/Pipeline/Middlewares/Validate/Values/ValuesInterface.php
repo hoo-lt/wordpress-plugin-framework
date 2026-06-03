@@ -6,5 +6,5 @@ use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 
 interface ValuesInterface
 {
-	public function __invoke(RequestInterface $request): array;
+	public function __invoke(RequestInterface $request): ?array;
 }

@@ -14,7 +14,7 @@ readonly class Values implements ValuesInterface
 	) {
 	}
 
-	public function __invoke(RequestInterface $request): array
+	public function __invoke(RequestInterface $request): ?array
 	{
 		return $request->queryValues($this->key);
 	}

@@ -14,11 +14,11 @@ readonly class Values implements ValuesInterface
 	) {
 	}
 
-	public function __invoke(RequestInterface $request): array
+	public function __invoke(RequestInterface $request): ?array
 	{
 		$routes = $request->routes();
 		if ($routes === null) {
-			return [];
+			return null;
 		}
 
 		return [

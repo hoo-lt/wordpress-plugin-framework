@@ -76,7 +76,7 @@ readonly class Middleware implements MiddlewareInterface
 
 		foreach ($this->valuesRules as $valuesRules) {
 			$values = $valuesRules->values($request);
-			if ($values === []) {
+			if ($values === null) {
 				throw new Exceptions\BadRequest\Exception('incorrect request', '');
 			}
 

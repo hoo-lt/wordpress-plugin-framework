@@ -2,17 +2,15 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\Float;
 
+use Closure;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\RuleInterface;
 
 readonly class Rule implements RuleInterface
 {
-	public function __invoke(mixed $value): bool
+	public function __invoke(mixed $value, Closure $closure): void
 	{
-		return filter_var($value, FILTER_VALIDATE_FLOAT) !== false;
-	}
-
-	public function error(): string
-	{
-		return 'must be a float';
+		if (filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE) === null) {
+			$closure('not a float');
+		}
 	}
 }

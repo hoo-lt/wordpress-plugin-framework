@@ -84,36 +84,16 @@ readonly class Response implements ResponseInterface
 		);
 	}
 
-	public function bodyValues(string $key): array
+	public function bodyValues(string $key): ?array
 	{
 		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->values($key) : [];
+		return $body instanceof KeyValueInterface ? $body->values($key) : null;
 	}
 
 	public function bodyValue(string $key): mixed
 	{
 		$body = $this->body();
 		return $body instanceof KeyValueInterface ? $body->value($key) : null;
-	}
-
-	public function values(string $key): array
-	{
-		$bodyValues = $this->bodyValues($key);
-		if ($bodyValues !== []) {
-			return $bodyValues;
-		}
-
-		return [];
-	}
-
-	public function value(string $key): mixed
-	{
-		$bodyValue = $this->bodyValue($key);
-		if ($bodyValue !== null) {
-			return $bodyValue;
-		}
-
-		return null;
 	}
 
 	protected function validateStatusCode(int $statusCode): void

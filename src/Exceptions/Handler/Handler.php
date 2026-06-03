@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
-	Collections\Message\CollectionInterface,
+	Collections\Message\CollectionInterface as MessageCollectionInterface,
 	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Http\Response\ResponseFactoryInterface,
@@ -88,7 +88,7 @@ readonly class Handler implements HandlerInterface
 		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
 	}
 
-	protected function messages(Throwable $throwable): ?CollectionInterface
+	protected function messages(Throwable $throwable): ?MessageCollectionInterface
 	{
 		return $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 	}
