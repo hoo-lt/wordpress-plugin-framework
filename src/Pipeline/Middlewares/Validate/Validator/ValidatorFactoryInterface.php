@@ -7,5 +7,11 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValue\KeyValue
 
 interface ValidatorFactoryInterface
 {
-	public function create(KeyValueInterface $keyValue, Closure $rulesBuilderClosure): ValidatorInterface;
+	public function create(KeyValueInterface $keyValue, Closure $closure): ValidatorInterface;
+
+	public function body(string $key, Closure $closure): ValidatorInterface;
+	public function bodyQuery(string $key, Closure $closure): ValidatorInterface;
+	public function query(string $key, Closure $closure): ValidatorInterface;
+	public function header(string $key, Closure $closure): ValidatorInterface;
+	public function route(string $key, Closure $closure): ValidatorInterface;
 }
