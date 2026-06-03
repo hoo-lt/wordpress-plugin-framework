@@ -29,11 +29,17 @@ readonly class Pipeline implements PipelineInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static(
-			$this->request,
-			$middlewares,
-			$this->catchClosure,
-		);
+		return new static($this->request, $middlewares, $this->catchClosure);
+	}
+
+	public function withoutMiddlewares(): static
+	{
+		return new static($this->request, [], $this->catchClosure);
+	}
+
+	public function withMiddleware(MiddlewareInterface $middleware): static
+	{
+		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function catch(Closure $closure): static

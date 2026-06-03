@@ -7,6 +7,8 @@ use Closure;
 interface RulesBuilderInterface
 {
 	public function withRules(RuleInterface ...$rules): static;
+	public function withoutRules(): static;
+
 	public function withRule(RuleInterface $rule): static;
 
 	public function bool(): static;

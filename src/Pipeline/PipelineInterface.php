@@ -11,7 +11,11 @@ use Hoo\WordPressPluginFramework\{
 interface PipelineInterface
 {
 	public function withRequest(RequestInterface $request): static;
+
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
+	public function withoutMiddlewares(): static;
+
+	public function withMiddleware(MiddlewareInterface $middleware): static;
 
 	public function catch(Closure $closure): static;
 

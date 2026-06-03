@@ -7,6 +7,8 @@ use Closure;
 interface MiddlewaresBuilderInterface
 {
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
+	public function withoutMiddlewares(): static;
+
 	public function withMiddleware(MiddlewareInterface $middleware): static;
 
 	public function currentUserCan(Closure $closure): static;

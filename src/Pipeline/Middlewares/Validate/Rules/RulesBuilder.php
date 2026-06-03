@@ -29,6 +29,11 @@ readonly class RulesBuilder implements RulesBuilderInterface
 		return new static($rules);
 	}
 
+	public function withoutRules(): static
+	{
+		return new static([]);
+	}
+
 	public function withRule(RuleInterface $rule): static
 	{
 		return $this->withRules(...$this->rules, $rule);
