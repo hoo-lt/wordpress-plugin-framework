@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Router\Routes\RouteFactoryInterface,
 	Hooker\HookerInterface,
-	Pipeline\Middlewares\MiddlewaresBuilder,
+	Http\Method\Method,
 };
 
 readonly class Router implements RouterInterface
@@ -15,7 +15,6 @@ readonly class Router implements RouterInterface
 	public function __construct(
 		protected RouteFactoryInterface $routeFactory,
 		protected HookerInterface $hooker,
-		protected MiddlewaresBuilder $middlewaresBuilder,
 		protected array $routes = [],
 	) {
 	}
@@ -25,40 +24,52 @@ readonly class Router implements RouterInterface
 		return new static(
 			$this->routeFactory,
 			$this->hooker,
-			$this->middlewaresBuilder,
 			$routes,
+		);
+	}
+
+	public function withoutRoutes(): static
+	{
+		return new static(
+			$this->routeFactory,
+			$this->hooker,
+			[],
 		);
 	}
 
 	public function withRoute(RouteInterface $route): static
 	{
-		return new static(
-			$this->routeFactory,
-			$this->hooker,
-			$this->middlewaresBuilder,
-			[
-				...$this->routes,
-				$route,
-			],
-		);
+		return $this->withRoutes(...$this->routes, $route);
 	}
 
 	public function adminAjax(string $action, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
 	{
 		return $this->withRoute(
-			$this->routeFactory->adminAjax($action, $closure)->withMiddlewares(
-				...$this->middlewares($middlewaresBuilderClosure),
-			),
+			$this->routeFactory->adminAjax($action, $closure, $middlewaresBuilderClosure),
 		);
 	}
 
-	public function __invoke(): void
+	public function feed(string $name, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
+	{
+		return $this->withRoute(
+			$this->routeFactory->feed($name, $closure, $middlewaresBuilderClosure),
+		);
+	}
+
+	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresBuilderClosure = null): static
+	{
+		return $this->withRoute(
+			$this->routeFactory->rest($routeNamespace, $route, $closure, $method, $middlewaresBuilderClosure),
+		);
+	}
+
+	public function route(): void
 	{
 		foreach ($this->routes as $route) {
 			$hooks = $route->hooks();
 
 			$hooker = $this->hooker->withHooks(...$hooks);
-			$hooker();
+			$hooker->hook();
 		}
 	}
 
@@ -78,15 +89,5 @@ readonly class Router implements RouterInterface
 	public function down(): void
 	{
 		flush_rewrite_rules();
-	}
-
-	protected function middlewares(Closure $closures): array
-	{
-		$middlewaresBuilder = $closures($this->middlewaresBuilder);
-		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
-			//throw there
-		}
-
-		return $middlewaresBuilder->build();
 	}
 }

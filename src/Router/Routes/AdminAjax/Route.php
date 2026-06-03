@@ -35,36 +35,55 @@ readonly class Route implements RouteInterface
 			$this->handler,
 			$this->action,
 			$this->closure,
-			$middlewares
+			$middlewares,
 		);
+	}
+
+	public function withoutMiddlewares(): static
+	{
+		return new static(
+			$this->hookFactory,
+			$this->responseFactory,
+			$this->pipeline,
+			$this->handler,
+			$this->action,
+			$this->closure,
+			[],
+		);
+	}
+
+	public function withMiddleware(MiddlewareInterface $middleware): static
+	{
+		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function hooks(): array
 	{
-		$closure = function (): void {
-			$response = $this->pipeline
-				->withMiddlewares(...$this->middlewares)
-				->catch($this->handler->handle(...))
-			(($this->closure)(...));
-
-			if (!$response instanceof ResponseInterface) {
-				$response = $this->response($response);
-			}
-
-			$this->statusCode($response);
-			$this->headers($response);
-			$this->body($response);
-
-			exit();
-		};
-
 		return [
-			$this->hookFactory->action("wp_ajax_{$this->action}", $closure),
-			$this->hookFactory->action("wp_ajax_nopriv_{$this->action}", $closure),
+			$this->hookFactory->action("wp_ajax_{$this->action}", $this->callback(...)),
+			$this->hookFactory->action("wp_ajax_nopriv_{$this->action}", $this->callback(...)),
 		];
 	}
 
-	protected function response(array|string|null $body): ResponseInterface
+	protected function callback(): void
+	{
+		$pipeline = $this->pipeline
+			->withMiddlewares(...$this->middlewares)
+			->catch($this->handler->handle(...));
+
+		$response = $pipeline(($this->closure)(...));
+		if (!$response instanceof ResponseInterface) {
+			$response = $this->createResponse($response);
+		}
+
+		$this->statusCode($response);
+		$this->headers($response);
+		$this->body($response);
+
+		exit();
+	}
+
+	protected function createResponse(array|string|null $body): ResponseInterface
 	{
 		return $this->responseFactory->from(
 			200,

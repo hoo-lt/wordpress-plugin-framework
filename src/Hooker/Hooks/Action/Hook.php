@@ -16,7 +16,7 @@ readonly class Hook implements HookInterface
 		protected PipelineInterface $pipeline,
 		protected string $name,
 		protected Closure $closure,
-		protected int $priority,
+		protected int $priority = 10,
 		protected array $middlewares = [],
 	) {
 	}
@@ -28,8 +28,24 @@ readonly class Hook implements HookInterface
 			$this->name,
 			$this->closure,
 			$this->priority,
-			$middlewares
+			$middlewares,
 		);
+	}
+
+	public function withoutMiddlewares(): static
+	{
+		return new static(
+			$this->pipeline,
+			$this->name,
+			$this->closure,
+			$this->priority,
+			[],
+		);
+	}
+
+	public function withMiddleware(MiddlewareInterface $middleware): static
+	{
+		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function closure(): Closure

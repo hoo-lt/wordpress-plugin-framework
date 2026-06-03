@@ -20,14 +20,6 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	) {
 	}
 
-	public function create(KeyValueInterface $keyValue, Closure $closure): ValidatorInterface
-	{
-		return new Validator(
-			$keyValue,
-			$this->rules($closure),
-		);
-	}
-
 	public function body(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
@@ -65,6 +57,14 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 		return $this->create(
 			new RouteKeyValue($key),
 			$closure,
+		);
+	}
+
+	protected function create(KeyValueInterface $keyValue, Closure $closure): ValidatorInterface
+	{
+		return new Validator(
+			$keyValue,
+			$this->rules($closure),
 		);
 	}
 

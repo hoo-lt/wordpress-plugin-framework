@@ -6,6 +6,7 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Request\RequestInterface,
 	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\Rules\RuleInterface,
 };
 
 readonly class Validator implements ValidatorInterface
@@ -14,6 +15,21 @@ readonly class Validator implements ValidatorInterface
 		protected KeyValueInterface $keyValue,
 		protected array $rules = [],
 	) {
+	}
+
+	public function withRules(RuleInterface ...$rules): static
+	{
+		return new static($this->keyValue, $rules);
+	}
+
+	public function withoutRules(): static
+	{
+		return new static($this->keyValue, []);
+	}
+
+	public function withRule(RuleInterface $rule): static
+	{
+		return $this->withRules(...$this->rules, $rule);
 	}
 
 	public function validate(RequestInterface $request, Closure $closure): void

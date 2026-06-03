@@ -11,6 +11,8 @@ use Hoo\WordPressPluginFramework\{
 interface MiddlewareInterface extends Middlewares\MiddlewareInterface
 {
 	public function withValidators(ValidatorInterface ...$validators): static;
+	public function withoutValidators(): static;
+
 	public function withValidator(ValidatorInterface $validator): static;
 
 	public function body(string $key, Closure $closure): static;

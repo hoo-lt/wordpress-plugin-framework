@@ -11,6 +11,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Exceptions\Handler\HandlerInterface,
+	Pipeline\Middlewares\MiddlewaresBuilder,
 };
 
 readonly class RouteFactory implements RouteFactoryInterface
@@ -22,10 +23,11 @@ readonly class RouteFactory implements RouteFactoryInterface
 		protected HandlerInterface $handler,
 		protected RequestInterface $request,
 		protected RoutesFactoryInterface $routesFactory,
+		protected MiddlewaresBuilder $middlewaresBuilder,
 	) {
 	}
 
-	public function adminAjax(string $action, Closure $closure): RouteInterface
+	public function adminAjax(string $action, Closure $closure, ?Closure $middlewaresBuilderClosure = null): RouteInterface
 	{
 		return new AdminAjax\Route(
 			$this->hookFactory,
@@ -34,10 +36,11 @@ readonly class RouteFactory implements RouteFactoryInterface
 			$this->handler,
 			$action,
 			$closure,
+			$this->tryBuildMiddlewares($middlewaresBuilderClosure),
 		);
 	}
 
-	public function feed(string $name, Closure $closure): RouteInterface
+	public function feed(string $name, Closure $closure, ?Closure $middlewaresBuilderClosure = null): RouteInterface
 	{
 		return new Feed\Route(
 			$this->hookFactory,
@@ -45,11 +48,12 @@ readonly class RouteFactory implements RouteFactoryInterface
 			$this->pipeline,
 			$this->handler,
 			$name,
-			$closure
+			$closure,
+			$this->tryBuildMiddlewares($middlewaresBuilderClosure),
 		);
 	}
 
-	public function rest(string $routeNamespace, string $route, Closure $closure, Method ...$methods): RouteInterface
+	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresBuilderClosure = null): RouteInterface
 	{
 		return new Rest\Route(
 			$this->hookFactory,
@@ -61,7 +65,27 @@ readonly class RouteFactory implements RouteFactoryInterface
 			$routeNamespace,
 			$route,
 			$closure,
-			$methods,
+			$method,
+			$this->tryBuildMiddlewares($middlewaresBuilderClosure),
 		);
+	}
+
+	protected function buildMiddlewares(Closure $closures): array
+	{
+		$middlewaresBuilder = $closures($this->middlewaresBuilder);
+		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
+			//throw there
+		}
+
+		return $middlewaresBuilder->build();
+	}
+
+	protected function tryBuildMiddlewares(?Closure $closures): array
+	{
+		if ($closures === null) {
+			return [];
+		}
+
+		return $this->buildMiddlewares($closures);
 	}
 }

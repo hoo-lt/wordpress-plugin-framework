@@ -35,8 +35,26 @@ readonly class Route implements RouteInterface
 			$this->handler,
 			$this->name,
 			$this->closure,
-			$middlewares
+			$middlewares,
 		);
+	}
+
+	public function withoutMiddlewares(): static
+	{
+		return new static(
+			$this->hookFactory,
+			$this->responseFactory,
+			$this->pipeline,
+			$this->handler,
+			$this->name,
+			$this->closure,
+			[],
+		);
+	}
+
+	public function withMiddleware(MiddlewareInterface $middleware): static
+	{
+		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function hooks(): array
@@ -44,27 +62,30 @@ readonly class Route implements RouteInterface
 		return [
 			$this->hookFactory->action('init', fn() => add_feed(
 				$this->name,
-				function () {
-					$response = $this->pipeline
-						->withMiddlewares(...$this->middlewares)
-						->catch($this->handler->handle(...))
-					(($this->closure)(...));
-
-					if (!$response instanceof ResponseInterface) {
-						$response = $this->response($response);
-					}
-
-					$this->statusCode($response);
-					$this->headers($response);
-					$this->body($response);
-
-					exit();
-				}
+				$this->callback(...),
 			)),
 		];
 	}
 
-	protected function response(array|string|null $body): ResponseInterface
+	protected function callback(): void
+	{
+		$pipeline = $this->pipeline
+			->withMiddlewares(...$this->middlewares)
+			->catch($this->handler->handle(...));
+
+		$response = $pipeline(($this->closure)(...));
+		if (!$response instanceof ResponseInterface) {
+			$response = $this->createResponse($response);
+		}
+
+		$this->statusCode($response);
+		$this->headers($response);
+		$this->body($response);
+
+		exit();
+	}
+
+	protected function createResponse(array|string|null $body): ResponseInterface
 	{
 		return $this->responseFactory->from(
 			200,

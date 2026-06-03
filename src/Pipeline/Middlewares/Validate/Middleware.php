@@ -24,6 +24,11 @@ readonly class Middleware implements MiddlewareInterface
 		return new static($this->validatorFactory, $validators);
 	}
 
+	public function withoutValidators(): static
+	{
+		return new static($this->validatorFactory, []);
+	}
+
 	public function withValidator(ValidatorInterface $validator): static
 	{
 		return $this->withValidators(...$this->validators, $validator);

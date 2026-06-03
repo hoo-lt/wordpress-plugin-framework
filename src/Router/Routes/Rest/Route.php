@@ -13,6 +13,7 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 	Exceptions\Handler\HandlerInterface,
+	Http\Method\Method,
 };
 use WP_REST_Request;
 use WP_REST_Response;
@@ -30,7 +31,7 @@ readonly class Route implements RouteInterface
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
-		protected array $methods,
+		protected Method $method,
 		protected array $middlewares = [],
 	) {
 	}
@@ -47,9 +48,31 @@ readonly class Route implements RouteInterface
 			$this->routeNamespace,
 			$this->route,
 			$this->closure,
-			$this->methods,
+			$this->method,
 			$middlewares,
 		);
+	}
+
+	public function withoutMiddlewares(): static
+	{
+		return new static(
+			$this->hookFactory,
+			$this->responseFactory,
+			$this->pipeline,
+			$this->handler,
+			$this->request,
+			$this->routesFactory,
+			$this->routeNamespace,
+			$this->route,
+			$this->closure,
+			$this->method,
+			[],
+		);
+	}
+
+	public function withMiddleware(MiddlewareInterface $middleware): static
+	{
+		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function hooks(): array
@@ -59,31 +82,11 @@ readonly class Route implements RouteInterface
 				$this->routeNamespace,
 				$this->route,
 				[
-					'methods' => array_map(fn($method) => $method->value, $this->methods),
-					'callback' => function (WP_REST_Request $request): WP_REST_Response {
-						$response = $this->pipeline
-							->withRequest(
-								$this->request->withRoutes(
-									$this->routesFactory->from(
-										$request->get_url_params(),
-									),
-								),
-							)
-							->withMiddlewares(...$this->middlewares)
-							->catch($this->handler->handle(...))
-						(($this->closure)(...));
-
-						if (!$response instanceof ResponseInterface) {
-							$response = $this->response($response);
-						}
-
-						return new WP_REST_Response(
-							(string) $response->body(),
-							$response->statusCode(),
-							$response->headers(),
-						);
-					},
-					'permission_callback' => fn() => true,
+					'methods' => [
+						$this->method,
+					],
+					'callback' => $this->callback(...),
+					'permission_callback' => $this->permissionCallback(...),
 				]
 			)),
 			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_REST_Response $response, WP_REST_Request $request, WP_REST_Server $server): bool {
@@ -98,7 +101,37 @@ readonly class Route implements RouteInterface
 		];
 	}
 
-	protected function response(array|string|null $body): ResponseInterface
+	protected function callback(WP_REST_Request $request): WP_REST_Response
+	{
+		$pipeline = $this->pipeline
+			->withRequest(
+				$this->request->withRoutes(
+					$this->routesFactory->from(
+						$request->get_url_params(),
+					),
+				),
+			)
+			->withMiddlewares(...$this->middlewares)
+			->catch($this->handler->handle(...));
+
+		$response = $pipeline(($this->closure)(...));
+		if (!$response instanceof ResponseInterface) {
+			$response = $this->createResponse($response);
+		}
+
+		return new WP_REST_Response(
+			(string) $response->body(),
+			$response->statusCode(),
+			$response->headers(),
+		);
+	}
+
+	protected function permissionCallback(): bool
+	{
+		return true;
+	}
+
+	protected function createResponse(array|string|null $body): ResponseInterface
 	{
 		return $this->responseFactory->from(
 			200,
