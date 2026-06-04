@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
+use Hoo\WordPressPluginFramework\Http\Server\Request\RequestInterface;
 
 interface MiddlewareInterface
 {
