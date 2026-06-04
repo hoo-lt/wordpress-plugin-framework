@@ -64,11 +64,11 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	{
 		return new Validator(
 			$keyValue,
-			$this->rules($closure),
+			$this->buildRules($closure),
 		);
 	}
 
-	protected function rules(Closure $closure): array
+	protected function buildRules(Closure $closure): array
 	{
 		$rulesBuilder = $closure($this->rulesBuilder);
 		if (!$rulesBuilder instanceof RulesBuilderInterface) {
