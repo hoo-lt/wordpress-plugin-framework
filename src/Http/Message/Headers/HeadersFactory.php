@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Headers;
+namespace Hoo\WordPressPluginFramework\Http\Message\Headers;
 
 readonly class HeadersFactory implements HeadersFactoryInterface
 {

@@ -1,12 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Request;
+namespace Hoo\WordPressPluginFramework\Http\Client\Request;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Message\MessageInterface,
 	Http\Method\Method,
 	Http\Url\UrlInterface,
-	Http\Request\Routes\RoutesInterface
 };
 
 interface RequestInterface extends MessageInterface
@@ -19,12 +18,6 @@ interface RequestInterface extends MessageInterface
 
 	public function queryValues(string $key): ?array;
 	public function queryValue(string $key): mixed;
-
-	public function routes(): ?RoutesInterface;
-	public function withRoutes(RoutesInterface $routes): static;
-	public function withoutRoutes(): static;
-
-	public function route(string $key): mixed;
 
 	public function bodyQueryValues(string $key): ?array;
 	public function bodyQueryValue(string $key): mixed;

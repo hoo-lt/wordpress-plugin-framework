@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Request\Routes;
+namespace Hoo\WordPressPluginFramework\Http\Server\Request\Routes;
 
 use Countable;
 use IteratorAggregate;

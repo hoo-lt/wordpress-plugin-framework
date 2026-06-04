@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Body;
+namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,

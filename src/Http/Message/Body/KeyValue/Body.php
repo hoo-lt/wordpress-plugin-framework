@@ -1,11 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Body\KeyValue;
+namespace Hoo\WordPressPluginFramework\Http\Message\Body\KeyValue;
 
 use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,
-	Http\Body\BodyInterface,
+	Http\Message\Body\BodyInterface,
 	Http\Coders\CoderInterface,
 	Http\KeyValue\KeyValueInterface,
 };

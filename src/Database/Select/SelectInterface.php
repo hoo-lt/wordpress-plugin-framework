@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Database\Select;
 
-use Hoo\WordPressPluginFramework\Database\Queries\QueryInterface;
+use Hoo\WordPressPluginFramework\Database\Query\QueryInterface;
 
 interface SelectInterface
 {

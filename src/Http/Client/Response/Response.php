@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Response;
+namespace Hoo\WordPressPluginFramework\Http\Client\Response;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Body\BodyInterface,
-	Http\Headers\HeadersInterface,
+	Http\Message\Body\BodyInterface,
+	Http\Message\Headers\HeadersInterface,
 	Http\KeyValue\KeyValueInterface,
 };
 

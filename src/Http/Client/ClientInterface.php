@@ -2,9 +2,9 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Client;
 
-use Hoo\WordPressPluginFramework\Http\{
-	Request\RequestInterface,
-	Response\ResponseInterface,
+use Hoo\WordPressPluginFramework\{
+	Http\Client\Request\RequestInterface,
+	Http\Client\Response\ResponseInterface,
 };
 
 interface ClientInterface

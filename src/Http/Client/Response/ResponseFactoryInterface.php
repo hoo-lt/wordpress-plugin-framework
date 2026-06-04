@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Response;
+namespace Hoo\WordPressPluginFramework\Http\Client\Response;
 
 interface ResponseFactoryInterface
 {

@@ -1,14 +1,13 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Request;
+namespace Hoo\WordPressPluginFramework\Http\Client\Request;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Body\BodyInterface,
+	Http\Message\Body\BodyInterface,
 	Http\Method\Method,
-	Http\Headers\HeadersInterface,
+	Http\Message\Headers\HeadersInterface,
 	Http\KeyValue\KeyValueInterface,
 	Http\Url\UrlInterface,
-	Http\Request\Routes\RoutesInterface,
 };
 
 readonly class Request implements RequestInterface
@@ -18,7 +17,6 @@ readonly class Request implements RequestInterface
 		protected UrlInterface $url,
 		protected ?HeadersInterface $headers = null,
 		protected ?BodyInterface $body = null,
-		protected ?RoutesInterface $routes = null,
 	) {
 	}
 
@@ -29,7 +27,7 @@ readonly class Request implements RequestInterface
 
 	public function withMethod(Method $method): static
 	{
-		return new static($method, $this->url, $this->headers, $this->body, $this->routes);
+		return new static($method, $this->url, $this->headers, $this->body);
 	}
 
 	public function url(): UrlInterface
@@ -39,7 +37,7 @@ readonly class Request implements RequestInterface
 
 	public function withUrl(UrlInterface $url): static
 	{
-		return new static($this->method, $url, $this->headers, $this->body, $this->routes);
+		return new static($this->method, $url, $this->headers, $this->body);
 	}
 
 	public function queryValues(string $key): ?array
@@ -61,12 +59,12 @@ readonly class Request implements RequestInterface
 
 	public function withHeaders(HeadersInterface $headers): static
 	{
-		return new static($this->method, $this->url, $headers, $this->body, $this->routes);
+		return new static($this->method, $this->url, $headers, $this->body);
 	}
 
 	public function withoutHeaders(): static
 	{
-		return new static($this->method, $this->url, null, $this->body, $this->routes);
+		return new static($this->method, $this->url, null, $this->body);
 	}
 
 	public function header(string $key): mixed
@@ -81,12 +79,12 @@ readonly class Request implements RequestInterface
 
 	public function withBody(BodyInterface $body): static
 	{
-		return new static($this->method, $this->url, $this->headers, $body, $this->routes);
+		return new static($this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
-		return new static($this->method, $this->url, $this->headers, null, $this->routes);
+		return new static($this->method, $this->url, $this->headers, null);
 	}
 
 	public function bodyValues(string $key): ?array
@@ -99,26 +97,6 @@ readonly class Request implements RequestInterface
 	{
 		$body = $this->body();
 		return $body instanceof KeyValueInterface ? $body->value($key) : null;
-	}
-
-	public function routes(): ?RoutesInterface
-	{
-		return $this->routes;
-	}
-
-	public function withRoutes(RoutesInterface $routes): static
-	{
-		return new static($this->method, $this->url, $this->headers, $this->body, $routes);
-	}
-
-	public function withoutRoutes(): static
-	{
-		return new static($this->method, $this->url, $this->headers, $this->body, null);
-	}
-
-	public function route(string $key): mixed
-	{
-		return $this->routes()?->route($key);
 	}
 
 	public function bodyQueryValues(string $key): ?array

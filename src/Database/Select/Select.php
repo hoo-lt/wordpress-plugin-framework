@@ -2,7 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Database\Select;
 
-use Hoo\WordPressPluginFramework\Database\Queries\QueryInterface;
+use Hoo\WordPressPluginFramework\Database\DatabaseException;
+use Hoo\WordPressPluginFramework\Database\Query\QueryInterface;
 use wpdb;
 
 readonly class Select implements SelectInterface
@@ -11,24 +12,23 @@ readonly class Select implements SelectInterface
 		protected wpdb $wpdb,
 	) {
 		/*
-		$this->wpdb->query(
-			"SET SESSION group_concat_max_len = 1048576"
-		);
-
-		if ($this->wpdb->last_error) {
-			throw new SelectException($this->wpdb->last_error);
-		}
+		$this->query('SET SESSION group_concat_max_len = 1048576;');
 		*/
 	}
 
 	public function __invoke(QueryInterface $query): array
 	{
+		$this->query($query);
+
+		return array_map(get_object_vars(...), $this->wpdb->last_result);
+	}
+
+	protected function query(string $query): void
+	{
 		$this->wpdb->query($query);
 
 		if ($this->wpdb->last_error) {
-			throw new SelectException($this->wpdb->last_error);
+			throw new DatabaseException($this->wpdb->last_error);
 		}
-
-		return array_map(get_object_vars(...), $this->wpdb->last_result);
 	}
 }

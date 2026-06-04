@@ -3,8 +3,8 @@
 namespace Hoo\WordPressPluginFramework\Http\Message;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Body\BodyInterface,
-	Http\Headers\HeadersInterface,
+	Http\Message\Body\BodyInterface,
+	Http\Message\Headers\HeadersInterface,
 };
 
 interface MessageInterface

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Body;
+namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 interface BodyInterface
 {
