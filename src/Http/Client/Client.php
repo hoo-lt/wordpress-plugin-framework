@@ -32,9 +32,9 @@ readonly class Client implements ClientInterface
 		}
 
 		return $this->responseFactory->create(
-			$response['response']['code'],
-			$response['headers']->getAll(),
-			$response['body'],
+			wp_remote_retrieve_response_code($response),
+			wp_remote_retrieve_headers($response)->getAll(),
+			wp_remote_retrieve_body($response)
 		);
 	}
 }
