@@ -24,10 +24,8 @@ readonly class View implements ViewInterface
 
 	public function withValue(string $key, mixed $value): static
 	{
-		$values = [
-			...$this->values,
-			$key => $value,
-		];
+		$values = $this->values;
+		$values[$key] = $value;
 
 		return new static($this->path, $values);
 	}
