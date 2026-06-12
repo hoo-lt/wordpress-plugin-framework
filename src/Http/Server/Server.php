@@ -26,9 +26,10 @@ readonly class Server implements ServerInterface
 
 	public function scheme(): string
 	{
-		$url = $this->url();
-
-		$scheme = parse_url($url, PHP_URL_SCHEME);
+		$scheme = parse_url(
+			$this->url(),
+			PHP_URL_SCHEME,
+		);
 		if ($scheme === false) {
 			throw new ServerException('an error occured while parsing url');
 		}
@@ -42,9 +43,10 @@ readonly class Server implements ServerInterface
 
 	public function host(): string
 	{
-		$url = $this->url();
-
-		$host = parse_url($url, PHP_URL_HOST);
+		$host = parse_url(
+			$this->url(),
+			PHP_URL_HOST,
+		);
 		if ($host === false) {
 			throw new ServerException('an error occured while parsing url');
 		}
@@ -58,9 +60,10 @@ readonly class Server implements ServerInterface
 
 	public function port(): ?int
 	{
-		$url = $this->url();
-
-		$port = parse_url($url, PHP_URL_PORT);
+		$port = parse_url(
+			$this->url(),
+			PHP_URL_PORT,
+		);
 		if ($port === false) {
 			throw new ServerException('an error occured while parsing url');
 		}
@@ -70,9 +73,10 @@ readonly class Server implements ServerInterface
 
 	public function path(): string
 	{
-		$url = $this->url();
-
-		$path = parse_url($url, PHP_URL_PATH);
+		$path = parse_url(
+			$this->url(),
+			PHP_URL_PATH,
+		);
 		if ($path === false) {
 			throw new ServerException('an error occured while parsing url');
 		}
@@ -86,9 +90,10 @@ readonly class Server implements ServerInterface
 
 	public function query(): ?string
 	{
-		$url = $this->url();
-
-		$query = parse_url($url, PHP_URL_QUERY);
+		$query = parse_url(
+			$this->url(),
+			PHP_URL_QUERY,
+		);
 		if ($query === false) {
 			throw new ServerException('an error occured while parsing url');
 		}
