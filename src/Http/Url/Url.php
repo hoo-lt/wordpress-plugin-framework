@@ -3,8 +3,8 @@
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Url\Scheme\Scheme,
 	Http\Url\Query\QueryInterface,
+	Http\Url\Scheme\Scheme,
 };
 
 readonly class Url implements UrlInterface
@@ -37,13 +37,7 @@ readonly class Url implements UrlInterface
 
 	public function withScheme(Scheme $scheme): static
 	{
-		return new static(
-			$scheme,
-			$this->host,
-			$this->port,
-			$this->path,
-			$this->query,
-		);
+		return new static($scheme, $this->host, $this->port, $this->path, $this->query);
 	}
 
 	public function host(): string
@@ -53,13 +47,7 @@ readonly class Url implements UrlInterface
 
 	public function withHost(string $host): static
 	{
-		return new static(
-			$this->scheme,
-			$host,
-			$this->port,
-			$this->path,
-			$this->query,
-		);
+		return new static($this->scheme, $host, $this->port, $this->path, $this->query);
 	}
 
 	public function port(): ?int
@@ -69,24 +57,12 @@ readonly class Url implements UrlInterface
 
 	public function withPort(int $port): static
 	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$port,
-			$this->path,
-			$this->query,
-		);
+		return new static($this->scheme, $this->host, $port, $this->path, $this->query);
 	}
 
 	public function withoutPort(): static
 	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			null,
-			$this->path,
-			$this->query,
-		);
+		return new static($this->scheme, $this->host, null, $this->path, $this->query);
 	}
 
 	public function path(): string
@@ -96,13 +72,7 @@ readonly class Url implements UrlInterface
 
 	public function withPath(string $path): static
 	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$this->port,
-			$path,
-			$this->query,
-		);
+		return new static($this->scheme, $this->host, $this->port, $path, $this->query);
 	}
 
 	public function query(): ?QueryInterface
@@ -112,24 +82,12 @@ readonly class Url implements UrlInterface
 
 	public function withQuery(QueryInterface $query): static
 	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$this->port,
-			$this->path,
-			$query,
-		);
+		return new static($this->scheme, $this->host, $this->port, $this->path, $query);
 	}
 
 	public function withoutQuery(): static
 	{
-		return new static(
-			$this->scheme,
-			$this->host,
-			$this->port,
-			$this->path,
-			null,
-		);
+		return new static($this->scheme, $this->host, $this->port, $this->path, null);
 	}
 
 	public function __toString(): string
@@ -164,7 +122,8 @@ readonly class Url implements UrlInterface
 	protected function validatePort(?int $port): void
 	{
 		if (
-			$port !== null && (
+			$port !== null &&
+			(
 				$port < 1 ||
 				$port > 65535
 			)
@@ -175,12 +134,15 @@ readonly class Url implements UrlInterface
 
 	protected function normalizePort(?int $port): ?int
 	{
-		return $port === $this->scheme->port() ? null : $port;
+		if ($port === null) {
+			return null;
+		}
+
+		return $this->scheme->port() === $port ? null : $port;
 	}
 
 	protected function validatePath(string $path): void
 	{
-		// RFC 3986 §3.3: with authority, path must be empty or begin with "/" (path-abempty).
 		if (
 			$path !== '' &&
 			$path[0] !== '/'
@@ -191,39 +153,38 @@ readonly class Url implements UrlInterface
 
 	protected function normalizePath(string $path): string
 	{
-		// RFC 3986 §5.2.4: remove_dot_segments. Validation guarantees path is '' or starts with '/'.
 		if ($path === '') {
 			return '';
 		}
 
-		$resolved = [];
 		$segments = explode('/', $path);
 
-		foreach ($segments as $segment) {
+		$path = array_reduce($segments, function ($carry, $segment) {
 			if ($segment === '.') {
-				continue;
+				return $carry;
 			}
 
 			if ($segment === '..') {
-				// Never pop the leading '' that represents the root '/'.
-				if (count($resolved) > 1) {
-					array_pop($resolved);
+				if (count($carry) > 1) {
+					array_pop($carry);
 				}
-				continue;
+
+				return $carry;
 			}
 
-			$resolved[] = $segment;
-		}
+			array_push($carry, $segment);
 
-		// Preserve trailing slash when the last segment was '.' or '..'.
-		$last = end($segments);
+			return $carry;
+		}, []);
+
+		$end = end($segments);
 		if (
-			$last === '.' ||
-			$last === '..'
+			$end === '.' ||
+			$end === '..'
 		) {
-			$resolved[] = '';
+			array_push($path, '');
 		}
 
-		return implode('/', $resolved);
+		return implode('/', $path);
 	}
 }

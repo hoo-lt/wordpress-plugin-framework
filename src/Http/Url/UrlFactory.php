@@ -2,16 +2,16 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Url;
 
-use Hoo\WordPressPluginFramework\Http;
+use Hoo\WordPressPluginFramework\Http\Url\Query\QueryFactoryInterface;
 
 readonly class UrlFactory implements UrlFactoryInterface
 {
 	public function __construct(
-		protected Http\Url\Query\QueryFactoryInterface $queryFactory,
+		protected QueryFactoryInterface $queryFactory,
 	) {
 	}
 
-	public function from(string $url): UrlInterface
+	public function create(string $url): UrlInterface
 	{
 		$url = parse_url($url);
 		if (!is_array($url)) {
@@ -23,7 +23,7 @@ readonly class UrlFactory implements UrlFactoryInterface
 			$url['host'] ?? '',
 			$url['port'] ?? null,
 			$url['path'] ?? '',
-			$this->queryFactory->tryFrom($url['query'] ?? null),
+			$this->queryFactory->tryCreate($url['query'] ?? null),
 		);
 	}
 }

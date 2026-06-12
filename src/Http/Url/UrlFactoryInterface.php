@@ -4,5 +4,5 @@ namespace Hoo\WordPressPluginFramework\Http\Url;
 
 interface UrlFactoryInterface
 {
-	public function from(string $url): UrlInterface;
+	public function create(string $url): UrlInterface;
 }

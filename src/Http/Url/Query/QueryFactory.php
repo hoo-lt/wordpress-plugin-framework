@@ -15,7 +15,7 @@ readonly class QueryFactory implements QueryFactoryInterface
 	) {
 	}
 
-	public function from(array|string $query): QueryInterface
+	public function create(array|string $query): QueryInterface
 	{
 		if (is_string($query)) {
 			$query = $this->coder->decode($query);
@@ -28,12 +28,12 @@ readonly class QueryFactory implements QueryFactoryInterface
 		);
 	}
 
-	public function tryFrom(array|string|null $query): ?QueryInterface
+	public function tryCreate(array|string|null $query): ?QueryInterface
 	{
 		if ($query === null) {
 			return null;
 		}
 
-		return $this->from($query);
+		return $this->create($query);
 	}
 }

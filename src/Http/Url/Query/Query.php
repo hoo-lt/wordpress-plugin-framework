@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,
-	Http\Coders\CoderInterface,
+	Http\Coders\Query\CoderInterface,
 	Http\KeyValue\KeyValueInterface,
 };
 use Traversable;
@@ -34,7 +34,7 @@ readonly class Query implements QueryInterface, KeyValueInterface
 		return new static(
 			$this->helper,
 			$this->coder,
-			$this->helper->withValue($this->query, $key, $value)
+			$this->helper->withValue($this->query, $key, $value),
 		);
 	}
 
@@ -43,7 +43,7 @@ readonly class Query implements QueryInterface, KeyValueInterface
 		return new static(
 			$this->helper,
 			$this->coder,
-			$this->helper->withoutValue($this->query, $key)
+			$this->helper->withoutValue($this->query, $key),
 		);
 	}
 

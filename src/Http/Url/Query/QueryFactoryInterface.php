@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
 interface QueryFactoryInterface
 {
-	public function from(array|string $query): QueryInterface;
-	public function tryFrom(array|string|null $query): ?QueryInterface;
+	public function create(array|string $query): QueryInterface;
+	public function tryCreate(array|string|null $query): ?QueryInterface;
 }
