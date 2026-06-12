@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Request\RequestInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\Validate\Rules\RuleInterface,
 };
 

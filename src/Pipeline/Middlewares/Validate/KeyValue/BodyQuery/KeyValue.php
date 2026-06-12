@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValue\BodyQuery;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Request\RequestInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
 };
 

@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Request\RequestInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,

@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValue;
 
-use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
+use Hoo\WordPressPluginFramework\Http\Server\Request\RequestInterface;
 
 interface KeyValueInterface
 {

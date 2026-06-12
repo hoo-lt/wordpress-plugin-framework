@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\VerifyNonce;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Exceptions\Forbidden\Exception as ForbiddenException,
-	Http\Request\RequestInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\MiddlewareException,
 };
 
