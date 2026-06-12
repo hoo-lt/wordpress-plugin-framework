@@ -12,7 +12,7 @@ readonly class Server implements ServerInterface
 
 	public function method(): string
 	{
-		return $this->server['REQUEST_METHOD'] ?? '';
+		return $this->server['REQUEST_METHOD'] ?? 'GET';
 	}
 
 	public function url(): string
