@@ -25,7 +25,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 			return new Body($body);
 		}
 
-		$coder = $this->coderFactory->tryFrom($contentType);
+		$coder = $this->coderFactory->tryCreate($contentType);
 		if ($coder === null) {
 			if (is_array($body)) {
 				throw new BodyFactoryException('cant use array w/o coder');

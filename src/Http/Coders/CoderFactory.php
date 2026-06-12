@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Http\Coders;
 
 readonly class CoderFactory implements CoderFactoryInterface
 {
-	public function from(string $mediaType): CoderInterface
+	public function create(string $mediaType): CoderInterface
 	{
-		$coder = $this->tryFrom($mediaType);
+		$coder = $this->tryCreate($mediaType);
 		if ($coder === null) {
 			throw new CoderFactoryException('failed to create coder');
 		}
@@ -14,7 +14,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryFrom(string $mediaType): ?CoderInterface
+	public function tryCreate(string $mediaType): ?CoderInterface
 	{
 		return match ($mediaType) {
 			'application/x-www-form-urlencoded' => new Form\Coder(),
