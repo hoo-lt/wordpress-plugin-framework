@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 interface BodyFactoryInterface
 {
-	public function from(array|string $body, ?string $contentType = null): BodyInterface;
-	public function tryFrom(array|string|null $body, ?string $contentType = null): ?BodyInterface;
+	public function create(array|string $body, ?string $contentType = null): BodyInterface;
+	public function tryCreate(array|string|null $body, ?string $contentType = null): ?BodyInterface;
 }

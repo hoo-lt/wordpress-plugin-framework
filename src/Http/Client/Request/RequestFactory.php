@@ -9,7 +9,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Url\UrlFactoryInterface,
 };
 
-readonly class RequestFactory
+readonly class RequestFactory implements RequestFactoryInterface
 {
 	public function __construct(
 		protected UrlFactoryInterface $urlFactory,
@@ -18,12 +18,12 @@ readonly class RequestFactory
 	) {
 	}
 
-	public function from(string $method, string $url, ?array $headers = null, array|string|null $body = null): RequestInterface
+	public function create(string $method, string $url, ?array $headers = null, array|string|null $body = null): RequestInterface
 	{
 		$method = Method::from($method);
-		$url = $this->urlFactory->from($url);
-		$headers = $this->headersFactory->tryFrom($headers);
-		$body = $this->bodyFactory->tryFrom(
+		$url = $this->urlFactory->create($url);
+		$headers = $this->headersFactory->tryCreate($headers);
+		$body = $this->bodyFactory->tryCreate(
 			$body,
 			$headers->contentType(),
 		);

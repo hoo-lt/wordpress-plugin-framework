@@ -15,10 +15,10 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 	) {
 	}
 
-	public function from(int $statusCode, ?array $headers = null, array|string|null $body = null): ResponseInterface
+	public function create(int $statusCode, ?array $headers = null, array|string|null $body = null): ResponseInterface
 	{
-		$headers = $this->headersFactory->tryFrom($headers);
-		$body = $this->bodyFactory->tryFrom(
+		$headers = $this->headersFactory->tryCreate($headers);
+		$body = $this->bodyFactory->tryCreate(
 			$body,
 			$headers->contentType(),
 		);

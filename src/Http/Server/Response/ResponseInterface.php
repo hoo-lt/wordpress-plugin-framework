@@ -2,8 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Server\Response;
 
-use Hoo\WordPressPluginFramework\Http\Client;
+use Hoo\WordPressPluginFramework\Http\Client\Response\ResponseInterface as ClientResponseInterface;
 
-interface ResponseInterface extends Client\Response\ResponseInterface
+interface ResponseInterface extends ClientResponseInterface
 {
 }

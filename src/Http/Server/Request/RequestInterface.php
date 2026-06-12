@@ -3,11 +3,11 @@
 namespace Hoo\WordPressPluginFramework\Http\Server\Request;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Client,
+	Http\Client\Request\RequestInterface as ClientRequestInterface,
 	Http\Server\Request\Routes\RoutesInterface,
 };
 
-interface RequestInterface extends Client\Request\RequestInterface
+interface RequestInterface extends ClientRequestInterface
 {
 	public function routes(): ?RoutesInterface;
 	public function withRoutes(RoutesInterface $routes): static;

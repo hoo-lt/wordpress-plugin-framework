@@ -31,7 +31,7 @@ readonly class Client implements ClientInterface
 			throw new ClientException($response->get_error_message());
 		}
 
-		return $this->responseFactory->from(
+		return $this->responseFactory->create(
 			$response['response']['code'],
 			$response['headers']->getAll(),
 			$response['body'],

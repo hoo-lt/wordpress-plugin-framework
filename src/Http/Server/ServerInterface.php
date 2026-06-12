@@ -14,9 +14,5 @@ interface ServerInterface
 	public function query(): ?string;
 
 	public function headers(): ?array;
-
-	public function contentLength(): ?int;
-	public function contentType(): ?string;
-
 	public function body(): ?string;
 }

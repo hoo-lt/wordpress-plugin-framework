@@ -4,11 +4,10 @@ namespace Hoo\WordPressPluginFramework\Http\Server;
 
 readonly class Server implements ServerInterface
 {
-	protected array $server;
-
-	public function __construct()
-	{
-		$this->server = $GLOBALS['_SERVER'];
+	public function __construct(
+		protected string $input,
+		protected array $server,
+	) {
 	}
 
 	public function method(): string
@@ -18,16 +17,8 @@ readonly class Server implements ServerInterface
 
 	public function url(): string
 	{
-		$scheme = $this->server['REQUEST_SCHEME'] ?? '';
-		if ($scheme === '') {
-			return '';
-		}
-
-		$hostPort = $this->server['HTTP_HOST'] ?? '';
-		if ($hostPort === '') {
-			return '';
-		}
-
+		$scheme = ($this->server['REQUEST_SCHEME'] ?? '') ?: 'http';
+		$hostPort = ($this->server['HTTP_HOST'] ?? '') ?: 'localhost';
 		$pathQuery = $this->server['REQUEST_URI'] ?? '';
 
 		return "{$scheme}://{$hostPort}{$pathQuery}";
@@ -35,15 +26,23 @@ readonly class Server implements ServerInterface
 
 	public function scheme(): string
 	{
-		return $this->server['REQUEST_SCHEME'] ?? '';
+		$url = $this->url();
+
+		$scheme = parse_url($url, PHP_URL_SCHEME);
+		if ($scheme === false) {
+			throw new ServerException('an error occured while parsing url');
+		}
+
+		if ($scheme === null) {
+			return '';
+		}
+
+		return $scheme;
 	}
 
 	public function host(): string
 	{
 		$url = $this->url();
-		if ($url === '') {
-			return '';
-		}
 
 		$host = parse_url($url, PHP_URL_HOST);
 		if ($host === false) {
@@ -60,9 +59,6 @@ readonly class Server implements ServerInterface
 	public function port(): ?int
 	{
 		$url = $this->url();
-		if ($url === '') {
-			return null;
-		}
 
 		$port = parse_url($url, PHP_URL_PORT);
 		if ($port === false) {
@@ -75,9 +71,6 @@ readonly class Server implements ServerInterface
 	public function path(): string
 	{
 		$url = $this->url();
-		if ($url === '') {
-			return '';
-		}
 
 		$path = parse_url($url, PHP_URL_PATH);
 		if ($path === false) {
@@ -94,9 +87,6 @@ readonly class Server implements ServerInterface
 	public function query(): ?string
 	{
 		$url = $this->url();
-		if ($url === '') {
-			return null;
-		}
 
 		$query = parse_url($url, PHP_URL_QUERY);
 		if ($query === false) {
@@ -106,28 +96,13 @@ readonly class Server implements ServerInterface
 		return $query;
 	}
 
-	public function contentLength(): ?int
-	{
-		return $this->server['CONTENT_LENGTH'] ?? null;
-	}
-
-	public function contentType(): ?string
-	{
-		return $this->server['CONTENT_TYPE'] ?? null;
-	}
-
 	public function body(): ?string
 	{
-		$body = file_get_contents('php://input');
-		if ($body === false) {
-			throw new ServerException('an error occured while reading input stream');
-		}
-
-		if ($body === '') {
+		if ($this->input === '') {
 			return null;
 		}
 
-		return $body;
+		return $this->input;
 	}
 
 	public function headers(): ?array

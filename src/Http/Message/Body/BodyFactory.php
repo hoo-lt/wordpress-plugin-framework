@@ -15,7 +15,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function from(array|string $body, ?string $contentType = null): BodyInterface
+	public function create(array|string $body, ?string $contentType = null): BodyInterface
 	{
 		if ($contentType === null) {
 			if (is_array($body)) {
@@ -38,19 +38,15 @@ readonly class BodyFactory implements BodyFactoryInterface
 			$body = $coder->decode($body);
 		}
 
-		return new KeyValue\Body(
-			$this->helper,
-			$coder,
-			$body,
-		);
+		return new KeyValue\Body($this->helper, $coder, $body);
 	}
 
-	public function tryFrom(array|string|null $body, ?string $contentType = null): ?BodyInterface
+	public function tryCreate(array|string|null $body, ?string $contentType = null): ?BodyInterface
 	{
 		if ($body === null) {
 			return null;
 		}
 
-		return $this->from($body, $contentType);
+		return $this->create($body, $contentType);
 	}
 }
