@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
 	Collections\Message\CollectionInterface as MessageCollectionInterface,
-	Http\Request\RequestInterface,
-	Http\Response\ResponseInterface,
-	Http\Response\ResponseFactoryInterface,
+	Http\Server\Request\RequestInterface,
+	Http\Server\Response\ResponseInterface,
+	Http\Server\Response\ResponseFactoryInterface,
 	Exceptions\Interfaces\HasStatusCodeInterface,
 	Exceptions\Interfaces\HasMessagesInterface,
 	View\ViewInterface,
@@ -36,7 +36,7 @@ readonly class Handler implements HandlerInterface
 			throw $throwable;
 		}
 
-		return $this->responseFactory->from(
+		return $this->responseFactory->create(
 			$this->statusCode($throwable),
 			[
 				'Content-Type' => 'text/html',
@@ -51,7 +51,7 @@ readonly class Handler implements HandlerInterface
 
 	protected function json(Throwable $throwable): ResponseInterface
 	{
-		return $this->responseFactory->from(
+		return $this->responseFactory->create(
 			$this->statusCode($throwable),
 			[
 				'Content-Type' => 'application/json',
