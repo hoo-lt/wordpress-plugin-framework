@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
+	Collections\Message\Collection as MessageCollection,
 	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
-	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,
 };
 
@@ -20,6 +20,11 @@ readonly class Middleware implements MiddlewareInterface
 	public function withCapabilities(Capability ...$capabilities): static
 	{
 		return new static($capabilities);
+	}
+
+	public function withoutCapabilities(): static
+	{
+		return new static([]);
 	}
 
 	public function withCapability(Capability $capability): static

@@ -4,9 +4,8 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Transaction;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Pipeline\Middlewares\MiddlewareInterface,
-	Http\Server\Request\RequestInterface,
 	Database\DatabaseInterface,
+	Http\Server\Request\RequestInterface,
 };
 use Throwable;
 

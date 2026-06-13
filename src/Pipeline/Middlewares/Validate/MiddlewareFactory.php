@@ -10,6 +10,7 @@ readonly class MiddlewareFactory implements MiddlewareFactoryInterface
 		protected ValidatorFactoryInterface $validatorFactory,
 	) {
 	}
+
 	public function create(): MiddlewareInterface
 	{
 		return new Middleware($this->validatorFactory);

@@ -5,26 +5,26 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\KeyValues\KeyValuesInterface,
 	Pipeline\Middlewares\Validate\Rules\RuleInterface,
 };
 
 readonly class Validator implements ValidatorInterface
 {
 	public function __construct(
-		protected KeyValueInterface $keyValue,
+		protected KeyValuesInterface $keyValues,
 		protected array $rules = [],
 	) {
 	}
 
 	public function withRules(RuleInterface ...$rules): static
 	{
-		return new static($this->keyValue, $rules);
+		return new static($this->keyValues, $rules);
 	}
 
 	public function withoutRules(): static
 	{
-		return new static($this->keyValue, []);
+		return new static($this->keyValues, []);
 	}
 
 	public function withRule(RuleInterface $rule): static
@@ -34,9 +34,9 @@ readonly class Validator implements ValidatorInterface
 
 	public function validate(RequestInterface $request, Closure $closure): void
 	{
-		$values = $this->keyValue->values($request);
+		$values = $this->keyValues->values($request);
 		if ($values === null) {
-			$key = $this->keyValue->key();
+			$key = $this->keyValues->key();
 
 			$closure($key, 'no content to validate');
 		} else {

@@ -1,13 +1,11 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValue;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValues;
 
 use Hoo\WordPressPluginFramework\Http\Server\Request\RequestInterface;
 
-interface KeyValueInterface
+interface KeyValuesInterface
 {
 	public function key(): string;
-
 	public function values(RequestInterface $request): ?array;
-	public function value(RequestInterface $request): mixed;
 }

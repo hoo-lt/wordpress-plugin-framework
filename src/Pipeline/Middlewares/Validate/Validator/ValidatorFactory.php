@@ -5,12 +5,12 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Rules\RulesBuilderInterface,
-	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
-	Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as BodyKeyValue,
-	Pipeline\Middlewares\Validate\KeyValue\BodyQuery\KeyValue as BodyQueryKeyValue,
-	Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as QueryKeyValue,
-	Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as HeaderKeyValue,
-	Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as RouteKeyValue,
+	Pipeline\Middlewares\Validate\KeyValues\KeyValuesInterface,
+	Pipeline\Middlewares\Validate\KeyValues\Body\KeyValues as BodyKeyValues,
+	Pipeline\Middlewares\Validate\KeyValues\BodyQuery\KeyValues as BodyQueryKeyValues,
+	Pipeline\Middlewares\Validate\KeyValues\Query\KeyValues as QueryKeyValues,
+	Pipeline\Middlewares\Validate\KeyValues\Header\KeyValues as HeaderKeyValues,
+	Pipeline\Middlewares\Validate\KeyValues\Route\KeyValues as RouteKeyValues,
 };
 
 readonly class ValidatorFactory implements ValidatorFactoryInterface
@@ -23,7 +23,7 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	public function body(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
-			new BodyKeyValue($key),
+			new BodyKeyValues($key),
 			$closure,
 		);
 	}
@@ -31,7 +31,7 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	public function bodyQuery(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
-			new BodyQueryKeyValue($key),
+			new BodyQueryKeyValues($key),
 			$closure,
 		);
 	}
@@ -39,7 +39,7 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	public function query(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
-			new QueryKeyValue($key),
+			new QueryKeyValues($key),
 			$closure,
 		);
 	}
@@ -47,7 +47,7 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	public function header(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
-			new HeaderKeyValue($key),
+			new HeaderKeyValues($key),
 			$closure,
 		);
 	}
@@ -55,12 +55,12 @@ readonly class ValidatorFactory implements ValidatorFactoryInterface
 	public function route(string $key, Closure $closure): ValidatorInterface
 	{
 		return $this->create(
-			new RouteKeyValue($key),
+			new RouteKeyValues($key),
 			$closure,
 		);
 	}
 
-	protected function create(KeyValueInterface $keyValue, Closure $closure): ValidatorInterface
+	protected function create(KeyValuesInterface $keyValue, Closure $closure): ValidatorInterface
 	{
 		return new Validator(
 			$keyValue,

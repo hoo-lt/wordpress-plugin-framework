@@ -1,13 +1,13 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValue\Route;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\KeyValues\Route;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\KeyValues\KeyValuesInterface,
 };
 
-readonly class KeyValue implements KeyValueInterface
+readonly class KeyValues implements KeyValuesInterface
 {
 	public function __construct(
 		protected string $key,
@@ -29,10 +29,5 @@ readonly class KeyValue implements KeyValueInterface
 		return [
 			$this->key => $routes->route($this->key),
 		];
-	}
-
-	public function value(RequestInterface $request): mixed
-	{
-		return $request->route($this->key);
 	}
 }
