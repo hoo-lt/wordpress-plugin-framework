@@ -1,9 +1,12 @@
 <?php
 
-namespace Hoo\WooCommercePluginFramework\Middlewares\LogExecutionTime;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\LogExecutionTime;
 
-use Hoo\WordPressPluginFramework\Middlewares\MiddlewareInterface;
-use Hoo\WordPressPluginFramework\Loggers\LoggerInterface;
+use Closure;
+use Hoo\WordPressPluginFramework\{
+	Http\Server\Request\RequestInterface,
+	Loggers\LoggerInterface,
+};
 
 readonly class Middleware implements MiddlewareInterface
 {
@@ -12,16 +15,21 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
-	public function __invoke(Closure $closure): mixed
+	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
 		$startTime = microtime(true);
 
-		$result = $callable();
-
+		$return = $closure($request);
+		
 		$stopTime = microtime(true);
 
-		$this->logger->info(sprintf('Execution time: %d ms', ($stopTime - $startTime) * 1000));
+		$this->logger->info(
+			sprintf(
+				'Execution time: %d ms',
+				($stopTime - $startTime) * 1000,
+			)
+		);
 
-		return $result;
+		return $return;
 	}
 }

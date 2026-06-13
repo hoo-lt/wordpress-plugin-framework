@@ -6,6 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\CurrentUserCan\Middleware as CurrentUserCanMiddleware,
 	Pipeline\Middlewares\CurrentUserCan\MiddlewareInterface as CurrentUserCanMiddlewareInterface,
+	Pipeline\Middlewares\LogExecutionTime\MiddlewareFactoryInterface as LogExecutionTimeMiddlewareFactoryInterface,
+	Pipeline\Middlewares\LogExecutionTime\MiddlewareInterface as LogExecutionTimeMiddlewareInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareFactoryInterface as TransactionMiddlewareFactoryInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareInterface as TransactionMiddlewareInterface,
 	Pipeline\Middlewares\Validate\MiddlewareFactoryInterface as ValidateMiddlewareFactoryInterface,
@@ -17,6 +19,7 @@ use Hoo\WordPressPluginFramework\{
 readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 {
 	public function __construct(
+		protected LogExecutionTimeMiddlewareFactoryInterface $logExecutionTimeMiddlewareFactory,
 		protected TransactionMiddlewareFactoryInterface $transactionMiddlewareFactory,
 		protected ValidateMiddlewareFactoryInterface $validateMiddlewareFactory,
 		protected array $middlewares = [],
@@ -25,12 +28,12 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, $middlewares);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, []);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -48,6 +51,18 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 		}
 
 		return $this->withMiddleware($currentUserCanMiddleware);
+	}
+
+	public function logExecutionTime(Closure $closure): static
+	{
+		$logExecutionTimeMiddleware = $closure(
+			$this->logExecutionTimeMiddlewareFactory->create(),
+		);
+		if (!$logExecutionTimeMiddleware instanceof LogExecutionTimeMiddlewareInterface) {
+			throw new MiddlewaresBuilderException('must return log execution time middleware instance');
+		}
+
+		return $this->withMiddleware($logExecutionTimeMiddleware);
 	}
 
 	public function transaction(Closure $closure): static
