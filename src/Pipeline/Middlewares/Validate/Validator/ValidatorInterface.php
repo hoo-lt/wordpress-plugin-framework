@@ -10,6 +10,7 @@ use Hoo\WordPressPluginFramework\{
 
 interface ValidatorInterface
 {
+	public function rules(): array;
 	public function withRules(RuleInterface ...$rules): static;
 	public function withoutRules(): static;
 

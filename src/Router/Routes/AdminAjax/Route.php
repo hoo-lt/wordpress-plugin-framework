@@ -26,6 +26,11 @@ readonly class Route implements RouteInterface
 	) {
 	}
 
+	public function middlewares(): array
+	{
+		return $this->middlewares;
+	}
+
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
 		return new static(

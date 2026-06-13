@@ -19,22 +19,19 @@ readonly class Router implements RouterInterface
 	) {
 	}
 
+	public function routes(): array
+	{
+		return $this->routes;
+	}
+
 	public function withRoutes(RouteInterface ...$routes): static
 	{
-		return new static(
-			$this->routeFactory,
-			$this->hooker,
-			$routes,
-		);
+		return new static($this->routeFactory, $this->hooker, $routes);
 	}
 
 	public function withoutRoutes(): static
 	{
-		return new static(
-			$this->routeFactory,
-			$this->hooker,
-			[],
-		);
+		return new static($this->routeFactory, $this->hooker, []);
 	}
 
 	public function withRoute(RouteInterface $route): static
@@ -63,13 +60,13 @@ readonly class Router implements RouterInterface
 		);
 	}
 
-	public function route(): void
+	public function __invoke(): void
 	{
 		foreach ($this->routes as $route) {
 			$hooks = $route->hooks();
 
 			$hooker = $this->hooker->withHooks(...$hooks);
-			$hooker->hook();
+			$hooker();
 		}
 	}
 

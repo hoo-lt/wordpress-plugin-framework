@@ -17,6 +17,11 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
+	public function capabilities(): array
+	{
+		return $this->capabilities;
+	}
+
 	public function withCapabilities(Capability ...$capabilities): static
 	{
 		return new static($capabilities);

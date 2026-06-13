@@ -16,6 +16,11 @@ readonly class Hooker implements HookerInterface
 	) {
 	}
 
+	public function hooks(): array
+	{
+		return $this->hooks;
+	}
+
 	public function withHooks(HookInterface ...$hooks): static
 	{
 		return new static($this->hookFactory, $hooks);
@@ -59,7 +64,7 @@ readonly class Hooker implements HookerInterface
 		);
 	}
 
-	public function hook(): void
+	public function __invoke(): void
 	{
 		foreach ($this->hooks as $hook) {
 			$hook();

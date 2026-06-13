@@ -6,6 +6,7 @@ use Closure;
 
 interface MiddlewaresBuilderInterface
 {
+	public function middlewares(): array;
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
 	public function withoutMiddlewares(): static;
 

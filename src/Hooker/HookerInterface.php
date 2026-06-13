@@ -7,6 +7,7 @@ use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
 
 interface HookerInterface
 {
+	public function hooks(): array;
 	public function withHooks(HookInterface ...$hooks): static;
 	public function withoutHooks(): static;
 
@@ -17,5 +18,5 @@ interface HookerInterface
 	public function activation(string $file, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static;
 	public function deactivation(string $file, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static;
 
-	public function hook(): void;
+	public function __invoke(): void;
 }

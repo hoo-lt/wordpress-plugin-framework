@@ -10,8 +10,10 @@ use Hoo\WordPressPluginFramework\{
 
 interface PipelineInterface
 {
+	public function request(): RequestInterface;
 	public function withRequest(RequestInterface $request): static;
 
+	public function middlewares(): array;
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
 	public function withoutMiddlewares(): static;
 

@@ -18,9 +18,19 @@ readonly class Pipeline implements PipelineInterface
 	) {
 	}
 
+	public function request(): RequestInterface
+	{
+		return $this->request;
+	}
+
 	public function withRequest(RequestInterface $request): static
 	{
 		return new static($request, $this->middlewares, $this->closure);
+	}
+
+	public function middlewares(): array
+	{
+		return $this->middlewares;
 	}
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static

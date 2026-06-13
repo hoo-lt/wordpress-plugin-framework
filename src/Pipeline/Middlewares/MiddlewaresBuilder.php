@@ -26,6 +26,11 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	) {
 	}
 
+	public function middlewares(): array
+	{
+		return $this->middlewares;
+	}
+
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
 		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, $middlewares);

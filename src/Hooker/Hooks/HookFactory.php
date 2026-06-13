@@ -62,7 +62,7 @@ readonly class HookFactory implements HookFactoryInterface
 	{
 		$middlewaresBuilder = $closures($this->middlewaresBuilder);
 		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
-			//throw there
+			throw new HookFactoryException('The middlewares builder closure must return an instance of MiddlewaresBuilder.');
 		}
 
 		return $middlewaresBuilder->build();

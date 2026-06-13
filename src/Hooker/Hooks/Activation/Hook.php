@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Activation;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookInterface,
-	Http\Request\RequestInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface
 };
@@ -18,6 +18,11 @@ readonly class Hook implements HookInterface
 		protected Closure $closure,
 		protected array $middlewares = [],
 	) {
+	}
+
+	public function middlewares(): array
+	{
+		return $this->middlewares;
 	}
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static

@@ -10,6 +10,7 @@ use Hoo\WordPressPluginFramework\{
 
 interface RouterInterface
 {
+	public function routes(): array;
 	public function withRoutes(RouteInterface ...$routes): static;
 	public function withoutRoutes(): static;
 
@@ -19,7 +20,7 @@ interface RouterInterface
 	public function feed(string $name, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static;
 	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresBuilderClosure = null): static;
 
-	public function route(): void;
+	public function __invoke(): void;
 
 	public function up(): void;
 	public function down(): void;

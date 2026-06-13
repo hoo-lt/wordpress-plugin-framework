@@ -6,9 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookFactoryInterface,
 	Http\Method\Method,
-	Http\Request\RequestInterface,
-	Http\Request\Routes\RoutesFactoryInterface,
-	Http\Response\ResponseFactoryInterface,
+	Http\Server\Request\Routes\RoutesFactoryInterface,
+	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Exceptions\Handler\HandlerInterface,
 	Pipeline\Middlewares\MiddlewaresBuilder,
@@ -21,7 +20,6 @@ readonly class RouteFactory implements RouteFactoryInterface
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
-		protected RequestInterface $request,
 		protected RoutesFactoryInterface $routesFactory,
 		protected MiddlewaresBuilder $middlewaresBuilder,
 	) {
@@ -60,7 +58,6 @@ readonly class RouteFactory implements RouteFactoryInterface
 			$this->responseFactory,
 			$this->pipeline,
 			$this->handler,
-			$this->request,
 			$this->routesFactory,
 			$routeNamespace,
 			$route,
@@ -74,7 +71,7 @@ readonly class RouteFactory implements RouteFactoryInterface
 	{
 		$middlewaresBuilder = $closures($this->middlewaresBuilder);
 		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
-			//throw there
+			throw new RouteFactoryException('The middlewares builder closure must return an instance of MiddlewaresBuilder.');
 		}
 
 		return $middlewaresBuilder->build();

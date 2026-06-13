@@ -6,6 +6,7 @@ use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewareInterface;
 
 interface RouteInterface
 {
+	public function middlewares(): array;
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
 	public function withoutMiddlewares(): static;
 

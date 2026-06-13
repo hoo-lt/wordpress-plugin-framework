@@ -12,6 +12,11 @@ readonly class View implements ViewInterface
 	) {
 	}
 
+	public function values(): array
+	{
+		return $this->values;
+	}
+
 	public function withValues(array $values): static
 	{
 		return new static($this->path, $values);
@@ -20,6 +25,11 @@ readonly class View implements ViewInterface
 	public function withoutValues(): static
 	{
 		return new static($this->path, []);
+	}
+
+	public function value(string $key): mixed
+	{
+		return $this->values[$key] ?? null;
 	}
 
 	public function withValue(string $key, mixed $value): static

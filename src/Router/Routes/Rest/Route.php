@@ -6,10 +6,9 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookFactoryInterface,
-	Http\Request\RequestInterface,
-	Http\Request\Routes\RoutesFactoryInterface,
-	Http\Response\ResponseInterface,
-	Http\Response\ResponseFactoryInterface,
+	Http\Server\Request\Routes\RoutesFactoryInterface,
+	Http\Server\Response\ResponseInterface,
+	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 	Exceptions\Handler\HandlerInterface,
@@ -26,7 +25,6 @@ readonly class Route implements RouteInterface
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
-		protected RequestInterface $request,
 		protected RoutesFactoryInterface $routesFactory,
 		protected string $routeNamespace,
 		protected string $route,
@@ -36,6 +34,11 @@ readonly class Route implements RouteInterface
 	) {
 	}
 
+	public function middlewares(): array
+	{
+		return $this->middlewares;
+	}
+
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
 		return new static(
@@ -43,7 +46,6 @@ readonly class Route implements RouteInterface
 			$this->responseFactory,
 			$this->pipeline,
 			$this->handler,
-			$this->request,
 			$this->routesFactory,
 			$this->routeNamespace,
 			$this->route,
@@ -60,7 +62,6 @@ readonly class Route implements RouteInterface
 			$this->responseFactory,
 			$this->pipeline,
 			$this->handler,
-			$this->request,
 			$this->routesFactory,
 			$this->routeNamespace,
 			$this->route,
@@ -105,8 +106,8 @@ readonly class Route implements RouteInterface
 	{
 		$pipeline = $this->pipeline
 			->withRequest(
-				$this->request->withRoutes(
-					$this->routesFactory->from(
+				$this->pipeline->request()->withRoutes(
+					$this->routesFactory->create(
 						$request->get_url_params(),
 					),
 				),
@@ -133,7 +134,7 @@ readonly class Route implements RouteInterface
 
 	protected function createResponse(array|string|null $body): ResponseInterface
 	{
-		return $this->responseFactory->from(
+		return $this->responseFactory->create(
 			200,
 			[
 				'Content-Type' => 'application/json',

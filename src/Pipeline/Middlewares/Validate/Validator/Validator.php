@@ -17,6 +17,11 @@ readonly class Validator implements ValidatorInterface
 	) {
 	}
 
+	public function rules(): array
+	{
+		return $this->rules;
+	}
+
 	public function withRules(RuleInterface ...$rules): static
 	{
 		return new static($this->keyValues, $rules);

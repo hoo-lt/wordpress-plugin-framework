@@ -9,6 +9,7 @@ use Hoo\WordPressPluginFramework\{
 
 interface MiddlewareInterface extends Middlewares\MiddlewareInterface
 {
+	public function capabilities(): array;
 	public function withCapabilities(Capability ...$capabilities): static;
 	public function withoutCapabilities(): static;
 

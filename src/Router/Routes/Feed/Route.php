@@ -6,8 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Hooker\Hooks\HookFactoryInterface,
-	Http\Response\ResponseInterface,
-	Http\Response\ResponseFactoryInterface,
+	Http\Server\Response\ResponseInterface,
+	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 	Exceptions\Handler\HandlerInterface,
@@ -24,6 +24,11 @@ readonly class Route implements RouteInterface
 		protected Closure $closure,
 		protected array $middlewares = [],
 	) {
+	}
+
+	public function middlewares(): array
+	{
+		return $this->middlewares;
 	}
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
@@ -87,7 +92,7 @@ readonly class Route implements RouteInterface
 
 	protected function createResponse(array|string|null $body): ResponseInterface
 	{
-		return $this->responseFactory->from(
+		return $this->responseFactory->create(
 			200,
 			[
 				'Content-Type' => 'application/xml',

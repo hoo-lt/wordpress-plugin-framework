@@ -17,9 +17,19 @@ readonly class Middleware implements MiddlewareInterface
 	) {
 	}
 
+	public function name(): ?string
+	{
+		return $this->name;
+	}
+
 	public function withName(string $name): static
 	{
 		return new static($name, $this->action);
+	}
+
+	public function action(): string|int
+	{
+		return $this->action;
 	}
 
 	public function withoutName(): static
