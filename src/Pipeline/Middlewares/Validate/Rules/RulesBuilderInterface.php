@@ -16,6 +16,7 @@ interface RulesBuilderInterface
 	public function closure(Closure $closure): static;
 	public function domain(): static;
 	public function email(): static;
+	public function enum(string $class): static;
 	public function float(): static;
 	public function int(): static;
 	public function ip(): static;

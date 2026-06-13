@@ -8,6 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Rules\Closure\Rule as ClosureRule,
 	Pipeline\Middlewares\Validate\Rules\Domain\Rule as DomainRule,
 	Pipeline\Middlewares\Validate\Rules\Email\Rule as EmailRule,
+	Pipeline\Middlewares\Validate\Rules\Enum\Rule as EnumRule,
 	Pipeline\Middlewares\Validate\Rules\Float\Rule as FloatRule,
 	Pipeline\Middlewares\Validate\Rules\Int\Rule as IntRule,
 	Pipeline\Middlewares\Validate\Rules\Ip\Rule as IpRule,
@@ -69,6 +70,13 @@ readonly class RulesBuilder implements RulesBuilderInterface
 	{
 		return $this->withRule(
 			new EmailRule(),
+		);
+	}
+
+	public function enum(string $class): static
+	{
+		return $this->withRule(
+			new EnumRule($class),
 		);
 	}
 
