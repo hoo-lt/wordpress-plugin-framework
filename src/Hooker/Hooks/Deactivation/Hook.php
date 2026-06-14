@@ -27,22 +27,12 @@ readonly class Hook implements HookInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static(
-			$this->pipeline,
-			$this->file,
-			$this->closure,
-			$middlewares
-		);
+		return new static($this->pipeline, $this->file, $this->closure, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static(
-			$this->pipeline,
-			$this->file,
-			$this->closure,
-			[],
-		);
+		return new static($this->pipeline, $this->file, $this->closure, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
