@@ -33,28 +33,12 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static(
-			$this->hookFactory,
-			$this->responseFactory,
-			$this->pipeline,
-			$this->handler,
-			$this->action,
-			$this->closure,
-			$middlewares,
-		);
+		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static(
-			$this->hookFactory,
-			$this->responseFactory,
-			$this->pipeline,
-			$this->handler,
-			$this->action,
-			$this->closure,
-			[],
-		);
+		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -92,10 +76,10 @@ readonly class Route implements RouteInterface
 	{
 		return $this->responseFactory->create(
 			200,
-			is_array($body) ? [
-				'Content-Type' => 'application/json',
-			] : null,
-			$body
+			[
+				'Content-Type' => is_array($body) ? 'application/json' : 'text/html',
+			],
+			$body,
 		);
 	}
 
