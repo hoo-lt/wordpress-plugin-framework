@@ -29,12 +29,12 @@ class Collection implements CollectionInterface
 
 	public function isEmpty(): bool
 	{
-		return $this->count() > 0;
+		return !$this->isNotEmpty();
 	}
 
 	public function isNotEmpty(): bool
 	{
-		return !$this->isEmpty();
+		return $this->count() > 0;
 	}
 
 	public function getIterator(): Traversable

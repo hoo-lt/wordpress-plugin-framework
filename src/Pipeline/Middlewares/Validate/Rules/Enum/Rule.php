@@ -21,7 +21,13 @@ readonly class Rule implements RuleInterface
 
 	public function __invoke(mixed $value, Closure $closure): void
 	{
-		if ($this->class::tryFrom($value) === null) {
+		if (
+			(
+				!is_int($value) &&
+				!is_string($value)
+			) ||
+			$this->class::tryFrom($value) === null
+		) {
 			$closure('Invalid enum value');
 		}
 	}

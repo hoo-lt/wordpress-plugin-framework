@@ -62,7 +62,7 @@ readonly class Route implements RouteInterface
 				$this->route,
 				[
 					'methods' => [
-						$this->method,
+						$this->method->value,
 					],
 					'callback' => $this->callback(...),
 					'permission_callback' => $this->permissionCallback(...),

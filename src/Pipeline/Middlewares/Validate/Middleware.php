@@ -8,13 +8,11 @@ use Hoo\WordPressPluginFramework\{
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareException,
 	Pipeline\Middlewares\Validate\Validator\ValidatorInterface,
-	Pipeline\Middlewares\Validate\Validator\ValidatorFactoryInterface,
 };
 
 readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
-		protected ValidatorFactoryInterface $validatorFactory,
 		protected array $validators = [],
 	) {
 	}
@@ -26,52 +24,17 @@ readonly class Middleware implements MiddlewareInterface
 
 	public function withValidators(ValidatorInterface ...$validators): static
 	{
-		return new static($this->validatorFactory, $validators);
+		return new static($validators);
 	}
 
 	public function withoutValidators(): static
 	{
-		return new static($this->validatorFactory, []);
+		return new static([]);
 	}
 
 	public function withValidator(ValidatorInterface $validator): static
 	{
 		return $this->withValidators(...$this->validators, $validator);
-	}
-
-	public function body(string $key, Closure $closure): static
-	{
-		return $this->withValidator(
-			$this->validatorFactory->body($key, $closure)
-		);
-	}
-
-	public function bodyQuery(string $key, Closure $closure): static
-	{
-		return $this->withValidator(
-			$this->validatorFactory->bodyQuery($key, $closure)
-		);
-	}
-
-	public function query(string $key, Closure $closure): static
-	{
-		return $this->withValidator(
-			$this->validatorFactory->query($key, $closure)
-		);
-	}
-
-	public function header(string $key, Closure $closure): static
-	{
-		return $this->withValidator(
-			$this->validatorFactory->header($key, $closure)
-		);
-	}
-
-	public function route(string $key, Closure $closure): static
-	{
-		return $this->withValidator(
-			$this->validatorFactory->route($key, $closure)
-		);
 	}
 
 	public function __invoke(RequestInterface $request, Closure $closure): mixed

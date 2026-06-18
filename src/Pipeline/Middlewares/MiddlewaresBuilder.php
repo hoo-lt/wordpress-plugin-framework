@@ -10,8 +10,8 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\LogExecutionTime\MiddlewareInterface as LogExecutionTimeMiddlewareInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareFactoryInterface as TransactionMiddlewareFactoryInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareInterface as TransactionMiddlewareInterface,
-	Pipeline\Middlewares\Validate\MiddlewareFactoryInterface as ValidateMiddlewareFactoryInterface,
-	Pipeline\Middlewares\Validate\MiddlewareInterface as ValidateMiddlewareInterface,
+	Pipeline\Middlewares\Validate\Validator\ValidatorsBuilderInterface,
+	Pipeline\Middlewares\Validate\Middleware as ValidateMiddleware,
 	Pipeline\Middlewares\VerifyNonce\Middleware as VerifyNonceMiddleware,
 	Pipeline\Middlewares\VerifyNonce\MiddlewareInterface as VerifyNonceMiddlewareInterface,
 };
@@ -21,7 +21,7 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	public function __construct(
 		protected LogExecutionTimeMiddlewareFactoryInterface $logExecutionTimeMiddlewareFactory,
 		protected TransactionMiddlewareFactoryInterface $transactionMiddlewareFactory,
-		protected ValidateMiddlewareFactoryInterface $validateMiddlewareFactory,
+		protected ValidatorsBuilderInterface $validatorsBuilder,
 		protected array $middlewares = [],
 	) {
 	}
@@ -33,12 +33,12 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, $middlewares);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validatorsBuilder, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, []);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validatorsBuilder, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -96,14 +96,16 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function validate(Closure $closure): static
 	{
-		$validateMiddleware = $closure(
-			$this->validateMiddlewareFactory->create(),
-		);
-		if (!$validateMiddleware instanceof ValidateMiddlewareInterface) {
-			throw new MiddlewaresBuilderException('must return validate middleware instance');
+		$validatorsBuilder = $closure($this->validatorsBuilder);
+		if (!$validatorsBuilder instanceof ValidatorsBuilderInterface) {
+			throw new MiddlewaresBuilderException('must return Validators Builder instance');
 		}
 
-		return $this->withMiddleware($validateMiddleware);
+		return $this->withMiddleware(
+			new ValidateMiddleware(
+				$validatorsBuilder->build(),
+			),
+		);
 	}
 
 	public function build(): array

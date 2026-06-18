@@ -18,9 +18,9 @@ readonly class Middleware implements MiddlewareInterface
 
 	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
+		$this->database->startTransaction();
+		
 		try {
-			$this->database->startTransaction();
-
 			$return = $closure($request);
 
 			$this->database->commit();

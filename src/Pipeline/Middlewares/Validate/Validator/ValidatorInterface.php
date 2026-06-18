@@ -3,18 +3,9 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
 
 use Closure;
-use Hoo\WordPressPluginFramework\{
-	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\Validate\Rules\RuleInterface,
-};
+use Hoo\WordPressPluginFramework\Http\Server\Request\RequestInterface;
 
 interface ValidatorInterface
 {
-	public function rules(): array;
-	public function withRules(RuleInterface ...$rules): static;
-	public function withoutRules(): static;
-
-	public function withRule(RuleInterface $rule): static;
-
 	public function validate(RequestInterface $request, Closure $closure): void;
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validator\Rules;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
