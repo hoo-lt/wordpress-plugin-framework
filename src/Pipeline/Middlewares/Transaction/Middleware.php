@@ -6,6 +6,7 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Database\DatabaseInterface,
 	Http\Server\Request\RequestInterface,
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 use Throwable;
 

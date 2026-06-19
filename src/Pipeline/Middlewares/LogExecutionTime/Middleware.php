@@ -6,6 +6,7 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
 	Loggers\LoggerInterface,
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 
 readonly class Middleware implements MiddlewareInterface

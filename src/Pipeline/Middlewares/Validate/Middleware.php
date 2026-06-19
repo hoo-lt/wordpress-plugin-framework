@@ -6,8 +6,8 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
 	Collections\Message\Collection as MessageCollection,
+	Pipeline\Middlewares\MiddlewareInterface,
 	Pipeline\Middlewares\MiddlewareException,
-	Pipeline\Middlewares\Validate\Validator\ValidatorInterface,
 };
 
 readonly class Middleware implements MiddlewareInterface
@@ -15,26 +15,6 @@ readonly class Middleware implements MiddlewareInterface
 	public function __construct(
 		protected array $validators = [],
 	) {
-	}
-
-	public function validators(): array
-	{
-		return $this->validators;
-	}
-
-	public function withValidators(ValidatorInterface ...$validators): static
-	{
-		return new static($validators);
-	}
-
-	public function withoutValidators(): static
-	{
-		return new static([]);
-	}
-
-	public function withValidator(ValidatorInterface $validator): static
-	{
-		return $this->withValidators(...$this->validators, $validator);
 	}
 
 	public function __invoke(RequestInterface $request, Closure $closure): mixed

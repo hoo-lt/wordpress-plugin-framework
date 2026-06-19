@@ -10,7 +10,7 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\LogExecutionTime\MiddlewareInterface as LogExecutionTimeMiddlewareInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareFactoryInterface as TransactionMiddlewareFactoryInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareInterface as TransactionMiddlewareInterface,
-	Pipeline\Middlewares\Validate\Validator\ValidatorsBuilderInterface,
+	Pipeline\Middlewares\Validate\Validators\ValidatorsBuilderInterface,
 	Pipeline\Middlewares\Validate\Middleware as ValidateMiddleware,
 	Pipeline\Middlewares\VerifyNonce\Middleware as VerifyNonceMiddleware,
 	Pipeline\Middlewares\VerifyNonce\MiddlewareInterface as VerifyNonceMiddlewareInterface,

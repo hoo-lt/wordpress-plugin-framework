@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\LogExecutionTime;
 
 use Hoo\WordPressPluginFramework\{
 	Loggers\LoggerInterface,
-	Pipeline\Middlewares\MiddlewareInterface
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 
 readonly class MiddlewareFactory implements MiddlewareFactoryInterface

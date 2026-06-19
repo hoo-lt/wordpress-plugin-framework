@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Transaction;
 
 use Hoo\WordPressPluginFramework\{
 	Database\DatabaseInterface,
-	Pipeline\Middlewares\MiddlewareInterface
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 
 readonly class MiddlewareFactory implements MiddlewareFactoryInterface
