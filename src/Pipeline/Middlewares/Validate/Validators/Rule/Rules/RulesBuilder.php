@@ -5,7 +5,6 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Bool\Rule as BoolRule,
-	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Closure\Rule as ClosureRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Domain\Rule as DomainRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Email\Rule as EmailRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Enum\Rule as EnumRule,
@@ -13,6 +12,7 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Int\Rule as IntRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Ip\Rule as IpRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Mac\Rule as MacRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Nullable\Rule as NullableRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Regexp\Rule as RegexpRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\String\Rule as StringRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Url\Rule as UrlRule,
@@ -49,13 +49,6 @@ readonly class RulesBuilder implements RulesBuilderInterface
 	{
 		return $this->withRule(
 			new BoolRule(),
-		);
-	}
-
-	public function closure(Closure $closure): static
-	{
-		return $this->withRule(
-			new ClosureRule($closure),
 		);
 	}
 
@@ -105,6 +98,13 @@ readonly class RulesBuilder implements RulesBuilderInterface
 	{
 		return $this->withRule(
 			new MacRule(),
+		);
+	}
+
+	public function nullable(): static
+	{
+		return $this->withRule(
+			new NullableRule(),
 		);
 	}
 
