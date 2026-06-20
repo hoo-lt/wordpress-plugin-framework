@@ -6,53 +6,19 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Exceptions\Forbidden\Exception as ForbiddenException,
 	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\MiddlewareException,
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 
 readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
-		protected ?string $name = null,
+		protected string $name,
 		protected string|int $action = -1,
 	) {
 	}
 
-	public function name(): ?string
-	{
-		return $this->name;
-	}
-
-	public function withName(string $name): static
-	{
-		return new static($name, $this->action);
-	}
-
-	public function action(): string|int
-	{
-		return $this->action;
-	}
-
-	public function withoutName(): static
-	{
-		return new static(null, $this->action);
-	}
-
-	public function withAction(string|int $action): static
-	{
-		return new static($this->name, $action);
-	}
-
-	public function withoutAction(): static
-	{
-		return new static($this->name, -1);
-	}
-
 	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
-		if ($this->name === null) {
-			throw new MiddlewareException('middleware misconfigured');
-		}
-
 		$nonce = $request->bodyQueryValue($this->name);
 		if ($nonce === null) {
 			throw new ForbiddenException('nonce is not presented', 'verify_nonce_error');

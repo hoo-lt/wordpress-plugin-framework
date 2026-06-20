@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Comparators\Float;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\Float;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Comparators\AbstractComparator;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\AbstractComparator;
 
 readonly class Comparator extends AbstractComparator
 {

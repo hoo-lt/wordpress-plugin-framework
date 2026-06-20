@@ -4,55 +4,23 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Collections\Message\Collection as MessageCollection,
+	Http\Exceptions\Forbidden\Exception as ForbiddenException,
 	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
-	Pipeline\Middlewares\MiddlewareException,
+	Pipeline\Middlewares\MiddlewareInterface,
 };
 
 readonly class Middleware implements MiddlewareInterface
 {
 	public function __construct(
-		protected array $capabilities = [],
+		protected Capability $capability,
 	) {
-	}
-
-	public function capabilities(): array
-	{
-		return $this->capabilities;
-	}
-
-	public function withCapabilities(Capability ...$capabilities): static
-	{
-		return new static($capabilities);
-	}
-
-	public function withoutCapabilities(): static
-	{
-		return new static([]);
-	}
-
-	public function withCapability(Capability $capability): static
-	{
-		return $this->withCapabilities(...$this->capabilities, $capability);
 	}
 
 	public function __invoke(RequestInterface $request, Closure $closure): mixed
 	{
-		if ($this->capabilities === []) {
-			throw new MiddlewareException('middleware misconfigured');
-		}
-
-		$messages = new MessageCollection();
-
-		foreach ($this->capabilities as $capability) {
-			if (!current_user_can($capability->value)) {
-				$messages->add($capability->value, 'not satisfied');
-			}
-		}
-
-		if ($messages->isNotEmpty()) {
-			throw new Exceptions\Forbidden\Exception('can not', 'current_user_can_error', $messages);
+		if (!current_user_can($this->capability->value)) {
+			throw new ForbiddenException('can not', 'current_user_can_error');
 		}
 
 		return $closure($request);

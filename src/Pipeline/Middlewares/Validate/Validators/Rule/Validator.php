@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rules;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
@@ -27,7 +27,9 @@ readonly class Validator implements ValidatorInterface
 		} else {
 			foreach ($values as $key => $value) {
 				foreach ($this->rules as $rule) {
-					$rule($value, fn($message) => $closure($key, $message));
+					if ($rule->break($value, fn($message) => $closure($key, $message))) {
+						break;
+					}
 				}
 			}
 		}

@@ -2,8 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\ValidatorsBuilderException;
+use Exception;
 
-class BuilderException extends ValidatorsBuilderException
+class ValidatorBuilderException extends Exception
 {
 }

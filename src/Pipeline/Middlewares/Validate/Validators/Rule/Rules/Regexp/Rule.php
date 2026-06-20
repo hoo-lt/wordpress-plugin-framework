@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\Regexp;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Regexp;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleInterface;
 
 readonly class Rule implements RuleInterface
 {
@@ -12,7 +12,7 @@ readonly class Rule implements RuleInterface
 	) {
 	}
 
-	public function __invoke(mixed $value, Closure $closure): void
+	public function break(mixed $value, Closure $closure): bool
 	{
 		if (
 			filter_var($value, FILTER_VALIDATE_REGEXP, [
@@ -24,5 +24,7 @@ readonly class Rule implements RuleInterface
 		) {
 			$closure('not a regexp');
 		}
+
+		return false;
 	}
 }

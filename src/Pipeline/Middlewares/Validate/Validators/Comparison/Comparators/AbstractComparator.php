@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Comparators;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Comparators\ComparatorInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface;
 
 abstract readonly class AbstractComparator implements ComparatorInterface
 {

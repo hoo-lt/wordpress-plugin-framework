@@ -1,12 +1,12 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules\Enum;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Enum;
 
 use BackedEnum;
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Pipeline\Middlewares\Validate\Rules\RuleInterface,
-	Pipeline\Middlewares\Validate\Rules\RuleException,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleInterface,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleException,
 };
 
 readonly class Rule implements RuleInterface
@@ -19,16 +19,13 @@ readonly class Rule implements RuleInterface
 		}
 	}
 
-	public function __invoke(mixed $value, Closure $closure): void
+	public function break(mixed $value, Closure $closure): bool
 	{
-		if (
-			(
-				!is_int($value) &&
-				!is_string($value)
-			) ||
-			$this->class::tryFrom($value) === null
-		) {
+		$break = !is_int($value) && !is_string($value) || $this->class::tryFrom($value) === null;
+		if ($break) {
 			$closure('Invalid enum value');
 		}
+
+		return $break;
 	}
 }

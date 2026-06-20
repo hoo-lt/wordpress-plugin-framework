@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\If;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Condition;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
@@ -13,7 +13,8 @@ readonly class Validator implements ValidatorInterface
 {
 	public function __construct(
 		protected array $expressionValidators,
-		protected array $statementValidators,
+		protected array $ifStatementValidators = [],
+		protected array $elseStatementValidators = [],
 	) {
 	}
 
@@ -28,12 +29,14 @@ readonly class Validator implements ValidatorInterface
 			);
 		}
 
-		if ($messages->isNotEmpty()) {
-			return;
-		}
-
-		foreach ($this->statementValidators as $statementValidator) {
-			$statementValidator->validate($request, $closure);
+		if ($messages->isEmpty()) {
+			foreach ($this->ifStatementValidators as $statementValidator) {
+				$statementValidator->validate($request, $closure);
+			}
+		} else {
+			foreach ($this->elseStatementValidators as $statementValidator) {
+				$statementValidator->validate($request, $closure);
+			}
 		}
 	}
 }

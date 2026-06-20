@@ -1,21 +1,21 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Rules;
+namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Pipeline\Middlewares\Validate\Rules\Bool\Rule as BoolRule,
-	Pipeline\Middlewares\Validate\Rules\Closure\Rule as ClosureRule,
-	Pipeline\Middlewares\Validate\Rules\Domain\Rule as DomainRule,
-	Pipeline\Middlewares\Validate\Rules\Email\Rule as EmailRule,
-	Pipeline\Middlewares\Validate\Rules\Enum\Rule as EnumRule,
-	Pipeline\Middlewares\Validate\Rules\Float\Rule as FloatRule,
-	Pipeline\Middlewares\Validate\Rules\Int\Rule as IntRule,
-	Pipeline\Middlewares\Validate\Rules\Ip\Rule as IpRule,
-	Pipeline\Middlewares\Validate\Rules\Mac\Rule as MacRule,
-	Pipeline\Middlewares\Validate\Rules\Regexp\Rule as RegexpRule,
-	Pipeline\Middlewares\Validate\Rules\String\Rule as StringRule,
-	Pipeline\Middlewares\Validate\Rules\Url\Rule as UrlRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Bool\Rule as BoolRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Closure\Rule as ClosureRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Domain\Rule as DomainRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Email\Rule as EmailRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Enum\Rule as EnumRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Float\Rule as FloatRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Int\Rule as IntRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Ip\Rule as IpRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Mac\Rule as MacRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Regexp\Rule as RegexpRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\String\Rule as StringRule,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Url\Rule as UrlRule,
 };
 
 readonly class RulesBuilder implements RulesBuilderInterface

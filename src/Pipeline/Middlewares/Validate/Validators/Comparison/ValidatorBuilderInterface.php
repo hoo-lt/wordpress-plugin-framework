@@ -2,24 +2,45 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\ValidatorInterface;
+use Hoo\WordPressPluginFramework\{
+	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Operator\Operator,
+	Pipeline\Middlewares\Validate\Validators\ValidatorInterface,
+};
 
-interface BuilderInterface
+interface ValidatorBuilderInterface
 {
-	public function key(string $key): static;          // left
+	public function comparator(): ComparatorInterface;
+	public function withComparator(ComparatorInterface $comparator): static;
 
-	public function numeric(): static;                 // comparator
-	public function date(string $format): static;
-	public function string(): static;
+	public function a(): KeyValueInterface;
+	public function withA(KeyValueInterface $a): static;
 
-	public function identical(): static;               // operator
-	public function notIdentical(): static;
+	public function operator(): Operator;
+	public function withOperator(Operator $operator): static;
+
+	public function b(): KeyValueInterface;
+	public function withB(KeyValueInterface $b): static;
+
+	public function body(string $key): static;
+	public function bodyQuery(string $key): static;
+	public function query(string $key): static;
+	public function header(string $key): static;
+	public function route(string $key): static;
+
+	public function equal(): static;
+	public function notEqual(): static;
 	public function lessThan(): static;
-	public function lessThanOrEqual(): static;
 	public function greaterThan(): static;
+	public function lessThanOrEqual(): static;
 	public function greaterThanOrEqual(): static;
 
-	public function against(string $key): static;      // right
+	public function toBody(string $key): static;
+	public function toBodyQuery(string $key): static;
+	public function toQuery(string $key): static;
+	public function toHeader(string $key): static;
+	public function toRoute(string $key): static;
 
 	public function build(): ValidatorInterface;
 }

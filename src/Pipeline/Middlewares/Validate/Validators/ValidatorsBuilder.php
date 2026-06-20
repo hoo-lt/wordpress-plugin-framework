@@ -4,20 +4,27 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-    Pipeline\Middlewares\Validate\Validators\If\Validator,
-    Pipeline\Middlewares\Validate\Validators\Comparison,
-    Pipeline\Middlewares\Validate\Validators\Rules\ValidatorFactoryInterface,
+    Pipeline\Middlewares\Validate\Validators\Condition\Validator as ConditionValidator,
+    Pipeline\Middlewares\Validate\Validators\Rule\ValidatorFactoryInterface as RuleValidatorFactoryInterface,
     Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as Body,
     Pipeline\Middlewares\Validate\KeyValue\BodyQuery\KeyValue as BodyQuery,
     Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as Query,
     Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as Header,
     Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as Route,
+    Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\DateTime\ComparatorFactoryInterface as DateTimeComparatorFactoryInterface,
+    Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\Float\Comparator as FloatComparator,
+    Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\Int\Comparator as IntComparator,
+    Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\String\Comparator as StringComparator,
+    Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface,
+    Pipeline\Middlewares\Validate\Validators\Comparison\ValidatorBuilderInterface as ComparisonValidatorBuilderInterface,
 };
 
 readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
 {
     public function __construct(
-        protected ValidatorFactoryInterface $validatorFactory,
+        protected RuleValidatorFactoryInterface $ruleValidatorFactory,
+        protected DateTimeComparatorFactoryInterface $dateTimeComparatorFactory,
+        protected ComparisonValidatorBuilderInterface $comparisonValidatorBuilder,
         protected array $validators = [],
     ) {
     }
@@ -29,12 +36,12 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
 
     public function withValidators(ValidatorInterface ...$validators): static
     {
-        return new static($this->validatorFactory, $validators);
+        return new static($this->ruleValidatorFactory, $this->dateTimeComparatorFactory, $this->comparisonValidatorBuilder, $validators);
     }
 
     public function withoutValidators(): static
     {
-        return new static($this->validatorFactory, []);
+        return new static($this->ruleValidatorFactory, $this->dateTimeComparatorFactory, $this->comparisonValidatorBuilder, []);
     }
 
     public function withValidator(ValidatorInterface $validator): static
@@ -45,7 +52,7 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
     public function body(string $key, Closure $closure): static
     {
         return $this->withValidator(
-            $this->validatorFactory->create(
+            $this->ruleValidatorFactory->create(
                 new Body($key),
                 $closure,
             ),
@@ -55,7 +62,7 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
     public function bodyQuery(string $key, Closure $closure): static
     {
         return $this->withValidator(
-            $this->validatorFactory->create(
+            $this->ruleValidatorFactory->create(
                 new BodyQuery($key),
                 $closure,
             ),
@@ -65,7 +72,7 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
     public function query(string $key, Closure $closure): static
     {
         return $this->withValidator(
-            $this->validatorFactory->create(
+            $this->ruleValidatorFactory->create(
                 new Query($key),
                 $closure,
             ),
@@ -75,7 +82,7 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
     public function header(string $key, Closure $closure): static
     {
         return $this->withValidator(
-            $this->validatorFactory->create(
+            $this->ruleValidatorFactory->create(
                 new Header($key),
                 $closure,
             ),
@@ -85,74 +92,96 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
     public function route(string $key, Closure $closure): static
     {
         return $this->withValidator(
-            $this->validatorFactory->create(
+            $this->ruleValidatorFactory->create(
                 new Route($key),
                 $closure,
             ),
         );
     }
 
-    public function if(Closure $expressionValidatorsClosure, Closure $statementValidatorsClosure): static
+    public function condition(Closure $expressionValidatorsClosure, ?Closure $ifStatementValidatorsClosure = null, ?Closure $elseStatementValidatorsClosure = null): static
     {
-        $expressionValidatorsBuilder = $expressionValidatorsClosure(
-            new static($this->validatorFactory),
-        );
-        if (!$expressionValidatorsBuilder instanceof static) {
-            throw new ValidatorsBuilderException('not an instance of validators builder');
-        }
-
-        $statementValidatorsBuilder = $statementValidatorsClosure(
-            new static($this->validatorFactory),
-        );
-        if (!$statementValidatorsBuilder instanceof static) {
-            throw new ValidatorsBuilderException('not an instance of validators builder');
-        }
-
         return $this->withValidator(
-            new Validator(
-                $expressionValidatorsBuilder->build(),
-                $statementValidatorsBuilder->build(),
+            new ConditionValidator(
+                $this->buildValidators($expressionValidatorsClosure),
+                $this->tryBuildValidators($ifStatementValidatorsClosure),
+                $this->tryBuildValidators($elseStatementValidatorsClosure),
             ),
         );
     }
 
-    public function compareBody(Closure $closure): static
+    public function compareDateTimes(Closure $closure): static
     {
-        return $this->buildComparison($closure, fn(string $key) => new Body($key));
+        return $this->buildComparisonValidator(
+            $closure,
+            $this->dateTimeComparatorFactory->create(),
+        );
     }
 
-    public function compareBodyQuery(Closure $closure): static
+    public function compareFloats(Closure $closure): static
     {
-        return $this->buildComparison($closure, fn(string $key) => new BodyQuery($key));
+        return $this->buildComparisonValidator(
+            $closure,
+            new FloatComparator(),
+        );
     }
 
-    public function compareQuery(Closure $closure): static
+    public function compareInts(Closure $closure): static
     {
-        return $this->buildComparison($closure, fn(string $key) => new Query($key));
+        return $this->buildComparisonValidator(
+            $closure,
+            new IntComparator(),
+        );
     }
 
-    public function compareHeader(Closure $closure): static
+    public function compareStrings(Closure $closure): static
     {
-        return $this->buildComparison($closure, fn(string $key) => new Header($key));
-    }
-
-    public function compareRoute(Closure $closure): static
-    {
-        return $this->buildComparison($closure, fn(string $key) => new Route($key));
-    }
-
-    protected function buildComparison(Closure $closure, Closure $keyValue): static
-    {
-        $builder = $closure(new Comparison\Builder($keyValue));
-        if (!$builder instanceof Comparison\BuilderInterface) {
-            throw new ValidatorsBuilderException('not an instance of comparison builder');
-        }
-
-        return $this->withValidator($builder->build());
+        return $this->buildComparisonValidator(
+            $closure,
+            new StringComparator(),
+        );
     }
 
     public function build(): array
     {
         return $this->validators;
+    }
+
+    protected function buildValidators(Closure $validatorsBuilderClosure): array
+    {
+        $validatorsBuilder = $validatorsBuilderClosure(
+            $this->withoutValidators(),
+        );
+        if (!$validatorsBuilder instanceof ValidatorsBuilderInterface) {
+            throw new ValidatorsBuilderException('not an instance of validators builder');
+        }
+
+        return $validatorsBuilder->build();
+    }
+
+    protected function tryBuildValidators(?Closure $validatorsBuilderClosure): array
+    {
+        if ($validatorsBuilderClosure === null) {
+            return [];
+        }
+
+        return $this->buildValidators($validatorsBuilderClosure);
+    }
+
+
+    protected function buildComparisonValidator(Closure $comparisonValidatorBuilderClosure, ComparatorInterface $comparator): static
+    {
+        $comparisonValidatorBuilder = $comparisonValidatorBuilderClosure(
+            $this->comparisonValidatorBuilder,
+        );
+        if (!$comparisonValidatorBuilder instanceof ComparisonValidatorBuilderInterface) {
+            throw new ValidatorsBuilderException('not an instance of comparison builder');
+        }
+
+        return $this->withValidator(
+            $comparisonValidatorBuilder
+                ->withComparator($comparator)
+                ->build()
+        );
     }
 }

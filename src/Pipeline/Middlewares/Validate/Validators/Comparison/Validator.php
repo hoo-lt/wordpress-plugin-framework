@@ -6,18 +6,18 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
-	Pipeline\Middlewares\Validate\Comparators\ComparatorInterface,
-	Pipeline\Middlewares\Validate\Operator\Operator,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Operator\Operator,
 	Pipeline\Middlewares\Validate\Validators\ValidatorInterface,
 };
 
 readonly class Validator implements ValidatorInterface
 {
 	public function __construct(
-		protected KeyValueInterface $a,
-		protected KeyValueInterface $b,
 		protected ComparatorInterface $comparator,
+		protected KeyValueInterface $a,
 		protected Operator $operator,
+		protected KeyValueInterface $b,
 	) {
 	}
 

@@ -2,101 +2,212 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison;
 
-use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\{
-	KeyValues\KeyValuesInterface,
-	Comparators\ComparatorInterface,
-	Comparators\Operator,
-	Comparators\Numeric\Comparator as NumericComparator,
-	Comparators\Date\Comparator as DateComparator,
-	Comparators\String\Comparator as StringComparator,
-	Validators\ValidatorInterface,
+use Hoo\WordPressPluginFramework\{
+	Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as Body,
+	Pipeline\Middlewares\Validate\KeyValue\BodyQuery\KeyValue as BodyQuery,
+	Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as Query,
+	Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as Header,
+	Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as Route,
+	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface,
+	Pipeline\Middlewares\Validate\Validators\Comparison\Operator\Operator,
+	Pipeline\Middlewares\Validate\Validators\ValidatorInterface,
 };
 
-readonly class Builder implements BuilderInterface
+
+readonly class ValidatorBuilder implements ValidatorBuilderInterface
 {
 	public function __construct(
-		protected Closure $keyValue,                  // fn(string $key): KeyValuesInterface — binds the source
-		protected ?KeyValuesInterface $left = null,
 		protected ?ComparatorInterface $comparator = null,
+		protected ?KeyValueInterface $a = null,
 		protected ?Operator $operator = null,
-		protected ?KeyValuesInterface $right = null,
+		protected ?KeyValueInterface $b = null,
 	) {
 	}
 
-	public function key(string $key): static
+	public function comparator(): ComparatorInterface
 	{
-		return $this->with(left: ($this->keyValue)($key));
-	}
-	public function against(string $key): static
-	{
-		return $this->with(right: ($this->keyValue)($key));
+		return $this->comparator;
 	}
 
-	public function numeric(): static
+	public function withComparator(ComparatorInterface $comparator): static
 	{
-		return $this->with(comparator: new NumericComparator());
-	}
-	public function date(string $format): static
-	{
-		return $this->with(comparator: new DateComparator($format));
-	}
-	public function string(): static
-	{
-		return $this->with(comparator: new StringComparator());
+		return new static(
+			$comparator,
+			$this->a,
+			$this->operator,
+			$this->b,
+		);
 	}
 
-	public function identical(): static
+	public function a(): KeyValueInterface
 	{
-		return $this->with(operator: Operator::Identical);
+		return $this->a;
 	}
-	public function notIdentical(): static
+
+	public function withA(KeyValueInterface $a): static
 	{
-		return $this->with(operator: Operator::NotIdentical);
+		return new static(
+			$this->comparator,
+			$a,
+			$this->operator,
+			$this->b,
+		);
 	}
+
+	public function operator(): Operator
+	{
+		return $this->operator;
+	}
+
+	public function withOperator(Operator $operator): static
+	{
+		return new static(
+			$this->comparator,
+			$this->a,
+			$operator,
+			$this->b,
+		);
+	}
+
+	public function b(): KeyValueInterface
+	{
+		return $this->b;
+	}
+
+	public function withB(KeyValueInterface $b): static
+	{
+		return new static(
+			$this->comparator,
+			$this->a,
+			$this->operator,
+			$b,
+		);
+	}
+
+	public function body(string $key): static
+	{
+		return $this->withA(
+			new Body($key),
+		);
+	}
+
+	public function bodyQuery(string $key): static
+	{
+		return $this->withA(
+			new BodyQuery($key),
+		);
+	}
+
+	public function query(string $key): static
+	{
+		return $this->withA(
+			new Query($key),
+		);
+	}
+
+	public function header(string $key): static
+	{
+		return $this->withA(
+			new Header($key),
+		);
+	}
+
+	public function route(string $key): static
+	{
+		return $this->withA(
+			new Route($key),
+		);
+	}
+
+	public function equal(): static
+	{
+		return $this->withOperator(
+			Operator::Equal,
+		);
+	}
+
+	public function notEqual(): static
+	{
+		return $this->withOperator(
+			Operator::NotEqual,
+		);
+	}
+
 	public function lessThan(): static
 	{
-		return $this->with(operator: Operator::LessThan);
+		return $this->withOperator(
+			Operator::LessThan,
+		);
 	}
-	public function lessThanOrEqual(): static
-	{
-		return $this->with(operator: Operator::LessThanOrEqual);
-	}
+
 	public function greaterThan(): static
 	{
-		return $this->with(operator: Operator::GreaterThan);
+		return $this->withOperator(
+			Operator::GreaterThan,
+		);
 	}
+
+	public function lessThanOrEqual(): static
+	{
+		return $this->withOperator(
+			Operator::LessThanOrEqual,
+		);
+	}
+
 	public function greaterThanOrEqual(): static
 	{
-		return $this->with(operator: Operator::GreaterThanOrEqual);
+		return $this->withOperator(
+			Operator::GreaterThanOrEqual,
+		);
+	}
+
+	public function toBody(string $key): static
+	{
+		return $this->withB(
+			new Body($key),
+		);
+	}
+
+	public function toBodyQuery(string $key): static
+	{
+		return $this->withB(
+			new BodyQuery($key),
+		);
+	}
+
+	public function toQuery(string $key): static
+	{
+		return $this->withB(
+			new Query($key),
+		);
+	}
+
+	public function toHeader(string $key): static
+	{
+		return $this->withB(
+			new Header($key),
+		);
+	}
+
+	public function toRoute(string $key): static
+	{
+		return $this->withB(
+			new Route($key),
+		);
 	}
 
 	public function build(): ValidatorInterface
 	{
 		if (
-			$this->left === null ||
 			$this->comparator === null ||
+			$this->a === null ||
 			$this->operator === null ||
-			$this->right === null
+			$this->b === null
 		) {
-			throw new BuilderException('comparison is incomplete');
+			throw new ValidatorBuilderException('comparison is incomplete');
 		}
 
-		return new Validator($this->left, $this->comparator, $this->operator, $this->right);
-	}
-
-	private function with(
-		?KeyValuesInterface $left = null,
-		?ComparatorInterface $comparator = null,
-		?Operator $operator = null,
-		?KeyValuesInterface $right = null,
-	): static {
-		return new static(
-			$this->keyValue,
-			$left ?? $this->left,
-			$comparator ?? $this->comparator,
-			$operator ?? $this->operator,
-			$right ?? $this->right,
-		);
+		return new Validator($this->comparator, $this->a, $this->operator, $this->b);
 	}
 }
