@@ -2,8 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules;
 
-use Closure;
 use Hoo\WordPressPluginFramework\{
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Array\Rule as ArrayRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Bool\Rule as BoolRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Domain\Rule as DomainRule,
 	Pipeline\Middlewares\Validate\Validators\Rule\Rules\Email\Rule as EmailRule,
@@ -43,6 +43,13 @@ readonly class RulesBuilder implements RulesBuilderInterface
 	public function withRule(RuleInterface $rule): static
 	{
 		return $this->withRules(...$this->rules, $rule);
+	}
+
+	public function array(): static
+	{
+		return $this->withRule(
+			new ArrayRule(),
+		);
 	}
 
 	public function bool(): static

@@ -12,6 +12,7 @@ interface RulesBuilderInterface
 
 	public function withRule(RuleInterface $rule): static;
 
+	public function array(): static;
 	public function bool(): static;
 	public function domain(): static;
 	public function email(): static;
