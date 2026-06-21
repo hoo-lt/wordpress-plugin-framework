@@ -2,18 +2,17 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Int;
 
-use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\AbstractRule;
 
-readonly class Rule implements RuleInterface
+readonly class Rule extends AbstractRule
 {
-	public function break(mixed $value, Closure $closure): bool
+	protected function normalize(mixed $value): ?int
 	{
-		$break = filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) === null;
-		if ($break) {
-			$closure('not an int');
-		}
+		return filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+	}
 
-		return $break;
+	protected function message(): string
+	{
+		return $this->translator->translate('Must be an int');
 	}
 }

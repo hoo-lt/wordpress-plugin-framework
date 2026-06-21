@@ -2,34 +2,21 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\String;
 
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\AbstractComparator;
 
-readonly class Comparator implements ComparatorInterface
+readonly class Comparator extends AbstractComparator
 {
-	public function compare(mixed $a, mixed $b): ?int
-	{
-		$a = $this->normalize($a);
-		if ($a === null) {
-			return null;
-		}
-
-		$b = $this->normalize($b);
-		if ($b === null) {
-			return null;
-		}
-
-		return strcmp($a, $b);
-	}
-
 	protected function normalize(mixed $value): ?string
 	{
-		if (
-			!is_null($value) &&
-			!is_scalar($value)
-		) {
-			return null;
+		if (is_string($value)) {
+			return $value;
 		}
 
-		return (string) $value;
+		return is_scalar($value) ? (string) $value : null;
+	}
+
+	protected function compareNormalized(mixed $a, mixed $b): ?int
+	{
+		return strcmp($a, $b);
 	}
 }

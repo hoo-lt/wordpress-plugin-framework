@@ -18,8 +18,9 @@ abstract readonly class AbstractComparator implements ComparatorInterface
 			return null;
 		}
 
-		return $a <=> $b;
+		return $this->compareNormalized($a, $b);
 	}
 
 	abstract protected function normalize(mixed $value): mixed;
+	abstract protected function compareNormalized(mixed $a, mixed $b): ?int;
 }

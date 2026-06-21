@@ -2,18 +2,17 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Array;
 
-use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\AbstractRule;
 
-readonly class Rule implements RuleInterface
+readonly class Rule extends AbstractRule
 {
-	public function break(mixed $value, Closure $closure): bool
+	protected function normalize(mixed $value): ?array
 	{
-		$break = !is_array($value);
-		if ($break) {
-			$closure('not an array');
-		}
+		return is_array($value) ? $value : null;
+	}
 
-		return $break;
+	protected function message(): string
+	{
+		return $this->translator->translate('Must be an array');
 	}
 }

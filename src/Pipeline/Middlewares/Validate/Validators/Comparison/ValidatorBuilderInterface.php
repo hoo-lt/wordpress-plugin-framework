@@ -11,17 +11,21 @@ use Hoo\WordPressPluginFramework\{
 
 interface ValidatorBuilderInterface
 {
-	public function comparator(): ComparatorInterface;
+	public function comparator(): ?ComparatorInterface;
 	public function withComparator(ComparatorInterface $comparator): static;
+	public function withoutComparator(): static;
 
-	public function a(): KeyValueInterface;
+	public function a(): ?KeyValueInterface;
 	public function withA(KeyValueInterface $a): static;
+	public function withoutA(): static;
 
-	public function operator(): Operator;
+	public function operator(): ?Operator;
 	public function withOperator(Operator $operator): static;
+	public function withoutOperator(): static;
 
-	public function b(): KeyValueInterface;
+	public function b(): ?KeyValueInterface;
 	public function withB(KeyValueInterface $b): static;
+	public function withoutB(): static;
 
 	public function body(string $key): static;
 	public function bodyQuery(string $key): static;

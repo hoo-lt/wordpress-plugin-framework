@@ -3,28 +3,39 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Regexp;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\RuleInterface;
+use Hoo\WordPressPluginFramework\{
+	Localization\Translator\TranslatorInterface,
+	Pipeline\Middlewares\Validate\Validators\Rule\Rules\AbstractRule
+};
 
-readonly class Rule implements RuleInterface
+readonly class Rule extends AbstractRule
 {
 	public function __construct(
+		TranslatorInterface $translator,
 		protected string $regexp,
+		?string $message = null,
 	) {
+		parent::__construct($translator, $message);
 	}
 
 	public function break(mixed $value, Closure $closure): bool
 	{
-		if (
-			filter_var($value, FILTER_VALIDATE_REGEXP, [
-				'options' => [
-					'regexp' => $this->regexp,
-				],
-				'flags' => FILTER_NULL_ON_FAILURE,
-			]) === null
-		) {
-			$closure('not a regexp');
-		}
-
+		parent::break($value, $closure);
 		return false;
+	}
+
+	protected function normalize(mixed $value): ?string
+	{
+		return filter_var($value, FILTER_VALIDATE_REGEXP, [
+			'options' => [
+				'regexp' => $this->regexp,
+			],
+			'flags' => FILTER_NULL_ON_FAILURE,
+		]);
+	}
+
+	protected function message(): string
+	{
+		return $this->translator->translate('Must be a regexp');
 	}
 }
