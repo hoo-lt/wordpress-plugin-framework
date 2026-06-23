@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\View;
 
 use Exception;
 
-class ViewException extends Exception
+class ViewFactoryException extends Exception
 {
 }

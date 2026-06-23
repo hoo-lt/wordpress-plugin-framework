@@ -10,6 +10,8 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class Rule extends AbstractRule
 {
+	protected const BREAK = false;
+
 	public function __construct(
 		TranslatorInterface $translator,
 		protected string $regexp,
@@ -17,13 +19,7 @@ readonly class Rule extends AbstractRule
 	) {
 		parent::__construct($translator, $message);
 	}
-
-	public function break(mixed $value, Closure $closure): bool
-	{
-		parent::break($value, $closure);
-		return false;
-	}
-
+	
 	protected function normalize(mixed $value): ?string
 	{
 		return filter_var($value, FILTER_VALIDATE_REGEXP, [

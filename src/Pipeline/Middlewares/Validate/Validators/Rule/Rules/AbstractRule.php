@@ -10,6 +10,8 @@ use Hoo\WordPressPluginFramework\{
 
 abstract readonly class AbstractRule implements RuleInterface
 {
+	protected const BREAK = null;
+
 	public function __construct(
 		protected TranslatorInterface $translator,
 		protected ?string $message = null,
@@ -25,7 +27,7 @@ abstract readonly class AbstractRule implements RuleInterface
 			);
 		}
 
-		return $break;
+		return static::BREAK ?? $break;
 	}
 
 	abstract protected function normalize(mixed $value): mixed;

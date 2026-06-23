@@ -2,16 +2,11 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\Mac;
 
-use Closure;
 use Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\Rule\Rules\AbstractRule;
 
 readonly class Rule extends AbstractRule
 {
-	public function break(mixed $value, Closure $closure): bool
-	{
-		parent::break($value, $closure);
-		return false;
-	}
+	protected const BREAK = false;
 
 	protected function normalize(mixed $value): ?string
 	{

@@ -9,7 +9,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Server\Response\ResponseFactoryInterface,
 	Exceptions\Interfaces\HasStatusCodeInterface,
 	Exceptions\Interfaces\HasMessagesInterface,
-	View\ViewInterface,
+	View\ViewFactoryInterface,
 };
 use Throwable;
 
@@ -17,7 +17,7 @@ readonly class Handler implements HandlerInterface
 {
 	public function __construct(
 		protected ResponseFactoryInterface $responseFactory,
-		protected ViewInterface $view,
+		protected ViewFactoryInterface $viewFactory,
 	) {
 	}
 
@@ -32,7 +32,11 @@ readonly class Handler implements HandlerInterface
 
 	protected function html(Throwable $throwable): ResponseInterface
 	{
-		if (!$this->view->has('exception')) {
+		$view = $this->viewFactory->tryCreate(
+			'exception',
+			ViewModel::fromThrowable(),
+		);
+		if ($view === null) {
 			throw $throwable;
 		}
 
@@ -41,11 +45,7 @@ readonly class Handler implements HandlerInterface
 			[
 				'Content-Type' => 'text/html',
 			],
-			$this->view
-				->withValues(
-					$this->values($throwable)
-				)
-				->get('exception'),
+			$view->render(),
 		);
 	}
 
@@ -56,7 +56,7 @@ readonly class Handler implements HandlerInterface
 			[
 				'Content-Type' => 'application/json',
 			],
-			$this->values($throwable),
+			ViewModel::fromThrowable(),
 		);
 	}
 
