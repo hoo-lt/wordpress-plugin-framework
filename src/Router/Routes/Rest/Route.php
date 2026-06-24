@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HookFactoryInterface,
+	Hooker\Hooks\HooksBuilderInterface,
 	Http\Server\Request\Routes\RoutesFactoryInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
@@ -21,7 +21,7 @@ use WP_REST_Server;
 readonly class Route implements RouteInterface
 {
 	public function __construct(
-		protected HookFactoryInterface $hookFactory,
+		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
@@ -41,12 +41,12 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, $middlewares);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, []);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -54,10 +54,10 @@ readonly class Route implements RouteInterface
 		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
-	public function hooks(): array
+	public function hooksBuilder(): HooksBuilderInterface
 	{
-		return [
-			$this->hookFactory->action('rest_api_init', fn(WP_REST_Server $server): bool => register_rest_route(
+		return $this->hooksBuilder
+			->action('rest_api_init', fn(WP_REST_Server $server): bool => register_rest_route(
 				$this->routeNamespace,
 				$this->route,
 				[
@@ -67,8 +67,7 @@ readonly class Route implements RouteInterface
 					'callback' => $this->callback(...),
 					'permission_callback' => $this->permissionCallback(...),
 				]
-			)),
-			$this->hookFactory->filter('rest_pre_serve_request', function (bool $served, WP_REST_Response $response, WP_REST_Request $request, WP_REST_Server $server): bool {
+			))->filter('rest_pre_serve_request', function (bool $served, WP_REST_Response $response, WP_REST_Request $request, WP_REST_Server $server): bool {
 				if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
 					return $served;
 				}
@@ -76,8 +75,7 @@ readonly class Route implements RouteInterface
 				echo $response->get_data();
 
 				return true;
-			}),
-		];
+			});
 	}
 
 	protected function callback(WP_REST_Request $request): WP_REST_Response

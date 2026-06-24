@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\AdminAjax;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HookFactoryInterface,
+	Hooker\Hooks\HooksBuilderInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -16,7 +16,7 @@ use Hoo\WordPressPluginFramework\{
 readonly class Route implements RouteInterface
 {
 	public function __construct(
-		protected HookFactoryInterface $hookFactory,
+		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
@@ -33,12 +33,12 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, $middlewares);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, []);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -46,12 +46,11 @@ readonly class Route implements RouteInterface
 		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
-	public function hooks(): array
+	public function hooksBuilder(): HooksBuilderInterface
 	{
-		return [
-			$this->hookFactory->action("wp_ajax_{$this->action}", $this->callback(...)),
-			$this->hookFactory->action("wp_ajax_nopriv_{$this->action}", $this->callback(...)),
-		];
+		return $this->hooksBuilder
+			->action("wp_ajax_{$this->action}", $this->callback(...))
+			->action("wp_ajax_nopriv_{$this->action}", $this->callback(...));
 	}
 
 	protected function callback(): void

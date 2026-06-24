@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Feed;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HookFactoryInterface,
+	Hooker\Hooks\HooksBuilderInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -16,7 +16,7 @@ use Hoo\WordPressPluginFramework\{
 readonly class Route implements RouteInterface
 {
 	public function __construct(
-		protected HookFactoryInterface $hookFactory,
+		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
@@ -33,12 +33,12 @@ readonly class Route implements RouteInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->name, $this->closure, $middlewares);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->name, $this->closure, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->hookFactory, $this->responseFactory, $this->pipeline, $this->handler, $this->name, $this->closure, []);
+		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->name, $this->closure, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -46,14 +46,13 @@ readonly class Route implements RouteInterface
 		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
-	public function hooks(): array
+	public function hooksBuilder(): HooksBuilderInterface
 	{
-		return [
-			$this->hookFactory->action('init', fn() => add_feed(
+		return $this->hooksBuilder
+			->action('init', fn() => add_feed(
 				$this->name,
 				$this->callback(...),
-			)),
-		];
+			));
 	}
 
 	protected function callback(): void

@@ -2,11 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Closure;
-use Hoo\WordPressPluginFramework\{
-	Router\Routes\RouteInterface,
-	Http\Method\Method,
-};
+use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
 
 interface RouterInterface
 {
@@ -15,10 +11,6 @@ interface RouterInterface
 	public function withoutRoutes(): static;
 
 	public function withRoute(RouteInterface $route): static;
-
-	public function adminAjax(string $action, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static;
-	public function feed(string $name, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static;
-	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresBuilderClosure = null): static;
 
 	public function __invoke(): void;
 
