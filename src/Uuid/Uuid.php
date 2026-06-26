@@ -9,7 +9,7 @@ readonly class Uuid implements UuidInterface
     ) {
     }
 
-    public function __tostring(): string
+    public function __toString(): string
     {
         return $this->uuid;
     }
