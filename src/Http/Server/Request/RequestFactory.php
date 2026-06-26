@@ -8,13 +8,13 @@ use Hoo\WordPressPluginFramework\{
 	Http\Method\Method,
 	Http\Server\ServerInterface,
 	Http\Url\UrlFactoryInterface,
-	Uuid\UuidFactoryInterface,
+	Uuid\UuidInterface,
 };
 
 readonly class RequestFactory implements RequestFactoryInterface
 {
 	public function __construct(
-		protected UuidFactoryInterface $uuidFactory,
+		protected UuidInterface $uuid,
 		protected UrlFactoryInterface $urlFactory,
 		protected HeadersFactoryInterface $headersFactory,
 		protected BodyFactoryInterface $bodyFactory,
@@ -24,7 +24,6 @@ readonly class RequestFactory implements RequestFactoryInterface
 
 	public function create(string $method, string $url, ?array $headers = null, array|string|null $body = null): RequestInterface
 	{
-		$uuid = $this->uuidFactory->create();
 		$method = Method::from($method);
 		$url = $this->urlFactory->create($url);
 		$headers = $this->headersFactory->tryCreate($headers);
@@ -33,7 +32,7 @@ readonly class RequestFactory implements RequestFactoryInterface
 			$headers->contentType(),
 		);
 
-		return new Request($uuid, $method, $url, $headers, $body);
+		return new Request($this->uuid, $method, $url, $headers, $body);
 	}
 
 	public function createFromServer(): RequestInterface
