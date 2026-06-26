@@ -5,15 +5,12 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\CurrentUserCan\Middleware as CurrentUserCanMiddleware,
-	Pipeline\Middlewares\CurrentUserCan\MiddlewareInterface as CurrentUserCanMiddlewareInterface,
+	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 	Pipeline\Middlewares\LogExecutionTime\MiddlewareFactoryInterface as LogExecutionTimeMiddlewareFactoryInterface,
-	Pipeline\Middlewares\LogExecutionTime\MiddlewareInterface as LogExecutionTimeMiddlewareInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareFactoryInterface as TransactionMiddlewareFactoryInterface,
-	Pipeline\Middlewares\Transaction\MiddlewareInterface as TransactionMiddlewareInterface,
 	Pipeline\Middlewares\Validate\Validators\ValidatorsBuilderInterface,
 	Pipeline\Middlewares\Validate\Middleware as ValidateMiddleware,
 	Pipeline\Middlewares\VerifyNonce\Middleware as VerifyNonceMiddleware,
-	Pipeline\Middlewares\VerifyNonce\MiddlewareInterface as VerifyNonceMiddlewareInterface,
 };
 
 readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
@@ -46,52 +43,33 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
-	public function currentUserCan(Closure $closure): static
+	public function currentUserCan(Capability $capability): static
 	{
-		$currentUserCanMiddleware = $closure(
-			new CurrentUserCanMiddleware(),
+		return $this->withMiddleware(
+			new CurrentUserCanMiddleware($capability),
 		);
-		if (!$currentUserCanMiddleware instanceof CurrentUserCanMiddlewareInterface) {
-			throw new MiddlewaresBuilderException('must return current user can middleware instance');
-		}
-
-		return $this->withMiddleware($currentUserCanMiddleware);
 	}
 
-	public function logExecutionTime(Closure $closure): static
+	public function logExecutionTime(): static
 	{
-		$logExecutionTimeMiddleware = $closure(
+
+		return $this->withMiddleware(
 			$this->logExecutionTimeMiddlewareFactory->create(),
 		);
-		if (!$logExecutionTimeMiddleware instanceof LogExecutionTimeMiddlewareInterface) {
-			throw new MiddlewaresBuilderException('must return log execution time middleware instance');
-		}
-
-		return $this->withMiddleware($logExecutionTimeMiddleware);
 	}
 
-	public function transaction(Closure $closure): static
+	public function transaction(): static
 	{
-		$transactionMiddleware = $closure(
+		return $this->withMiddleware(
 			$this->transactionMiddlewareFactory->create(),
 		);
-		if (!$transactionMiddleware instanceof TransactionMiddlewareInterface) {
-			throw new MiddlewaresBuilderException('must return transaction middleware instance');
-		}
-
-		return $this->withMiddleware($transactionMiddleware);
 	}
 
-	public function verifyNonce(Closure $closure): static
+	public function verifyNonce(string $name, string|int $action = -1): static
 	{
-		$verifyNonceMiddleware = $closure(
-			new VerifyNonceMiddleware(),
+		return $this->withMiddleware(
+			new VerifyNonceMiddleware($name, $action),
 		);
-		if (!$verifyNonceMiddleware instanceof VerifyNonceMiddlewareInterface) {
-			throw new MiddlewaresBuilderException('must return verify nonce middleware instance');
-		}
-
-		return $this->withMiddleware($verifyNonceMiddleware);
 	}
 
 	public function validate(Closure $closure): static
