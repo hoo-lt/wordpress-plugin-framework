@@ -27,7 +27,7 @@ readonly class Request implements RequestInterface
 
 	public function withMethod(Method $method): static
 	{
-		return new static($method, $this->url, $this->headers, $this->body);
+		return new static($this->uuid, $method, $this->url, $this->headers, $this->body);
 	}
 
 	public function url(): UrlInterface
@@ -37,7 +37,7 @@ readonly class Request implements RequestInterface
 
 	public function withUrl(UrlInterface $url): static
 	{
-		return new static($this->method, $url, $this->headers, $this->body);
+		return new static($this->uuid, $this->method, $url, $this->headers, $this->body);
 	}
 
 	public function queryValues(string $key): ?array
@@ -59,12 +59,12 @@ readonly class Request implements RequestInterface
 
 	public function withHeaders(HeadersInterface $headers): static
 	{
-		return new static($this->method, $this->url, $headers, $this->body);
+		return new static($this->uuid, $this->method, $this->url, $headers, $this->body);
 	}
 
 	public function withoutHeaders(): static
 	{
-		return new static($this->method, $this->url, null, $this->body);
+		return new static($this->uuid, $this->method, $this->url, null, $this->body);
 	}
 
 	public function header(string $key): mixed
@@ -79,12 +79,12 @@ readonly class Request implements RequestInterface
 
 	public function withBody(BodyInterface $body): static
 	{
-		return new static($this->method, $this->url, $this->headers, $body);
+		return new static($this->uuid, $this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
-		return new static($this->method, $this->url, $this->headers, null);
+		return new static($this->uuid, $this->method, $this->url, $this->headers, null);
 	}
 
 	public function bodyValues(string $key): ?array

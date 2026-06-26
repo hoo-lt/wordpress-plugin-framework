@@ -2,7 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Database\Query;
 
-interface QueryInterface
+use Stringable;
+
+interface QueryInterface extends Stringable
 {
-	public function __toString(): string;
 }

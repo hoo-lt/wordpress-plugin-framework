@@ -6,8 +6,9 @@ use Hoo\WordPressPluginFramework\{
 	Http\Url\Query\QueryInterface,
 	Http\Url\Scheme\Scheme,
 };
+use Stringable;
 
-interface UrlInterface
+interface UrlInterface extends Stringable
 {
 	public function scheme(): Scheme;
 	public function withScheme(Scheme $scheme): static;
@@ -25,6 +26,4 @@ interface UrlInterface
 	public function query(): ?QueryInterface;
 	public function withQuery(QueryInterface $query): static;
 	public function withoutQuery(): static;
-
-	public function __toString(): string;
 }

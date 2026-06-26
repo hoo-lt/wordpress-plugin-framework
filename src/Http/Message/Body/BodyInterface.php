@@ -2,7 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
-interface BodyInterface
+use Stringable;
+
+interface BodyInterface extends Stringable
 {
-	public function __toString(): string;
 }
