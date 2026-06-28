@@ -92,12 +92,66 @@ The scaffold rewrites the namespace and identifiers for your new plugin on first
 
 ## Roadmap
 
-- **PHP-Scoper build step** — prefix bundled dependencies (PHP-DI, PSR) so two
-  Hoo-based plugins can never clash on a shared install.
-- **Engine + add-ons** — ship the framework as a foundational plugin with child
-  plugins that gracefully self-disable (admin notice, no WSOD) when it's absent.
-- Test suite and expanded documentation.
+The framework is being driven to a stable release through a series of tagged
+milestones. Each milestone has a clear exit criterion and a git tag.
+
+### `alpha.1` — it works (current focus)
+
+Make the framework and the scaffold boot cleanly on a vanilla WordPress install,
+end to end, with no fatal errors.
+
+- [ ] Add the missing plugin entry file (`wordpress-plugin.php` with the plugin
+      header, booting `Application`) so WordPress can activate it.
+- [ ] Fix the scaffold `routes.php` — `rest()` requires an HTTP `Method`; remove the
+      duplicate/placeholder routes.
+- [ ] Ship the example handlers referenced by `hooks.php` / `routes.php`
+      (`RegisterFeed`, `ContentController`) instead of referencing classes that
+      don't exist.
+- [ ] Ensure scaffold support directories exist (`views/`, `migrations/`).
+- [ ] Audit the framework `src/` for the same class of errors (wrong signatures,
+      dangling references); get a clean boot + a lint/static-analysis pass.
+
+**Exit:** `composer create-project` produces a plugin that activates and runs. **Tag `alpha.1`.**
+
+### `alpha.2` — a usable platform
+
+Fill the gaps that stop the framework from handling real plugin work.
+
+- [ ] **Cron** — first-class scheduled-task registration (alongside `hook()` /
+      `route()`), wired through the same controller + middleware pipeline.
+- [ ] **Complete the database layer** — today it is select-only. Add full CRUD
+      (insert/update/delete), a query abstraction, and a path for plain SQL, so the
+      DB layer is a complete way to work with custom tables.
+- [ ] **Current user** — a `User` object representing the current WordPress user,
+      injectable into controllers/services (so domain code reads identity through a
+      typed object instead of `wp_get_current_user()` / globals).
+
+**Exit:** a non-trivial plugin (scheduled job + custom-table CRUD + auth) can be
+built without dropping to raw WordPress APIs. **Tag `alpha.2`.**
+
+### `alpha.3` — self-contained container
+
+Replace PHP-DI with a small, purpose-built autowiring container (the scaffold only
+uses `get`, autowiring, scalar constructor overrides, and closure/array factories).
+
+- [ ] Implement the container (`get` + shared caching, constructor autowiring,
+      `constructorParameter` overrides, closure & array-callable factories, cycle
+      detection) and the `autowire()` / `factory()` helpers.
+- [ ] Swap the scaffold over; drop the `php-di/php-di` dependency.
+
+**Why it matters:** removing PHP-DI also removes its transitive deps and the
+compiled-container problem — shrinking the surface that has to be isolated for safe
+public distribution down to essentially just the framework's own namespace.
+**Tag `alpha.3`.**
+
+### Beyond alpha (path to beta)
+
+- **Dependency isolation for public distribution** — per-plugin prefixing (e.g.
+  Strauss) so two Hoo-based plugins can never clash on a shared install.
+- **Engine + add-ons** — optionally ship the framework as a foundational plugin
+  with child plugins that gracefully self-disable (admin notice, no WSOD) when it's
+  absent.
+- **Tests & documentation** — a real test suite and expanded docs.
 
 [PHP-DI]: https://php-di.org/
 [plugin scaffold]: https://github.com/hoo-lt/wordpress-plugin
-```
