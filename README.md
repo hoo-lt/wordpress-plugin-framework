@@ -68,6 +68,29 @@ By the time execution reaches `ProductController::syncExternal()`, the request h
 already been validated and wrapped in a transaction — and the controller has its
 dependencies injected. The domain code never sees a nonce or a global.
 
+## The one rule: never contest WordPress's control flow
+
+There is a graveyard of ambitious WordPress frameworks. They didn't die because
+their code was bad — they died because they tried to **own the request lifecycle**:
+their own bootstrap, their own router, their own dispatch, with WordPress demoted to
+"the thing that loads my container." Blade and Twig were just the visible flag of
+that mindset. The moment your control flow competes with WordPress's for ownership of
+the same request, you need glue — and that glue tears every time core moves the hook
+order, the REST pipeline, or the bootstrap sequence underneath you.
+
+Hoo's single non-negotiable rule: **never contest WordPress's control flow.**
+WordPress keeps the lifecycle, routing, capabilities, escaping and persistence. Hoo
+only adds structure *in the seams WordPress already yields* — a pipeline inside a hook
+callback, a controller resolved lazily when the hook fires, middleware attached at
+registration. Everything is **additive**, never a replacement. There is no glue,
+because there are not two worldviews fighting to own the request.
+
+The corollary tells you what is safe to build yourself. Shadowing WordPress's
+lifecycle is fatal because it *moves* every release. Shadowing a frozen spec is not:
+the internal HTTP value objects (headers, body, URL, method) mirror HTTP semantics,
+which don't change — so the cost was paid once at authoring time and never rots. The
+test isn't "is it custom code?" It's "does it contest something that moves?"
+
 ## Why not just Roots, or raw PHP-DI?
 
 - **vs. the "WordPress way":** you get SOLID/DDD *where it pays off* (sync jobs,

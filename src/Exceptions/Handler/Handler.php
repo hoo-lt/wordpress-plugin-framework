@@ -4,6 +4,7 @@ namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
 	Collections\Message\CollectionInterface as MessageCollectionInterface,
+	Exceptions\Handler\ViewModel\ViewModel,
 	Http\Server\Request\RequestInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
@@ -34,7 +35,7 @@ readonly class Handler implements HandlerInterface
 	{
 		$view = $this->viewFactory->tryCreate(
 			'exception',
-			ViewModel::fromThrowable(),
+			ViewModel::createFromThrowable($throwable),
 		);
 		if ($view === null) {
 			throw $throwable;
@@ -56,7 +57,7 @@ readonly class Handler implements HandlerInterface
 			[
 				'Content-Type' => 'application/json',
 			],
-			ViewModel::fromThrowable(),
+			ViewModel::createFromThrowable($throwable),
 		);
 	}
 
@@ -66,13 +67,6 @@ readonly class Handler implements HandlerInterface
 			'message' => $throwable->getMessage(),
 			'code' => $throwable->getCode(),
 		];
-
-		$messages = $this->messages($throwable);
-		if ($messages !== null) {
-			if ($messages->isNotEmpty()) {
-				$values['messages'] = $messages->all();
-			}
-		}
 
 		if ($this->isDebug()) {
 			$values['file'] = $throwable->getFile();
@@ -86,11 +80,6 @@ readonly class Handler implements HandlerInterface
 	protected function statusCode(Throwable $throwable): int
 	{
 		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
-	}
-
-	protected function messages(Throwable $throwable): ?MessageCollectionInterface
-	{
-		return $throwable instanceof HasMessagesInterface ? $throwable->getMessages() : null;
 	}
 
 	protected function isDebug(): bool
