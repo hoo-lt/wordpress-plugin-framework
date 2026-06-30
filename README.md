@@ -1,7 +1,7 @@
-# Hoo — a modern framework for serious WordPress plugins
+# Hoo — a plugin framework that builds on WordPress instead of fighting it
 
-> Bring DI, controllers, routing and middleware to WordPress — without forcing
-> the rest of WordPress to change, and without shipping Bedrock/Acorn to your users.
+> DI, controllers, routing and middleware for serious WordPress plugins — added in the
+> seams WordPress already gives you, never bolted on top. No Bedrock, no Acorn, no glue.
 
 **Status: pre-alpha.** The API is still shifting. It is, however, already running a
 real WooCommerce integration in production.
