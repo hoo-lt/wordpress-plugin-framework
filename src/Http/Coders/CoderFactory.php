@@ -4,6 +4,11 @@ namespace Hoo\WordPressPluginFramework\Http\Coders;
 
 readonly class CoderFactory implements CoderFactoryInterface
 {
+	public function __construct(
+		protected array $coders,
+	) {
+	}
+
 	public function create(string $mediaType): CoderInterface
 	{
 		$coder = $this->tryCreate($mediaType);
@@ -14,12 +19,13 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryCreate(string $mediaType): ?CoderInterface
+	public function tryCreate(?string $mediaType): ?CoderInterface
 	{
-		return match ($mediaType) {
-			'application/x-www-form-urlencoded' => new Form\Coder(),
-			'application/json' => new Json\Coder(),
-			default => null,
-		};
+		$coder = $this->coders[$mediaType] ?? null;
+		if ($coder === null) {
+			return null;
+		}
+
+		return $coder;
 	}
 }

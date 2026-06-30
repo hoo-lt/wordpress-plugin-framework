@@ -3,13 +3,13 @@
 namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
-	Collections\Message\CollectionInterface as MessageCollectionInterface,
-	Exceptions\Handler\ViewModel\ViewModel,
+	Exceptions\Handler\ViewModels\ViewModel,
+	Exceptions\Interfaces\HasStatusCodeInterface,
+	Http\Coders\CoderFactoryInterface,
 	Http\Server\Request\RequestInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
-	Exceptions\Interfaces\HasStatusCodeInterface,
-	Exceptions\Interfaces\HasMessagesInterface,
+	View\Model\ModelInterface as ViewModelInterface,
 	View\ViewFactoryInterface,
 };
 use Throwable;
@@ -17,6 +17,7 @@ use Throwable;
 readonly class Handler implements HandlerInterface
 {
 	public function __construct(
+		protected CoderFactoryInterface $coderFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected ViewFactoryInterface $viewFactory,
 	) {
@@ -24,57 +25,27 @@ readonly class Handler implements HandlerInterface
 
 	public function handle(RequestInterface $request, Throwable $throwable): ResponseInterface
 	{
-		$accept = $request->headers()?->accept();
-		return match ($accept) {
-			'application/json' => $this->json($throwable),
-			default => $this->html($throwable),
-		};
-	}
+		$viewModel = ViewModel::createFromThrowable($throwable);
 
-	protected function html(Throwable $throwable): ResponseInterface
-	{
-		$view = $this->viewFactory->tryCreate(
-			'exception',
-			ViewModel::createFromThrowable($throwable),
-		);
-		if ($view === null) {
-			throw $throwable;
+		$contentType = $this->contentType($request);
+		if ($contentType === 'text/html') {
+			$view = $this->viewFactory->tryCreate('exception', $viewModel);
+			if ($view === null) {
+				throw $throwable;
+			}
+
+			$body = $view->render();
 		}
+
+		$body = $viewModel->toArray();
 
 		return $this->responseFactory->create(
 			$this->statusCode($throwable),
 			[
-				'Content-Type' => 'text/html',
+				'Content-Type' => $contentType,
 			],
-			$view->render(),
+			$body,
 		);
-	}
-
-	protected function json(Throwable $throwable): ResponseInterface
-	{
-		return $this->responseFactory->create(
-			$this->statusCode($throwable),
-			[
-				'Content-Type' => 'application/json',
-			],
-			ViewModel::createFromThrowable($throwable),
-		);
-	}
-
-	protected function values(Throwable $throwable): array
-	{
-		$values = [
-			'message' => $throwable->getMessage(),
-			'code' => $throwable->getCode(),
-		];
-
-		if ($this->isDebug()) {
-			$values['file'] = $throwable->getFile();
-			$values['line'] = $throwable->getLine();
-			$values['trace'] = $throwable->getTrace();
-		}
-
-		return $values;
 	}
 
 	protected function statusCode(Throwable $throwable): int
@@ -82,15 +53,13 @@ readonly class Handler implements HandlerInterface
 		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
 	}
 
-	protected function isDebug(): bool
+	protected function contentType(RequestInterface $request): string
 	{
-		if (
-			defined('WP_DEBUG') &&
-			WP_DEBUG
-		) {
-			return true;
+		$accept = $request->headers()?->accept();
+		if ($this->coderFactory->tryCreate($accept) === null) {
+			return 'text/html';
 		}
 
-		return false;
+		return $accept;
 	}
 }

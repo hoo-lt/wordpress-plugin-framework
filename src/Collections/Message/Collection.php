@@ -37,6 +37,10 @@ class Collection implements CollectionInterface
 		return $this->count() > 0;
 	}
 
+	public function toArray(): array {
+		return $this->messages;
+	}
+
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator($this->messages);

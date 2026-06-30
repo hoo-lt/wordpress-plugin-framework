@@ -14,4 +14,6 @@ interface CollectionInterface extends IteratorAggregate, Countable
 
 	public function isEmpty(): bool;
 	public function isNotEmpty(): bool;
+
+	public function toArray(): array;
 }

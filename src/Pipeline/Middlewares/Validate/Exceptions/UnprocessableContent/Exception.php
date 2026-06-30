@@ -3,7 +3,6 @@
 namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Exceptions\UnprocessableContent;
 
 use Hoo\WordPressPluginFramework\{
-	Collections\Message\CollectionInterface as MessageCollectionInterface,
 	Exceptions\Interfaces\HasMessagesInterface,
 	Http\Exceptions\UnprocessableContent\Exception as UnprocessableContentException,
 };
@@ -13,7 +12,7 @@ class Exception extends UnprocessableContentException implements HasMessagesInte
 	public function __construct(
 		string $message,
 		string $code,
-		protected MessageCollectionInterface $messages,
+		protected array $messages,
 	) {
 		parent::__construct(
 			$message,
@@ -21,7 +20,7 @@ class Exception extends UnprocessableContentException implements HasMessagesInte
 		);
 	}
 
-	public function getMessages(): MessageCollectionInterface
+	public function getMessages(): array
 	{
 		return $this->messages;
 	}

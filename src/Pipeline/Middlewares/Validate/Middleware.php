@@ -33,7 +33,11 @@ readonly class Middleware implements MiddlewareInterface
 		}
 
 		if ($messages->isNotEmpty()) {
-			throw new Exceptions\UnprocessableContent\Exception('validation error', '', $messages);
+			throw new Exceptions\UnprocessableContent\Exception(
+				'validation error',
+				'',
+				$messages->toArray()
+			);
 		}
 
 		return $closure($request);

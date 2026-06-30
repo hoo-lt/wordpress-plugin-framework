@@ -6,38 +6,34 @@ use Hoo\WordPressPluginFramework\Http\Coders\CoderException;
 
 readonly class Coder implements CoderInterface
 {
-	public function decode(string $string): array
+	public function decode(string $encoded): array
 	{
-		$array = $this->tryDecode($string);
-		if ($array === null) {
-			throw new CoderException('failed to decode');
+		parse_str($encoded, $decoded);
+		return $decoded;
+	}
+
+	public function tryDecode(?string $encoded): ?array
+	{
+		if ($encoded === null) {
+			return null;
 		}
 
-		return $array;
+		parse_str($encoded, $decoded);
+		return $decoded;
 	}
 
-	public function tryDecode(string $string): ?array
+	public function encode(array|object $decoded): string
 	{
-		$array = [];
-
-		parse_str($string, $array);
-
-		return $array;
+		return http_build_query($decoded, '', '&', PHP_QUERY_RFC3986);
 	}
 
-	public function encode(array $array): string
+
+	public function tryEncode(array|object|null $decoded): ?string
 	{
-		$string = $this->tryEncode($array);
-		if ($string === null) {
-			throw new CoderException('failed to encode');
+		if ($decoded === null) {
+			return null;
 		}
 
-		return $string;
-	}
-
-
-	public function tryEncode(array $array): ?string
-	{
-		return http_build_query($array, '', '&', PHP_QUERY_RFC3986);
+		return http_build_query($decoded, '', '&', PHP_QUERY_RFC3986);
 	}
 }
