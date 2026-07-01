@@ -56,7 +56,11 @@ readonly class Handler implements HandlerInterface
 	protected function contentType(RequestInterface $request): string
 	{
 		$accept = $request->headers()?->accept();
-		if ($this->coderFactory->tryCreate($accept) === null) {
+		if ($accept === null) {
+			return 'text/html';
+		}
+
+		if ($this->coderFactory->tryCreateEncoder($accept, []) === null) {
 			return 'text/html';
 		}
 

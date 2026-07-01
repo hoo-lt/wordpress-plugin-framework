@@ -9,23 +9,51 @@ readonly class CoderFactory implements CoderFactoryInterface
 	) {
 	}
 
-	public function create(string $mediaType): CoderInterface
+	public function createDecoder(string $mediaType, mixed $encoded): CoderInterface
 	{
-		$coder = $this->tryCreate($mediaType);
+		$coder = $this->tryCreateDecoder($mediaType, $encoded);
 		if ($coder === null) {
-			throw new CoderFactoryException('failed to create coder');
+			throw new CoderFactoryException('no coder decodes this media type');
 		}
 
 		return $coder;
 	}
 
-	public function tryCreate(?string $mediaType): ?CoderInterface
+	public function tryCreateDecoder(string $mediaType, mixed $encoded): ?CoderInterface
 	{
-		$coder = $this->coders[$mediaType] ?? null;
+		foreach ($this->coders as $coder) {
+			if (
+				$coder->supports($mediaType) &&
+				$coder->decodes($encoded)
+			) {
+				return $coder;
+			}
+		}
+
+		return null;
+	}
+
+	public function createEncoder(string $mediaType, mixed $decoded): CoderInterface
+	{
+		$coder = $this->tryCreateEncoder($mediaType, $decoded);
 		if ($coder === null) {
-			return null;
+			throw new CoderFactoryException('no coder encodes this value for this media type');
 		}
 
 		return $coder;
+	}
+
+	public function tryCreateEncoder(string $mediaType, mixed $decoded): ?CoderInterface
+	{
+		foreach ($this->coders as $coder) {
+			if (
+				$coder->supports($mediaType) &&
+				$coder->encodes($decoded)
+			) {
+				return $coder;
+			}
+		}
+
+		return null;
 	}
 }

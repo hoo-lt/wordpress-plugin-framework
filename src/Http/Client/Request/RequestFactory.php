@@ -18,12 +18,12 @@ readonly class RequestFactory implements RequestFactoryInterface
 	) {
 	}
 
-	public function create(string $method, string $url, ?array $headers = null, array|string|null $body = null): RequestInterface
+	public function create(string $method, string $url, ?array $headers = null, mixed $body = null): RequestInterface
 	{
 		$method = Method::from($method);
 		$url = $this->urlFactory->create($url);
 		$headers = $this->headersFactory->tryCreate($headers);
-		$body = $this->bodyFactory->tryCreate(
+		$body = $this->bodyFactory->tryCreateEncoded(
 			$body,
 			$headers->contentType(),
 		);

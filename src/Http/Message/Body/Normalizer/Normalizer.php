@@ -2,35 +2,50 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Body\Normalizer;
 
-use BackedEnum;
-use DateTimeInterface;
-
 readonly class Normalizer implements NormalizerInterface
 {
-	public function normalize(array|object $body): array
-	{
-		$array = is_array($body) ? $body : get_object_vars($body);
+	private const MAX_DEPTH = 32;
 
-		return array_map($this->value(...), $array);
+	/**
+	 * @param NormalizerInterface[] $normalizers
+	 */
+	public function __construct(
+		private array $normalizers,
+	) {
 	}
 
-	private function value(mixed $value): mixed
+	public function supports(mixed $value): bool
 	{
+		return is_array($value) || is_object($value);
+	}
+
+	public function normalize(mixed $value): array
+	{
+		return $this->recurse($value, 0);
+	}
+
+	private function recurse(mixed $value, int $depth): array
+	{
+		if ($depth >= self::MAX_DEPTH) {
+			throw new NormalizerException('maximum normalization depth exceeded');
+		}
+
+		$array = is_array($value) ? $value : get_object_vars($value);
+
+		return array_map(fn (mixed $item): mixed => $this->value($item, $depth), $array);
+	}
+
+	private function value(mixed $value, int $depth): mixed
+	{
+		foreach ($this->normalizers as $normalizer) {
+			if ($normalizer->supports($value)) {
+				return $normalizer->normalize($value);
+			}
+		}
+
 		return match (true) {
-			$value instanceof BackedEnum => $this->enum($value),
-			$value instanceof DateTimeInterface => $this->dateTime($value),
-			is_array($value), is_object($value) => $this->normalize($value),
+			is_array($value), is_object($value) => $this->recurse($value, $depth + 1),
 			default => $value,
 		};
-	}
-
-	private function enum(BackedEnum $enum): int|string
-	{
-		return $enum->value;
-	}
-
-	private function dateTime(DateTimeInterface $dateTime): string
-	{
-		return $dateTime->format(DateTimeInterface::ATOM);
 	}
 }

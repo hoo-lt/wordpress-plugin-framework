@@ -6,15 +6,42 @@ use Hoo\WordPressPluginFramework\Http\Coders\CoderException;
 
 readonly class Coder implements CoderInterface
 {
-	public function decode(string $encoded): array
+	public function supports(string $mediaType): bool
 	{
+		[
+			$type,
+			$subtype
+		] = explode('/', strtolower($mediaType), 2);
+
+		if ($type !== 'application') {
+			return false;
+		}
+
+		if ($subtype !== 'x-www-form-urlencoded') {
+			return false;
+		}
+
+		return true;
+	}
+
+	public function decodes(mixed $encoded): bool
+	{
+		return is_string($encoded);
+	}
+
+	public function decode(mixed $encoded): array
+	{
+		if (!$this->decodes($encoded)) {
+			throw new CoderException('failed to decode');
+		}
+
 		parse_str($encoded, $decoded);
 		return $decoded;
 	}
 
-	public function tryDecode(?string $encoded): ?array
+	public function tryDecode(mixed $encoded): ?array
 	{
-		if ($encoded === null) {
+		if (!$this->decodes($encoded)) {
 			return null;
 		}
 
@@ -22,14 +49,23 @@ readonly class Coder implements CoderInterface
 		return $decoded;
 	}
 
-	public function encode(array|object $decoded): string
+	public function encodes(mixed $decoded): bool
 	{
+		return is_array($decoded) || is_object($decoded);
+	}
+
+	public function encode(mixed $decoded): string
+	{
+		if (!$this->encodes($decoded)) {
+			throw new CoderException('failed to encode');
+		}
+
 		return http_build_query($decoded, '', '&', PHP_QUERY_RFC1738);
 	}
 
-	public function tryEncode(array|object|null $decoded): ?string
+	public function tryEncode(mixed $decoded): ?string
 	{
-		if ($decoded === null) {
+		if (!$this->encodes($decoded)) {
 			return null;
 		}
 
