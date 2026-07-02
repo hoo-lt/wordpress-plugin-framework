@@ -22,12 +22,12 @@ readonly class BodyFactory implements BodyFactoryInterface
 		$body = $this->normalizer->normalize($body);
 
 		if ($contentType === null) {
-			throw new BodyFactoryException('the content type is not presented');
+			throw new BodyFactoryException('the content type is required');
 		}
 
 		$encoder = $this->coderFactory->tryCreateEncoder($body, $contentType);
 		if ($encoder === null) {
-			throw new BodyFactoryException("no coder encoded {$contentType} content type");
+			throw new BodyFactoryException("no coder encodes {$contentType} content type");
 		}
 
 		if (is_array($body)) {
@@ -49,7 +49,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface
 	{
 		if ($contentType === null) {
-			throw new BodyFactoryException('the content type is not presented');
+			throw new BodyFactoryException('the content type is required');
 		}
 
 		$decoder = $this->coderFactory->tryCreateDecoder($body, $contentType);
