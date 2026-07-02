@@ -46,6 +46,20 @@ final class HelperTest extends TestCase
 			'wildcard returns a list'      => [(object) ['x' => [10, 20]], 'x[*]', [10, 20]],
 			'escaped dot in key'           => [(object) ['items' => ['a.b' => 5]], 'items[a\.b]', 5],
 			'escaped star is literal'      => [(object) ['x' => ['*' => 7]], 'x[\*]', 7],
+			'container leaf returned as-is'   => [$obj, 'items', [10, 20]],
+			'wildcard zero matches is []'     => [(object) ['x' => []], 'x[*]', []],
+			'wildcard on missing is []'       => [(object) [], 'x[*]', []],
+			'object wildcard on array is []'  => [(object) ['x' => [1, 2]], 'x.*', []],
+			'double wildcard flattens'        => [
+				(object) ['rows' => [(object) ['tags' => [1, 2]], (object) ['tags' => [3]]]],
+				'rows[*].tags[*]',
+				[1, 2, 3],
+			],
+			'escaped closing bracket in key'  => [['a]b' => 7], '[a\]b]', 7],
+			'escaped backslash in key'        => [['a\b' => 8], '[a\\\b]', 8],
+			'literal ] in property'           => [(object) ['a]b' => 4], 'a]b', 4],
+			'property with literal dot'       => [(object) ['a.b' => 3], 'a\.b', 3],
+			'whitespace is literal'           => [(object) [' a' => 2], ' a', 2],
 		];
 	}
 
@@ -71,6 +85,28 @@ final class HelperTest extends TestCase
 				['rows[0].n' => 1, 'rows[1].n' => 2],
 			],
 			'wildcard on wrong type'      => [(object) ['a' => 1], '[*]', []],
+			'root array wildcard keys'    => [['x', 'y'], '[*]', ['[0]' => 'x', '[1]' => 'y']],
+			'double wildcard keys'        => [
+				(object) ['rows' => [(object) ['tags' => [1, 2]], (object) ['tags' => [3]]]],
+				'rows[*].tags[*]',
+				['rows[0].tags[0]' => 1, 'rows[0].tags[1]' => 2, 'rows[1].tags[0]' => 3],
+			],
+			'partial wildcard misses omitted' => [
+				(object) ['rows' => [(object) ['n' => 1], (object) []]],
+				'rows[*].n',
+				['rows[0].n' => 1],
+			],
+			'container value returned whole'  => [(object) ['a' => ['b' => 1]], 'a', ['a' => ['b' => 1]]],
+			'reserved array keys escaped'     => [
+				(object) ['x' => ['*' => 1, 'a]b' => 2, 'a\b' => 3, 'a.b' => 4]],
+				'x[*]',
+				['x[\*]' => 1, 'x[a\]b]' => 2, 'x[a\\\b]' => 3, 'x[a.b]' => 4],
+			],
+			'reserved property keys escaped'  => [
+				(object) ['*' => 1, 'a.b' => 2, 'a[b' => 3, 'a]b' => 4],
+				'*',
+				['\*' => 1, 'a\.b' => 2, 'a\[b' => 3, 'a]b' => 4],
+			],
 		];
 	}
 
@@ -97,6 +133,18 @@ final class HelperTest extends TestCase
 			'wildcard object set'          => [(object) ['a' => 1, 'b' => 2], '*', 0, '{"a":0,"b":0}'],
 			'wildcard array set'           => [(object) ['x' => [1, 2]], 'x[*]', 0, '{"x":[0,0]}'],
 			'nested object wildcard set'   => [(object) ['a' => (object) ['x' => 1, 'y' => 2]], 'a.*', 0, '{"a":{"x":0,"y":0}}'],
+			'replace container leaf'       => [(object) ['a' => (object) ['b' => 1]], 'a', 9, '{"a":9}'],
+			'set null is a real value'     => [(object) ['a' => 1], 'a', null, '{"a":null}'],
+			'gap index degrades list'      => [(object) ['x' => [1]], 'x[5]', 9, '{"x":{"0":1,"5":9}}'],
+			'deep object chain'            => [new stdClass(), 'a.b.c.d', 9, '{"a":{"b":{"c":{"d":9}}}}'],
+			'wildcard on empty array'      => [(object) ['x' => []], 'x[*]', 0, '{"x":[]}'],
+			'wildcard materializes empty'  => [new stdClass(), 'x[*]', 0, '{"x":[]}'],
+			'wildcard creates missing leaf in children' => [
+				(object) ['rows' => [(object) ['f' => 1], new stdClass()]],
+				'rows[*].f',
+				0,
+				'{"rows":[{"f":0},{"f":0}]}',
+			],
 		];
 	}
 
@@ -114,6 +162,10 @@ final class HelperTest extends TestCase
 			'index on object'                => [new stdClass(), '[0]'],
 			'descend into scalar'            => [(object) ['a' => 5], 'a.b'],
 			'empty array root, object path'  => [[], 'a'],
+			'mid-path mismatch'              => [(object) ['a' => [1, 2]], 'a.b'],
+			'bracket into object mid-path'   => [(object) ['a' => new stdClass()], 'a[0]'],
+			'wildcard over scalar children'  => [(object) ['rows' => [1, 2]], 'rows[*].b'],
+			'object wildcard on array'       => [(object) ['x' => [1, 2]], 'x.*'],
 		];
 	}
 
@@ -156,6 +208,24 @@ final class HelperTest extends TestCase
 			'type mismatch is a no-op'     => [[1, 2], 'name', '[1,2]'],
 			'wildcard clears object'       => [(object) ['a' => 1, 'b' => 2], '*', '{}'],
 			'wildcard clears array'        => [(object) ['x' => [1, 2]], 'x[*]', '{"x":[]}'],
+			'deep nested remove'           => [
+				(object) ['a' => (object) ['b' => (object) ['c' => 1, 'd' => 2]]],
+				'a.b.c',
+				'{"a":{"b":{"d":2}}}',
+			],
+			'wildcard mid-path remove'     => [
+				(object) ['rows' => [(object) ['n' => 1, 'k' => 2], (object) ['n' => 3]]],
+				'rows[*].n',
+				'{"rows":[{"k":2},{}]}',
+			],
+			'missing under wildcard is a no-op' => [
+				(object) ['rows' => [(object) ['n' => 1], (object) []]],
+				'rows[*].n',
+				'{"rows":[{},{}]}',
+			],
+			'gapped int keys do not reindex'    => [(object) ['x' => [0 => 'a', 2 => 'c']], 'x[0]', '{"x":{"2":"c"}}'],
+			'object wildcard on array is a no-op' => [(object) ['x' => [1, 2]], 'x.*', '{"x":[1,2]}'],
+			'root array wildcard clears'   => [['a', 'b'], '[*]', '[]'],
 		];
 	}
 
@@ -165,6 +235,82 @@ final class HelperTest extends TestCase
 		$this->helper->withoutValue($data, 'a');
 
 		$this->assertSame(1, $data->a);
+	}
+
+	public function testWithoutValueClonesNestedContainers(): void
+	{
+		$inner = (object) ['b' => 1, 'c' => 2];
+		$data = (object) ['a' => $inner];
+
+		$result = $this->helper->withoutValue($data, 'a.b');
+
+		$this->assertSame(1, $inner->b, 'nested original must be untouched');
+		$this->assertFalse(property_exists($result->a, 'b'));
+	}
+
+	public function testWildcardWriteDoesNotMutateOriginal(): void
+	{
+		$row = (object) ['n' => 1];
+		$data = (object) ['rows' => [$row]];
+
+		$this->helper->withValue($data, 'rows[*].n', 0);
+
+		$this->assertSame(1, $row->n);
+	}
+
+	// ------------------------------------------------------------- invariants
+
+	public function testUntouchedSiblingContainersAreShared(): void
+	{
+		$shared = (object) ['s' => 1];
+		$data = (object) ['a' => (object) ['b' => 1], 'shared' => $shared];
+
+		$result = $this->helper->withValue($data, 'a.b', 9);
+
+		$this->assertNotSame($data, $result, 'root must be cloned');
+		$this->assertNotSame($data->a, $result->a, 'container on the written path must be cloned');
+		$this->assertSame($shared, $result->shared, 'container off the written path must be shared, not copied');
+	}
+
+	public function testValuesKeysAreRoundTrippablePaths(): void
+	{
+		$data = (object) [
+			'rows' => [(object) ['n' => 1], (object) ['n' => 2]],
+			'map' => (object) ['x' => ['a' => 5, 'b.c' => 6, '*' => 7, 'a]b' => 8, 'a\b' => 9]],
+			'*' => 10,
+			'p.q' => 11,
+			'p[q' => 12,
+		];
+
+		foreach (['rows[*].n', 'map.*', 'map.x[*]', '*'] as $wildcard) {
+			$values = $this->helper->values($data, $wildcard);
+			$this->assertNotSame([], $values);
+
+			foreach ($values as $resolved => $value) {
+				$this->assertSame(
+					$value,
+					$this->helper->value($data, $resolved),
+					sprintf('resolved path "%s" from "%s" must address the same value', $resolved, $wildcard)
+				);
+			}
+		}
+	}
+
+	public function testWriteThenReadReturnsWritten(): void
+	{
+		$result = $this->helper->withValue(new stdClass(), 'a[0].b', 9);
+
+		$this->assertSame(9, $this->helper->value($result, 'a[0].b'));
+	}
+
+	public function testRemoveThenValuesOmits(): void
+	{
+		$data = (object) ['a' => 1, 'b' => 2];
+
+		$result = $this->helper->withoutValue($data, 'a');
+
+		$this->assertSame([], $this->helper->values($result, 'a'));
+		$this->assertSame(['b' => 2], $this->helper->values($result, 'b'));
 	}
 
 	// ---------------------------------------------------------- path parsing

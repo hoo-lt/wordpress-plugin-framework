@@ -209,9 +209,22 @@ readonly class Helper implements HelperInterface
 
 	private function appendSegment(string $path, string $type, string $key): string
 	{
-		return $type === 'object'
-			? ($path === '' ? $key : $path . '.' . $key)
-			: $path . '[' . $key . ']';
+		if ($type === 'object') {
+			$segment = $this->escapeSegment($key, '\\.[');
+
+			return $path === '' ? $segment : $path . '.' . $segment;
+		}
+
+		return $path . '[' . $this->escapeSegment($key, '\\]') . ']';
+	}
+
+	private function escapeSegment(string $key, string $reserved): string
+	{
+		if ($key === '*') {
+			return '\*';
+		}
+
+		return addcslashes($key, $reserved);
 	}
 
 	/**
