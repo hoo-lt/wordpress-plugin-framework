@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 interface BodyFactoryInterface
 {
-	public function createDecoded(string $encoded, ?string $contentType = null): BodyInterface;
-	public function tryCreateDecoded(?string $encoded, ?string $contentType = null): ?BodyInterface;
+	public function createFromDecoded(object|array|string|float|int|bool $body, ?string $contentType = null): BodyInterface;
+	public function tryCreateFromDecoded(object|array|string|float|int|bool|null $body, ?string $contentType = null): ?BodyInterface;
 
-	public function createEncoded(mixed $decoded, ?string $contentType = null): BodyInterface;
-	public function tryCreateEncoded(mixed $decoded, ?string $contentType = null): ?BodyInterface;
+	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface;
+	public function tryCreateFromEncoded(?string $body, ?string $contentType = null): ?BodyInterface;
 }

@@ -2,30 +2,20 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders\Json;
 
-use Hoo\WordPressPluginFramework\Http\Coders\CoderException;
+use Hoo\WordPressPluginFramework\{
+	Http\Coders\AbstractCoder,
+	Http\Coders\CoderException,
+	Http\Coders\CoderInterface,
+};
 use Throwable;
 
-readonly class Coder implements CoderInterface
+readonly class Coder extends AbstractCoder implements CoderInterface
 {
-	public function supports(string $mediaType): bool
+	public function mediaTypes(): array
 	{
-		[
-			$type,
-			$subtype
-		] = explode('/', strtolower($mediaType), 2);
-
-		if ($type !== 'application') {
-			return false;
-		}
-
-		if (
-			$subtype !== 'json' &&
-			!str_ends_with($subtype, '+json')
-		) {
-			return false;
-		}
-
-		return true;
+		return [
+			'application/json',
+		];
 	}
 
 	public function decodes(mixed $encoded): bool
@@ -46,19 +36,6 @@ readonly class Coder implements CoderInterface
 		}
 	}
 
-	public function tryDecode(mixed $encoded): mixed
-	{
-		if (!$this->decodes($encoded)) {
-			return null;
-		}
-
-		try {
-			return json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
-		} catch (Throwable $throwable) {
-			return null;
-		}
-	}
-
 	public function encodes(mixed $decoded): bool
 	{
 		return !is_resource($decoded);
@@ -74,19 +51,6 @@ readonly class Coder implements CoderInterface
 			return json_encode($decoded, JSON_THROW_ON_ERROR, 512);
 		} catch (Throwable $throwable) {
 			throw new CoderException($throwable->getMessage());
-		}
-	}
-
-	public function tryEncode(mixed $decoded): ?string
-	{
-		if (!$this->encodes($decoded)) {
-			return null;
-		}
-
-		try {
-			return json_encode($decoded, JSON_THROW_ON_ERROR, 512);
-		} catch (Throwable $throwable) {
-			return null;
 		}
 	}
 }

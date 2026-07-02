@@ -17,61 +17,60 @@ readonly class BodyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function createDecoded(string $encoded, ?string $contentType = null): BodyInterface
+	public function createFromDecoded(object|array|string|float|int|bool $body, ?string $contentType = null): BodyInterface
 	{
+		$body = $this->normalizer->normalize($body);
+
 		if ($contentType === null) {
-			return new Body($encoded);
+			throw new BodyFactoryException('the content type is not presented');
 		}
 
-		$coder = $this->coderFactory->tryCreateDecoder($contentType, $encoded);
-		if ($coder === null) {
-			return new Body($encoded);
+		$encoder = $this->coderFactory->tryCreateEncoder($body, $contentType);
+		if ($encoder === null) {
+			throw new BodyFactoryException("no coder encoded {$contentType} content type");
 		}
 
-		$decoded = $coder->decode($encoded);
+		if (is_array($body)) {
+			return new KeyValue\Body($this->helper, $encoder, $body);
+		}
 
-		return is_array($decoded)
-			? new KeyValue\Body($this->helper, $coder, $decoded)
-			: new Body($encoded);
+		return new Body($encoder, $body);
 	}
 
-	public function tryCreateDecoded(?string $encoded, ?string $contentType = null): ?BodyInterface
+	public function tryCreateFromDecoded(object|array|string|float|int|bool|null $body, ?string $contentType = null): ?BodyInterface
 	{
-		if ($encoded === null) {
+		if ($body === null) {
 			return null;
 		}
 
-		return $this->createDecoded($encoded, $contentType);
+		return $this->createFromDecoded($body, $contentType);
 	}
 
-	public function createEncoded(mixed $decoded, ?string $contentType = null): BodyInterface
+	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface
 	{
-		if (is_string($decoded)) {
-			return new Body($decoded);
-		}
-
 		if ($contentType === null) {
-			throw new BodyFactoryException('non-string body requires a media type');
+			throw new BodyFactoryException('the content type is not presented');
 		}
 
-		$decoded = $this->normalizer->normalize($decoded);
-
-		$coder = $this->coderFactory->tryCreateEncoder($contentType, $decoded);
-		if ($coder === null) {
-			throw new BodyFactoryException('no coder encodes this value for this media type');
+		$decoder = $this->coderFactory->tryCreateDecoder($body, $contentType);
+		if ($decoder === null) {
+			throw new BodyFactoryException("no coder decodes {$contentType} content type");
 		}
 
-		return is_array($decoded)
-			? new KeyValue\Body($this->helper, $coder, $decoded)
-			: new Body($coder->encode($decoded));
+		$body = $decoder->decode($body);
+		if (is_array($body)) {
+			return new KeyValue\Body($this->helper, $decoder, $body);
+		}
+
+		return new Body($decoder, $body);
 	}
 
-	public function tryCreateEncoded(mixed $decoded, ?string $contentType = null): ?BodyInterface
+	public function tryCreateFromEncoded(?string $body, ?string $contentType = null): ?BodyInterface
 	{
-		if ($decoded === null) {
+		if ($body === null) {
 			return null;
 		}
 
-		return $this->createEncoded($decoded, $contentType);
+		return $this->createFromEncoded($body, $contentType);
 	}
 }

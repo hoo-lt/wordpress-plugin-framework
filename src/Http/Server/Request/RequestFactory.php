@@ -27,7 +27,7 @@ readonly class RequestFactory implements RequestFactoryInterface
 		$method = Method::from($method);
 		$url = $this->urlFactory->create($url);
 		$headers = $this->headersFactory->tryCreate($headers);
-		$body = $this->bodyFactory->tryCreateDecoded(
+		$body = $this->bodyFactory->tryCreateFromEncoded(
 			$body,
 			$headers->contentType(),
 		);

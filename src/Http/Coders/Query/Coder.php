@@ -2,18 +2,16 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders\Query;
 
-use Hoo\WordPressPluginFramework\Http\Coders\CoderException;
+use Hoo\WordPressPluginFramework\{
+	Http\Coders\AbstractCoder,
+	Http\Coders\CoderException,
+};
 
-readonly class Coder implements CoderInterface
+readonly class Coder extends AbstractCoder implements CoderInterface
 {
-	public function supports(string $mediaType): bool
+	public function mediaTypes(): array
 	{
-		[
-			$type,
-			$subtype
-		] = explode('/', strtolower($mediaType), 2);
-
-		return false;
+		return [];
 	}
 
 	public function decodes(mixed $encoded): bool
@@ -31,16 +29,6 @@ readonly class Coder implements CoderInterface
 		return $decoded;
 	}
 
-	public function tryDecode(mixed $encoded): ?array
-	{
-		if (!$this->decodes($encoded)) {
-			return null;
-		}
-
-		parse_str($encoded, $decoded);
-		return $decoded;
-	}
-
 	public function encodes(mixed $decoded): bool
 	{
 		return is_array($decoded) || is_object($decoded);
@@ -50,15 +38,6 @@ readonly class Coder implements CoderInterface
 	{
 		if (!$this->encodes($decoded)) {
 			throw new CoderException('failed to encode');
-		}
-
-		return http_build_query($decoded, '', '&', PHP_QUERY_RFC3986);
-	}
-
-	public function tryEncode(mixed $decoded): ?string
-	{
-		if (!$this->encodes($decoded)) {
-			return null;
 		}
 
 		return http_build_query($decoded, '', '&', PHP_QUERY_RFC3986);

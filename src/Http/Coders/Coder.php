@@ -1,20 +1,22 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Coders\Form;
+namespace Hoo\WordPressPluginFramework\Http\Coders;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Coders\AbstractCoder,
 	Http\Coders\CoderException,
-	Http\Coders\CoderInterface,
 };
 
 readonly class Coder extends AbstractCoder implements CoderInterface
 {
+	public function __construct(
+		protected array $mediaTypes,
+	) {
+	}
+
 	public function mediaTypes(): array
 	{
-		return [
-			'application/x-www-form-urlencoded',
-		];
+		return $this->mediaTypes;
 	}
 
 	public function decodes(mixed $encoded): bool
@@ -22,19 +24,18 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 		return is_string($encoded);
 	}
 
-	public function decode(mixed $encoded): array
+	public function decode(mixed $encoded): string
 	{
 		if (!$this->decodes($encoded)) {
 			throw new CoderException('failed to decode');
 		}
 
-		parse_str($encoded, $decoded);
-		return $decoded;
+		return $encoded;
 	}
 
 	public function encodes(mixed $decoded): bool
 	{
-		return is_array($decoded) || is_object($decoded);
+		return is_string($decoded);
 	}
 
 	public function encode(mixed $decoded): string
@@ -43,6 +44,6 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 			throw new CoderException('failed to encode');
 		}
 
-		return http_build_query($decoded, '', '&', PHP_QUERY_RFC1738);
+		return $decoded;
 	}
 }

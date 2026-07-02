@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Http\Coders;
 
 interface CoderFactoryInterface
 {
-	public function createDecoder(string $mediaType, mixed $encoded): CoderInterface;
-	public function tryCreateDecoder(string $mediaType, mixed $encoded): ?CoderInterface;
+	public function createDecoder(mixed $encoded, string $mediaType): CoderInterface;
+	public function tryCreateDecoder(mixed $encoded, string $mediaType): ?CoderInterface;
 
-	public function createEncoder(string $mediaType, mixed $decoded): CoderInterface;
-	public function tryCreateEncoder(string $mediaType, mixed $decoded): ?CoderInterface;
+	public function createEncoder(mixed $decoded, string $mediaType): CoderInterface;
+	public function tryCreateEncoder(mixed $decoded, string $mediaType): ?CoderInterface;
 }

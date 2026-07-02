@@ -9,9 +9,9 @@ readonly class CoderFactory implements CoderFactoryInterface
 	) {
 	}
 
-	public function createDecoder(string $mediaType, mixed $encoded): CoderInterface
+	public function createDecoder(mixed $encoded, string $mediaType): CoderInterface
 	{
-		$coder = $this->tryCreateDecoder($mediaType, $encoded);
+		$coder = $this->tryCreateDecoder($encoded, $mediaType);
 		if ($coder === null) {
 			throw new CoderFactoryException('no coder decodes this media type');
 		}
@@ -19,11 +19,11 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryCreateDecoder(string $mediaType, mixed $encoded): ?CoderInterface
+	public function tryCreateDecoder(mixed $encoded, string $mediaType): ?CoderInterface
 	{
 		foreach ($this->coders as $coder) {
 			if (
-				$coder->supports($mediaType) &&
+				$coder->codes($mediaType) &&
 				$coder->decodes($encoded)
 			) {
 				return $coder;
@@ -33,9 +33,9 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return null;
 	}
 
-	public function createEncoder(string $mediaType, mixed $decoded): CoderInterface
+	public function createEncoder(mixed $decoded, string $mediaType): CoderInterface
 	{
-		$coder = $this->tryCreateEncoder($mediaType, $decoded);
+		$coder = $this->tryCreateEncoder($decoded, $mediaType);
 		if ($coder === null) {
 			throw new CoderFactoryException('no coder encodes this value for this media type');
 		}
@@ -43,11 +43,11 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryCreateEncoder(string $mediaType, mixed $decoded): ?CoderInterface
+	public function tryCreateEncoder(mixed $decoded, string $mediaType): ?CoderInterface
 	{
 		foreach ($this->coders as $coder) {
 			if (
-				$coder->supports($mediaType) &&
+				$coder->codes($mediaType) &&
 				$coder->encodes($decoded)
 			) {
 				return $coder;
