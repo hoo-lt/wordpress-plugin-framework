@@ -1,11 +1,20 @@
 {
 	"name": "hoo-lt/wordpress-plugin-framework",
+	"description": "A framework for building WordPress plugins.",
 	"type": "library",
-	"license": "GPL-3.0",
+	"license": "GPL-3.0-or-later",
 	"autoload": {
 		"psr-4": {
 			"Hoo\\WordPressPluginFramework\\": "src/"
 		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Hoo\\WordPressPluginFramework\\Tests\\": "tests/"
+		}
+	},
+	"scripts": {
+		"test": "phpunit"
 	},
 	"authors": [
 		{
@@ -19,5 +28,8 @@
 	],
 	"require": {
 		"php": ">=8.2"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "11.5.*"
 	}
 }

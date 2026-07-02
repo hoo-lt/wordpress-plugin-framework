@@ -4,9 +4,9 @@ namespace Hoo\WordPressPluginFramework\Helpers\KeyValue;
 
 interface HelperInterface
 {
-	public function values(array $array, string $key): array;
+	public function values(array|object $data, string $path): array;
 
-	public function value(array $array, string $key): mixed;
-	public function withValue(array $array, string $key, mixed $value): array;
-	public function withoutValue(array $array, string $key): array;
+	public function value(array|object $data, string $path): mixed;
+	public function withValue(array|object $data, string $path, mixed $value): array|object;
+	public function withoutValue(array|object $data, string $path): array|object;
 }
