@@ -60,6 +60,19 @@ final class HelperTest extends TestCase
 			'literal ] in property'           => [(object) ['a]b' => 4], 'a]b', 4],
 			'property with literal dot'       => [(object) ['a.b' => 3], 'a\.b', 3],
 			'whitespace is literal'           => [(object) [' a' => 2], ' a', 2],
+			'utf-8 property and key'          => [(object) ['ключ' => ['значение' => 6]], 'ключ[значение]', 6],
+			'numeric property on object'      => [(object) ['0' => 'x'], '0', 'x'],
+			'found false is not a miss'       => [(object) ['a' => false], 'a', false],
+			'found zero is not a miss'        => [(object) ['a' => 0], 'a', 0],
+			'found empty string is not a miss' => [(object) ['a' => ''], 'a', ''],
+			'found "0" is not a miss'         => [(object) ['a' => '0'], 'a', '0'],
+			'escaped star key mid-path'       => [(object) ['x' => ['*' => (object) ['y' => 5]]], 'x[\*].y', 5],
+			'star-prefixed key is literal'    => [(object) ['*x' => 3, 'y' => 4], '*x', 3],
+			'wildcard list keeps found nulls' => [
+				(object) ['rows' => [(object) ['n' => null], (object) ['n' => 2]]],
+				'rows[*].n',
+				[null, 2],
+			],
 		];
 	}
 
@@ -76,6 +89,8 @@ final class HelperTest extends TestCase
 		return [
 			'present key'                 => [(object) ['a' => 1], 'a', ['a' => 1]],
 			'found null is present'       => [(object) ['a' => null], 'a', ['a' => null]],
+			'found false is present'      => [(object) ['a' => false], 'a', ['a' => false]],
+			'null array value is present' => [['a' => null], '[a]', ['[a]' => null]],
 			'missing is omitted'          => [(object) [], 'a', []],
 			'object wildcard'             => [(object) ['a' => 1, 'b' => 2], '*', ['a' => 1, 'b' => 2]],
 			'array wildcard keys'         => [(object) ['x' => [10, 20]], 'x[*]', ['x[0]' => 10, 'x[1]' => 20]],
@@ -115,7 +130,7 @@ final class HelperTest extends TestCase
 	#[DataProvider('withValueProvider')]
 	public function testWithValue(array|object $data, string $path, mixed $value, string $expectedJson): void
 	{
-		$this->assertSame($expectedJson, json_encode($this->helper->withValue($data, $path, $value)));
+		$this->assertSame($expectedJson, json_encode($this->helper->withValue($data, $path, $value), JSON_UNESCAPED_UNICODE));
 	}
 
 	public static function withValueProvider(): array
@@ -145,6 +160,16 @@ final class HelperTest extends TestCase
 				0,
 				'{"rows":[{"f":0},{"f":0}]}',
 			],
+			'write via escaped star key'   => [(object) ['x' => ['*' => 1]], 'x[\*]', 9, '{"x":{"*":9}}'],
+			'write via escaped star property' => [(object) ['*' => 1], '\*', 9, '{"*":9}'],
+			'write via escaped bracket key' => [(object) ['x' => ['a]b' => 1]], 'x[a\]b]', 9, '{"x":{"a]b":9}}'],
+			'write utf-8 path'             => [new stdClass(), 'ключ[значение]', 9, '{"ключ":{"значение":9}}'],
+			'write numeric object property' => [(object) ['0' => 'x'], '0', 9, '{"0":9}'],
+			'double wildcard write'        => [(object) ['x' => [[1, 2], [3]]], 'x[*][*]', 0, '{"x":[[0,0],[0]]}'],
+			'wildcard on empty object'     => [new stdClass(), '*', 0, '{}'],
+			'deep wildcard materializes empty' => [new stdClass(), 'x[*].y', 0, '{"x":[]}'],
+			'wildcard on assoc preserves keys' => [(object) ['x' => ['a' => 1, 'b' => 2]], 'x[*]', 0, '{"x":{"a":0,"b":0}}'],
+			'container as written value'   => [new stdClass(), 'a', ['b' => 1], '{"a":{"b":1}}'],
 		];
 	}
 
@@ -166,6 +191,7 @@ final class HelperTest extends TestCase
 			'bracket into object mid-path'   => [(object) ['a' => new stdClass()], 'a[0]'],
 			'wildcard over scalar children'  => [(object) ['rows' => [1, 2]], 'rows[*].b'],
 			'object wildcard on array'       => [(object) ['x' => [1, 2]], 'x.*'],
+			'descend into null intermediate' => [(object) ['a' => null], 'a.b'],
 		];
 	}
 
@@ -226,6 +252,27 @@ final class HelperTest extends TestCase
 			'gapped int keys do not reindex'    => [(object) ['x' => [0 => 'a', 2 => 'c']], 'x[0]', '{"x":{"2":"c"}}'],
 			'object wildcard on array is a no-op' => [(object) ['x' => [1, 2]], 'x.*', '{"x":[1,2]}'],
 			'root array wildcard clears'   => [['a', 'b'], '[*]', '[]'],
+			'wildcard skips mismatched children' => [
+				(object) ['rows' => [1, (object) ['n' => 2]]],
+				'rows[*].n',
+				'{"rows":[1,{}]}',
+			],
+			'remove via escaped star key'  => [(object) ['x' => ['*' => 1, 'a' => 2]], 'x[\*]', '{"x":{"a":2}}'],
+			'wildcard clear on assoc flips shape' => [(object) ['x' => ['a' => 1, 'b' => 2]], 'x[*]', '{"x":[]}'],
+			'double wildcard remove'       => [
+				(object) ['rows' => [(object) ['tags' => [1, 2]], (object) ['tags' => [3]]]],
+				'rows[*].tags[*]',
+				'{"rows":[{"tags":[]},{"tags":[]}]}',
+			],
+			'removes null-valued property'  => [(object) ['a' => null, 'b' => 2], 'a', '{"b":2}'],
+			'removes null-valued array key' => [(object) ['x' => ['a' => null, 'b' => 2]], 'x[a]', '{"x":{"b":2}}'],
+			'null intermediate is a no-op'  => [(object) ['a' => null], 'a.b', '{"a":null}'],
+			'removes numeric object property' => [(object) ['0' => 'x', 'a' => 1], '0', '{"a":1}'],
+			'object wildcard with rest'     => [
+				(object) ['r1' => (object) ['n' => 1, 'k' => 2], 'r2' => (object) ['n' => 3]],
+				'*.n',
+				'{"r1":{"k":2},"r2":{}}',
+			],
 		];
 	}
 
@@ -258,6 +305,16 @@ final class HelperTest extends TestCase
 		$this->assertSame(1, $row->n);
 	}
 
+	public function testWildcardRemoveDoesNotMutateOriginal(): void
+	{
+		$row = (object) ['n' => 1, 'k' => 2];
+		$data = (object) ['rows' => [$row]];
+
+		$this->helper->withoutValue($data, 'rows[*].n');
+
+		$this->assertSame(1, $row->n);
+	}
+
 	// ------------------------------------------------------------- invariants
 
 	public function testUntouchedSiblingContainersAreShared(): void
@@ -270,6 +327,49 @@ final class HelperTest extends TestCase
 		$this->assertNotSame($data, $result, 'root must be cloned');
 		$this->assertNotSame($data->a, $result->a, 'container on the written path must be cloned');
 		$this->assertSame($shared, $result->shared, 'container off the written path must be shared, not copied');
+	}
+
+	public function testRemoveSharesUntouchedSiblings(): void
+	{
+		$shared = (object) ['s' => 1];
+		$data = (object) ['a' => (object) ['b' => 1, 'c' => 2], 'shared' => $shared];
+
+		$result = $this->helper->withoutValue($data, 'a.b');
+
+		$this->assertNotSame($data->a, $result->a, 'container on the removed path must be cloned');
+		$this->assertSame($shared, $result->shared, 'container off the removed path must be shared, not copied');
+	}
+
+	public function testReadReturnsTheActualInstance(): void
+	{
+		$inner = (object) ['b' => 1];
+		$data = (object) ['a' => $inner];
+
+		$this->assertSame($inner, $this->helper->value($data, 'a'), 'reads must not clone');
+	}
+
+	public function testWrittenContainerIsStoredAsIs(): void
+	{
+		$value = (object) ['b' => 1];
+
+		$result = $this->helper->withValue(new stdClass(), 'a', $value);
+
+		$this->assertSame($value, $result->a, 'written values must be stored by identity, not cloned');
+	}
+
+	public function testThrowingWriteLeavesOriginalUntouched(): void
+	{
+		$row = (object) ['n' => 1];
+		$data = (object) ['rows' => [$row, 5]];
+
+		try {
+			$this->helper->withValue($data, 'rows[*].n', 0);
+			$this->fail('expected HelperException');
+		} catch (HelperException) {
+		}
+
+		$this->assertSame(1, $row->n, 'partially applied write must not leak into the original');
+		$this->assertSame(5, $data->rows[1]);
 	}
 
 	public function testValuesKeysAreRoundTrippablePaths(): void
@@ -301,6 +401,33 @@ final class HelperTest extends TestCase
 		$result = $this->helper->withValue(new stdClass(), 'a[0].b', 9);
 
 		$this->assertSame(9, $this->helper->value($result, 'a[0].b'));
+	}
+
+	public function testObjectInsideArrayIsClonedOnWrite(): void
+	{
+		$inner = (object) ['b' => 1];
+		$data = ['o' => $inner];
+
+		$result = $this->helper->withValue($data, '[o].b', 9);
+
+		$this->assertSame(1, $inner->b, 'object referenced from the original array must be untouched');
+		$this->assertSame(9, $result['o']->b);
+		$this->assertNotSame($inner, $result['o']);
+	}
+
+	public function testValuesKeysAreWritablePaths(): void
+	{
+		$data = (object) ['map' => (object) ['x' => ['a' => 5, '*' => 7, 'a]b' => 8, 'a\b' => 9]]];
+
+		foreach ($this->helper->values($data, 'map.x[*]') as $resolved => $value) {
+			$written = $this->helper->withValue($data, $resolved, 'W');
+
+			$this->assertSame(
+				'W',
+				$this->helper->value($written, $resolved),
+				sprintf('resolved path "%s" must be writable back to the same address', $resolved)
+			);
+		}
 	}
 
 	public function testRemoveThenValuesOmits(): void
