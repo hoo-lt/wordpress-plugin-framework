@@ -20,7 +20,7 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 		$headers = $this->headersFactory->tryCreate($headers);
 		$body = $this->bodyFactory->tryCreateFromEncoded(
 			$body,
-			$headers->contentType(),
+			$headers?->contentType(),
 		);
 
 		return new Response($statusCode, $headers, $body);

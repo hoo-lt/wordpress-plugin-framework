@@ -13,9 +13,9 @@ readonly class Response extends ClientResponse implements ResponseInterface
 {
 	public function __construct(
 		protected UuidInterface $uuid,
-		protected int $statusCode,
-		protected ?HeadersInterface $headers,
-		protected ?BodyInterface $body,
+		int $statusCode,
+		?HeadersInterface $headers,
+		?BodyInterface $body,
 	) {
 		parent::__construct($statusCode, $headers, $body);
 	}

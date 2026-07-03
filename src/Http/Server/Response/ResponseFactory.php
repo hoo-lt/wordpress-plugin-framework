@@ -22,7 +22,7 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 		$headers = $this->headersFactory->tryCreate($headers);
 		$body = $this->bodyFactory->tryCreateFromDecoded(
 			$body,
-			$headers->contentType(),
+			$headers?->contentType(),
 		);
 
 		return new Response($this->uuid, $statusCode, $headers, $body);
