@@ -47,16 +47,6 @@ readonly class Query implements QueryInterface, KeyValueInterface
 		);
 	}
 
-	public function getIterator(): Traversable
-	{
-		return new ArrayIterator($this->query);
-	}
-
-	public function count(): int
-	{
-		return count($this->query);
-	}
-
 	public function __toString(): string
 	{
 		return $this->coder->encode($this->query);

@@ -30,7 +30,7 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 		}
 
 		try {
-			return json_decode($encoded, true, 512, JSON_THROW_ON_ERROR);
+			return json_decode($encoded, false, 512, JSON_THROW_ON_ERROR);
 		} catch (Throwable $throwable) {
 			throw new CoderException($throwable->getMessage());
 		}

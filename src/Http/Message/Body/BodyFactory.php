@@ -30,7 +30,10 @@ readonly class BodyFactory implements BodyFactoryInterface
 			throw new BodyFactoryException("no coder encodes {$contentType} content type");
 		}
 
-		if (is_array($body)) {
+		if (
+			is_array($body) ||
+			is_object($body)
+		) {
 			return new KeyValue\Body($this->helper, $encoder, $body);
 		}
 
@@ -58,7 +61,10 @@ readonly class BodyFactory implements BodyFactoryInterface
 		}
 
 		$body = $decoder->decode($body);
-		if (is_array($body)) {
+		if (
+			is_array($body) ||
+			is_object($body)
+		) {
 			return new KeyValue\Body($this->helper, $decoder, $body);
 		}
 

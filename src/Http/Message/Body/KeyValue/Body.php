@@ -2,25 +2,23 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Body\KeyValue;
 
-use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,
 	Http\Message\Body\BodyInterface,
 	Http\Coders\CoderInterface,
 	Http\KeyValue\KeyValueInterface,
 };
-use Traversable;
 
 readonly class Body implements BodyInterface, KeyValueInterface
 {
 	public function __construct(
 		protected HelperInterface $helper,
 		protected CoderInterface $coder,
-		protected array $body,
+		protected object|array $body,
 	) {
 	}
 
-	public function values(string $key): array
+	public function values(string $key): object|array
 	{
 		return $this->helper->values($this->body, $key);
 	}
@@ -46,16 +44,6 @@ readonly class Body implements BodyInterface, KeyValueInterface
 			$this->coder,
 			$this->helper->withoutValue($this->body, $key),
 		);
-	}
-
-	public function getIterator(): Traversable
-	{
-		return new ArrayIterator($this->body);
-	}
-
-	public function count(): int
-	{
-		return count($this->body);
 	}
 
 	public function __toString(): string
