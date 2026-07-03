@@ -174,24 +174,25 @@ final class HelperTest extends TestCase
 	}
 
 	#[DataProvider('writeThrowProvider')]
-	public function testWithValueThrowsOnConflict(array|object $data, string $path): void
+	public function testWithValueThrowsOnConflict(array|object $data, string $path, string $message): void
 	{
 		$this->expectException(HelperException::class);
+		$this->expectExceptionMessage($message);
 		$this->helper->withValue($data, $path, 9);
 	}
 
 	public static function writeThrowProvider(): array
 	{
 		return [
-			'property on array'              => [[1, 2], 'name'],
-			'index on object'                => [new stdClass(), '[0]'],
-			'descend into scalar'            => [(object) ['a' => 5], 'a.b'],
-			'empty array root, object path'  => [[], 'a'],
-			'mid-path mismatch'              => [(object) ['a' => [1, 2]], 'a.b'],
-			'bracket into object mid-path'   => [(object) ['a' => new stdClass()], 'a[0]'],
-			'wildcard over scalar children'  => [(object) ['rows' => [1, 2]], 'rows[*].b'],
-			'object wildcard on array'       => [(object) ['x' => [1, 2]], 'x.*'],
-			'descend into null intermediate' => [(object) ['a' => null], 'a.b'],
+			'property on array'              => [[1, 2], 'name', 'expects object but found array'],
+			'index on object'                => [new stdClass(), '[0]', 'expects array but found stdClass'],
+			'descend into scalar'            => [(object) ['a' => 5], 'a.b', 'expects object but found int'],
+			'empty array root, object path'  => [[], 'a', 'expects object but found array'],
+			'mid-path mismatch'              => [(object) ['a' => [1, 2]], 'a.b', 'expects object but found array'],
+			'bracket into object mid-path'   => [(object) ['a' => new stdClass()], 'a[0]', 'expects array but found stdClass'],
+			'wildcard over scalar children'  => [(object) ['rows' => [1, 2]], 'rows[*].b', 'expects object but found int'],
+			'object wildcard on array'       => [(object) ['x' => [1, 2]], 'x.*', 'expects object but found array'],
+			'descend into null intermediate' => [(object) ['a' => null], 'a.b', 'expects object but found null'],
 		];
 	}
 
@@ -231,6 +232,7 @@ final class HelperTest extends TestCase
 			'remove leaves empty array'    => [(object) ['x' => [1]], 'x[0]', '{"x":[]}'],
 			'remove assoc key no reindex'  => [(object) ['x' => ['a' => 1, 'b' => 2]], 'x[a]', '{"x":{"b":2}}'],
 			'missing path is a no-op'      => [(object) ['a' => 1], 'b', '{"a":1}'],
+			'missing mid-path is a no-op'  => [(object) ['a' => 1], 'b.c', '{"a":1}'],
 			'type mismatch is a no-op'     => [[1, 2], 'name', '[1,2]'],
 			'wildcard clears object'       => [(object) ['a' => 1, 'b' => 2], '*', '{}'],
 			'wildcard clears array'        => [(object) ['x' => [1, 2]], 'x[*]', '{"x":[]}'],
@@ -443,23 +445,25 @@ final class HelperTest extends TestCase
 	// ---------------------------------------------------------- path parsing
 
 	#[DataProvider('invalidPathProvider')]
-	public function testInvalidPathThrows(string $path): void
+	public function testInvalidPathThrows(string $path, string $message): void
 	{
 		$this->expectException(InvalidArgumentException::class);
+		$this->expectExceptionMessage($message);
 		$this->helper->value(new stdClass(), $path);
 	}
 
 	public static function invalidPathProvider(): array
 	{
 		return [
-			'empty path'            => [''],
-			'leading dot'           => ['.a'],
-			'trailing dot'          => ['a.'],
-			'double dot'            => ['a..b'],
-			'empty index'           => ['[]'],
-			'unbalanced bracket'    => ['[a'],
-			'dangling escape'       => ['a\\'],
-			'bare token after index'=> ['[0]x'],
+			'empty path'            => ['', 'Path must not be empty.'],
+			'leading dot'           => ['.a', 'must not start with "."'],
+			'trailing dot'          => ['a.', 'Empty property in path.'],
+			'double dot'            => ['a..b', 'Empty property in path.'],
+			'empty index'           => ['[]', 'Empty index "[]" in path.'],
+			'unbalanced bracket'    => ['[a', 'Unbalanced "[" in path.'],
+			'dangling escape'       => ['a\\', 'Dangling escape in path.'],
+			'dangling escape in index' => ['[a\\', 'Dangling escape in path.'],
+			'bare token after index'=> ['[0]x', 'must be preceded by "."'],
 		];
 	}
 }

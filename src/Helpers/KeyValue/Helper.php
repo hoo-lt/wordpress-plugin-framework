@@ -65,7 +65,7 @@ readonly class Helper implements HelperInterface
 		if ($accessor[2]) {
 			$values = [];
 			foreach ($this->entries($current) as $key => $child) {
-				$values += $this->read($child, $rest, $this->appendSegment($path, $accessor[0], (string) $key));
+				$values += $this->read($child, $rest, $this->appendSegment($path, $accessor[0], $key));
 			}
 
 			return $values;
@@ -96,7 +96,7 @@ readonly class Helper implements HelperInterface
 		if ($accessor[2]) {
 			$result = $current;
 			foreach ($this->entries($current) as $key => $child) {
-				$result = $this->set($result, $accessor[0], (string) $key, $this->write($child, $rest, $value));
+				$result = $this->set($result, $accessor[0], $key, $this->write($child, $rest, $value));
 			}
 
 			return $result;
@@ -132,7 +132,7 @@ readonly class Helper implements HelperInterface
 
 			$result = $current;
 			foreach ($this->entries($current) as $key => $child) {
-				$result = $this->set($result, $accessor[0], (string) $key, $this->remove($child, $rest));
+				$result = $this->set($result, $accessor[0], $key, $this->remove($child, $rest));
 			}
 
 			return $result;
