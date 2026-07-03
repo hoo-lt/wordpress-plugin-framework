@@ -7,13 +7,13 @@ use Hoo\WordPressPluginFramework\Http\Message\Body\Normalizer\NormalizerInterfac
 
 readonly class Normalizer implements NormalizerInterface
 {
-	public function normalizes(mixed $value): bool
+	public function normalizes(mixed $unnormalized): bool
 	{
-		return $value instanceof BackedEnum;
+		return $unnormalized instanceof BackedEnum;
 	}
 
-	public function normalize(mixed $value): int|string
+	public function normalize(mixed $unnormalized): int|string
 	{
-		return $value->value;
+		return $unnormalized->value;
 	}
 }

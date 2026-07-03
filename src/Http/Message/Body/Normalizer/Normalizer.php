@@ -11,46 +11,46 @@ readonly class Normalizer implements NormalizerInterface
 	) {
 	}
 
-	public function normalizes(mixed $value): bool
+	public function normalizes(mixed $unnormalized): bool
 	{
 		return true;
 	}
 
-	public function normalize(mixed $value): mixed
+	public function normalize(mixed $unnormalized): mixed
 	{
 		foreach ($this->normalizers as $normalizer) {
-			if ($normalizer->normalizes($value)) {
-				return $normalizer->normalize($value);
+			if ($normalizer->normalizes($unnormalized)) {
+				return $normalizer->normalize($unnormalized);
 			}
 		}
 
-		if (is_array($value)) {
-			return $this->normalizeArray($value);
+		if (is_array($unnormalized)) {
+			return $this->normalizeArray($unnormalized);
 		}
 
-		if (is_object($value)) {
-			return $this->normalizeObject($value);
+		if (is_object($unnormalized)) {
+			return $this->normalizeObject($unnormalized);
 		}
 
-		return $value;
+		return $unnormalized;
 	}
 
-	protected function normalizeArray(array $array): array
+	protected function normalizeArray(array $unnormalized): array
 	{
 		$normalized = [];
 
-		foreach ($array as $key => $value) {
+		foreach ($unnormalized as $key => $value) {
 			$normalized[$key] = $this->normalize($value);
 		}
 
 		return $normalized;
 	}
 
-	protected function normalizeObject(object $object): object
+	protected function normalizeObject(object $unnormalized): object
 	{
 		$normalized = new stdClass();
 
-		foreach ($object as $key => $value) {
+		foreach ($unnormalized as $key => $value) {
 			$normalized->{$key} = $this->normalize($value);
 		}
 

@@ -7,13 +7,13 @@ use Hoo\WordPressPluginFramework\Http\Message\Body\Normalizer\NormalizerInterfac
 
 readonly class Normalizer implements NormalizerInterface
 {
-	public function normalizes(mixed $value): bool
+	public function normalizes(mixed $unnormalized): bool
 	{
-		return $value instanceof DateTimeInterface;
+		return $unnormalized instanceof DateTimeInterface;
 	}
 
-	public function normalize(mixed $value): string
+	public function normalize(mixed $unnormalized): string
 	{
-		return $value->format(DateTimeInterface::ATOM);
+		return $unnormalized->format(DateTimeInterface::ATOM);
 	}
 }
