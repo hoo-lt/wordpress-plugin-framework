@@ -36,6 +36,9 @@
 	"config": {
 		"allow-plugins": {
 			"infection/extension-installer": true
+		},
+		"platform": {
+			"php": "8.2"
 		}
 	}
 }
