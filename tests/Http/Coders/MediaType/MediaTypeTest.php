@@ -2,10 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Tests\Http\Coders\MediaType;
 
-use Hoo\WordPressPluginFramework\Http\Coders\MediaType\MediaType;
-use Hoo\WordPressPluginFramework\Http\Coders\MediaType\MediaTypeException;
-use Hoo\WordPressPluginFramework\Http\Coders\MediaType\MediaTypeFactory;
-use Hoo\WordPressPluginFramework\Http\Coders\MediaType\MediaTypeFactoryException;
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaType;
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeException;
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeFactory;
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeFactoryException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;

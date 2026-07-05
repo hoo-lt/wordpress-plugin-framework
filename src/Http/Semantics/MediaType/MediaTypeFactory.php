@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Coders\MediaType;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\ParametersFactoryInterface,
@@ -30,7 +30,7 @@ readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 		return new MediaType(
 			$this->createType($type),
 			$this->createSubtype($subtype),
-			$this->parametersFactory->tryCreate($parameters),
+			...$this->parametersFactory->tryCreate($parameters),
 		);
 	}
 

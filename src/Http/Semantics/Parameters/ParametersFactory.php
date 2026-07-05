@@ -38,8 +38,8 @@ readonly class ParametersFactory implements ParametersFactoryInterface
 	 */
 	protected function validate(string $parameters): void
 	{
-		$parameter = '(?:' . Parameter::PATTERN . ')?+';
-		$pattern = '/\A[ \t]*+' . $parameter . '[ \t]*+(?:;[ \t]*+' . $parameter . '[ \t]*+)*+\z/';
+		$pattern = '(?:' . Parameter::PATTERN . ')?+';
+		$pattern = '/\A[ \t]*+' . $pattern . '[ \t]*+(?:;[ \t]*+' . $pattern . '[ \t]*+)*+\z/';
 
 		if (preg_match($pattern, $parameters) !== 1) {
 			throw new ParametersFactoryException('not a valid parameters section');

@@ -12,13 +12,10 @@ readonly class QuotedString implements QuotedStringInterface
 	 */
 	public const PATTERN = '"(?:[\x09\x20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\\\\[\x09\x20-\x7E\x80-\xFF])*+"';
 
-	protected string $quotedString;
-
 	public function __construct(
-		string $quotedString,
+		protected string $quotedString,
 	) {
 		$this->validate($quotedString);
-		$this->quotedString = $this->normalize($quotedString);
 	}
 
 	public function value(): string
@@ -31,15 +28,14 @@ readonly class QuotedString implements QuotedStringInterface
 		return '"' . preg_replace('/([\\\\"])/', '\\\\$1', $this->quotedString) . '"';
 	}
 
+	/**
+	 * the representable content space: HTAB / SP / VCHAR / obs-text —
+	 * qdtext plus the two characters only expressible as quoted pairs
+	 */
 	protected function validate(string $quotedString): void
 	{
-		if (preg_match('/\A' . static::PATTERN . '\z/', $quotedString) !== 1) {
-			throw new QuotedStringException('not a valid quoted string');
+		if (preg_match('/\A[\x09\x20-\x7E\x80-\xFF]*+\z/', $quotedString) !== 1) {
+			throw new QuotedStringException('not a valid quoted string value');
 		}
-	}
-
-	protected function normalize(string $quotedString): string
-	{
-		return preg_replace('/\\\\(.)/s', '$1', substr($quotedString, 1, -1));
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Coders\MediaType;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\Parameter\ParameterInterface,
@@ -9,11 +9,14 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class MediaType implements MediaTypeInterface
 {
+	protected array $parameters;
+
 	public function __construct(
 		protected TokenInterface $type,
 		protected TokenInterface $subtype,
-		protected array $parameters,
+		ParameterInterface ...$parameters,
 	) {
+		$this->parameters = $parameters;
 	}
 
 	public function type(): string

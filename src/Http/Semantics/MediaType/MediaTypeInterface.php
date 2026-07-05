@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Coders\MediaType;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter\ParameterInterface;
 use Stringable;

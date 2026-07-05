@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Semantics\QuotedString\QuotedString,
+	Http\Semantics\QuotedString\QuotedStringFactoryInterface,
 	Http\Semantics\QuotedString\QuotedStringInterface,
 	Http\Semantics\Token\Token,
 	Http\Semantics\Token\TokenInterface,
@@ -11,6 +11,11 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class ParameterFactory implements ParameterFactoryInterface
 {
+	public function __construct(
+		protected QuotedStringFactoryInterface $quotedStringFactory,
+	) {
+	}
+
 	public function create(string $parameter): ParameterInterface
 	{
 		$this->validate($parameter);
@@ -52,7 +57,7 @@ readonly class ParameterFactory implements ParameterFactoryInterface
 	protected function createValue(string $value): TokenInterface|QuotedStringInterface
 	{
 		if (str_starts_with($value, '"')) {
-			return new QuotedString($value);
+			return $this->quotedStringFactory->create($value);
 		}
 
 		return new Token($value);
