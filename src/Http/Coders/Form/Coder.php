@@ -13,7 +13,7 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 	public function mediaTypes(): array
 	{
 		return [
-			'application/x-www-form-urlencoded',
+			$this->mediaTypeFactory->create('application/x-www-form-urlencoded'),
 		];
 	}
 

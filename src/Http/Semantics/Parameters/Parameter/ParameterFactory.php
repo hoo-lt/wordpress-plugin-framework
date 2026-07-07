@@ -18,33 +18,15 @@ readonly class ParameterFactory implements ParameterFactoryInterface
 
 	public function create(string $parameter): ParameterInterface
 	{
-		$this->validate($parameter);
-
 		[
 			$name,
 			$value,
-		] = explode('=', $parameter, 2);
+		] = array_pad(explode('=', $parameter, 2), 2, '');
 
 		return new Parameter(
 			$this->createName($name),
 			$this->createValue($value),
 		);
-	}
-
-	public function tryCreate(?string $parameter): ?ParameterInterface
-	{
-		if ($parameter === null) {
-			return null;
-		}
-
-		return $this->create($parameter);
-	}
-
-	protected function validate(string $parameter): void
-	{
-		if (preg_match('/\A' . Parameter::PATTERN . '\z/', $parameter) !== 1) {
-			throw new ParameterFactoryException('not a valid parameter');
-		}
 	}
 
 	protected function createName(string $name): TokenInterface

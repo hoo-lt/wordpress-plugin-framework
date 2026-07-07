@@ -4,19 +4,17 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\Parameter\ParameterInterface,
+	Http\Semantics\Parameters\ParametersInterface,
 	Http\Semantics\Token\TokenInterface,
 };
 
 readonly class MediaType implements MediaTypeInterface
 {
-	protected array $parameters;
-
 	public function __construct(
 		protected TokenInterface $type,
 		protected TokenInterface $subtype,
-		ParameterInterface ...$parameters,
+		protected ParametersInterface $parameters,
 	) {
-		$this->parameters = $parameters;
 	}
 
 	public function type(): string
@@ -29,37 +27,19 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->subtype;
 	}
 
-	public function parameters(): array
+	public function parameters(): ParametersInterface
 	{
 		return $this->parameters;
 	}
 
 	public function parameter(string $name): ?ParameterInterface
 	{
-		$name = strtolower($name);
-
-		foreach ($this->parameters as $parameter) {
-			if ($parameter->name() === $name) {
-				return $parameter;
-			}
-		}
-
-		return null;
+		return $this->parameters->parameter($name);
 	}
 
 	public function charset(): ?string
 	{
-		return $this->parameter('charset')?->value();
-	}
-
-	public function __toString(): string
-	{
-		$mediaType = "{$this->type}/{$this->subtype}";
-
-		foreach ($this->parameters as $parameter) {
-			$mediaType .= "; {$parameter}";
-		}
-
-		return $mediaType;
+		$charset = $this->parameter('charset')?->value();
+		return $charset === null ? null : strtolower($charset);
 	}
 }

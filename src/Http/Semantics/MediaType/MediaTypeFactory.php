@@ -30,7 +30,7 @@ readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 		return new MediaType(
 			$this->createType($type),
 			$this->createSubtype($subtype),
-			...$this->parametersFactory->tryCreate($parameters),
+			$this->parametersFactory->create($parameters ?? ''),
 		);
 	}
 

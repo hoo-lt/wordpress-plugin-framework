@@ -4,34 +4,17 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\QuotedString;
 
 readonly class QuotedString implements QuotedStringInterface
 {
-	/**
-	 * quoted-string = DQUOTE *( qdtext / quoted-pair ) DQUOTE per RFC 9110 section 5.6.4
-	 *
-	 * qdtext = HTAB / SP / %x21 / %x23-5B / %x5D-7E / obs-text
-	 * quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
-	 */
-	public const PATTERN = '"(?:[\x09\x20\x21\x23-\x5B\x5D-\x7E\x80-\xFF]|\\\\[\x09\x20-\x7E\x80-\xFF])*+"';
-
 	public function __construct(
 		protected string $quotedString,
 	) {
 		$this->validate($quotedString);
 	}
 
-	public function value(): string
+	public function __toString(): string
 	{
 		return $this->quotedString;
 	}
 
-	public function __toString(): string
-	{
-		return '"' . preg_replace('/([\\\\"])/', '\\\\$1', $this->quotedString) . '"';
-	}
-
-	/**
-	 * the representable content space: HTAB / SP / VCHAR / obs-text —
-	 * qdtext plus the two characters only expressible as quoted pairs
-	 */
 	protected function validate(string $quotedString): void
 	{
 		if (preg_match('/\A[\x09\x20-\x7E\x80-\xFF]*+\z/', $quotedString) !== 1) {

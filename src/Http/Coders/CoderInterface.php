@@ -2,9 +2,11 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders;
 
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeInterface;
+
 interface CoderInterface
 {
-	public function codes(string $mediaType): bool;
+	public function codes(MediaTypeInterface $mediaType): bool;
 	public function mediaTypes(): array;
 
 	public function decodes(mixed $encoded): bool;

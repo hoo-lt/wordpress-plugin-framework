@@ -6,5 +6,4 @@ use Stringable;
 
 interface QuotedStringInterface extends Stringable
 {
-	public function value(): string;
 }

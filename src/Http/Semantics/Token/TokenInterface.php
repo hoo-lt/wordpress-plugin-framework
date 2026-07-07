@@ -6,5 +6,4 @@ use Stringable;
 
 interface TokenInterface extends Stringable
 {
-	public function value(): string;
 }

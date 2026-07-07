@@ -14,7 +14,7 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 	public function mediaTypes(): array
 	{
 		return [
-			'application/json',
+			$this->mediaTypeFactory->create('application/json'),
 		];
 	}
 

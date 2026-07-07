@@ -2,10 +2,13 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter;
 
-use Stringable;
+use Hoo\WordPressPluginFramework\{
+	Http\Semantics\QuotedString\QuotedStringInterface,
+	Http\Semantics\Token\TokenInterface,
+};
 
-interface ParameterInterface extends Stringable
+interface ParameterInterface
 {
-	public function name(): string;
-	public function value(): string;
+	public function name(): TokenInterface;
+	public function value(): TokenInterface|QuotedStringInterface;
 }
