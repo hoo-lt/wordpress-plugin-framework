@@ -6,6 +6,7 @@ use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,
 	Http\Coders\CoderFactoryInterface,
 	Http\Message\Body\Normalizer\NormalizerInterface,
+	Http\Semantics\MediaType\MediaTypeFactoryInterface,
 };
 
 readonly class BodyFactory implements BodyFactoryInterface
@@ -14,6 +15,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 		protected HelperInterface $helper,
 		protected CoderFactoryInterface $coderFactory,
 		protected NormalizerInterface $normalizer,
+		protected MediaTypeFactoryInterface $mediaTypeFactory,
 	) {
 	}
 
@@ -21,11 +23,12 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$body = $this->normalizer->normalize($body);
 
-		if ($contentType === null) {
+		$mediaType = $this->mediaTypeFactory->tryCreate($contentType);
+		if ($mediaType === null) {
 			throw new BodyFactoryException('the content type is required');
 		}
 
-		$encoder = $this->coderFactory->tryCreateEncoder($body, $contentType);
+		$encoder = $this->coderFactory->tryCreateEncoder($body, $mediaType);
 		if ($encoder === null) {
 			throw new BodyFactoryException("no coder encodes {$contentType} content type");
 		}
@@ -51,11 +54,12 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface
 	{
-		if ($contentType === null) {
+		$mediaType = $this->mediaTypeFactory->tryCreate($contentType);
+		if ($mediaType === null) {
 			throw new BodyFactoryException('the content type is required');
 		}
 
-		$decoder = $this->coderFactory->tryCreateDecoder($body, $contentType);
+		$decoder = $this->coderFactory->tryCreateDecoder($body, $mediaType);
 		if ($decoder === null) {
 			throw new BodyFactoryException("no coder decodes {$contentType} content type");
 		}

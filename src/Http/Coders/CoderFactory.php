@@ -2,6 +2,8 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders;
 
+use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeInterface;
+
 readonly class CoderFactory implements CoderFactoryInterface
 {
 	public function __construct(
@@ -9,7 +11,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 	) {
 	}
 
-	public function createDecoder(mixed $encoded, string $mediaType): CoderInterface
+	public function createDecoder(mixed $encoded, MediaTypeInterface $mediaType): CoderInterface
 	{
 		$coder = $this->tryCreateDecoder($encoded, $mediaType);
 		if ($coder === null) {
@@ -19,7 +21,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryCreateDecoder(mixed $encoded, string $mediaType): ?CoderInterface
+	public function tryCreateDecoder(mixed $encoded, MediaTypeInterface $mediaType): ?CoderInterface
 	{
 		foreach ($this->coders as $coder) {
 			if (
@@ -33,7 +35,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return null;
 	}
 
-	public function createEncoder(mixed $decoded, string $mediaType): CoderInterface
+	public function createEncoder(mixed $decoded, MediaTypeInterface $mediaType): CoderInterface
 	{
 		$coder = $this->tryCreateEncoder($decoded, $mediaType);
 		if ($coder === null) {
@@ -43,7 +45,7 @@ readonly class CoderFactory implements CoderFactoryInterface
 		return $coder;
 	}
 
-	public function tryCreateEncoder(mixed $decoded, string $mediaType): ?CoderInterface
+	public function tryCreateEncoder(mixed $decoded, MediaTypeInterface $mediaType): ?CoderInterface
 	{
 		foreach ($this->coders as $coder) {
 			if (
