@@ -19,13 +19,13 @@ abstract readonly class AbstractCoder implements CoderInterface
 		$mediaTypes = $this->mediaTypes();
 		foreach ($mediaTypes as $mt) {
 			if (
-				$mt->type() !== $mediaType->type() ||
-				$mt->subtype() !== $mediaType->subtype()
+				$mt->type() === $mediaType->type() &&
+				$mt->subtype() === $mediaType->subtype()
 			) {
-				return false;
+				return true;
 			}
 		}
 
-		return true;
+		return false;
 	}
 }
