@@ -20,12 +20,12 @@ readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 		[
 			$typeSubtype,
 			$parameters,
-		] = array_pad(explode(';', trim($mediaType), 2), 2, null);
+		] = array_pad(explode(';', $mediaType, 2), 2, null);
 
 		[
 			$type,
 			$subtype,
-		] = array_pad(explode('/', trim($typeSubtype), 2), 2, '');
+		] = array_pad(explode('/', trim($typeSubtype, " \t"), 2), 2, '');
 
 		return new MediaType(
 			$this->createType($type),

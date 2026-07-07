@@ -2,7 +2,8 @@
     "$schema": "vendor/infection/infection/resources/schema.json",
     "source": {
         "directories": [
-            "src/Helpers/KeyValue"
+            "src/Helpers/KeyValue",
+            "src/Http/Semantics"
         ],
         "excludes": [
             "OldHelper.php"
@@ -13,6 +14,17 @@
         "text": "infection.log"
     },
     "mutators": {
-        "@default": true
+        "@default": true,
+        "ProtectedVisibility": {
+            "ignore": [
+                "Hoo\\WordPressPluginFramework\\Http\\Semantics\\*"
+            ]
+        },
+        "IncrementInteger": {
+            "ignore": [
+                "Hoo\\WordPressPluginFramework\\Http\\Semantics\\MediaType\\MediaTypeFactory::create",
+                "Hoo\\WordPressPluginFramework\\Http\\Semantics\\Parameters\\Parameter\\ParameterFactory::create"
+            ]
+        }
     }
 }
