@@ -79,6 +79,8 @@ final class MediaTypeFactoryTest extends TestCase
 			'name case-insensitive' => ['text/html; CharSet=utf-8', 'utf-8'],
 			'first duplicate wins' => ['text/html; charset=utf-8; charset=ascii', 'utf-8'],
 			'after quoted semicolon' => ['text/html; title="a;b"; charset=utf-8', 'utf-8'],
+			'after empty parameter slots' => ['text/html;;charset=utf-8', 'utf-8'],
+			'quoted uppercase decoded then lowercased' => ['text/html; charset="UTF-8"', 'utf-8'],
 		];
 	}
 
@@ -88,6 +90,17 @@ final class MediaTypeFactoryTest extends TestCase
 
 		$this->assertCount(2, $mediaType->parameters());
 		$this->assertSame('flowed', (string) $mediaType->parameter('format')->value());
+	}
+
+	/**
+	 * "+" and "." are tchars, so structured-syntax suffixes parse intact
+	 */
+	public function testStructuredSyntaxSuffix(): void
+	{
+		$mediaType = $this->factory->create('application/vnd.api+json');
+
+		$this->assertSame('application', $mediaType->type());
+		$this->assertSame('vnd.api+json', $mediaType->subtype());
 	}
 
 	public function testTrailingSeparatorIsLegal(): void

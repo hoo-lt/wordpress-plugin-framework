@@ -48,6 +48,7 @@ final class QuotedStringTest extends TestCase
 		return [
 			'null byte' => ["\x00"],
 			'bell' => ["\x07"],
+			'backspace (boundary below HTAB)' => ["\x08"],
 			'line feed' => ["a\nb"],
 			'vertical tab' => ["\x0B"],
 			'carriage return' => ["a\rb"],

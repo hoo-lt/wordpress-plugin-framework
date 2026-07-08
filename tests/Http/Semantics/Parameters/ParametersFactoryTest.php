@@ -7,6 +7,7 @@ use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter\ParameterFa
 use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameters;
 use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\ParametersFactory;
 use Hoo\WordPressPluginFramework\Http\Semantics\QuotedString\QuotedStringFactory;
+use Hoo\WordPressPluginFramework\Http\Semantics\QuotedString\QuotedStringFactoryException;
 use Hoo\WordPressPluginFramework\Http\Semantics\Token\TokenException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -80,6 +81,13 @@ final class ParametersFactoryTest extends TestCase
 		$this->assertSame('utf-8', (string) $parameters->parameter('charset')->value());
 	}
 
+	public function testSkippedSlotsLeaveNoGapsInIteration(): void
+	{
+		$parameters = $this->factory->create('; charset=utf-8 ; ; level=1;');
+
+		$this->assertSame([0, 1], array_keys(iterator_to_array($parameters)));
+	}
+
 	public function testSemicolonInsideQuotedStringIsNotASeparator(): void
 	{
 		$parameters = $this->factory->create('title="a;b"; charset=utf-8');
@@ -96,6 +104,40 @@ final class ParametersFactoryTest extends TestCase
 		$this->assertCount(2, $parameters);
 		$this->assertSame('a";b', (string) $parameters->parameter('title')->value());
 		$this->assertSame('1', (string) $parameters->parameter('level')->value());
+	}
+
+	public function testSplitterReentersAfterQuotedString(): void
+	{
+		$parameters = $this->factory->create('a="1;2"; b="3;4"');
+
+		$this->assertCount(2, $parameters);
+		$this->assertSame('1;2', (string) $parameters->parameter('a')->value());
+		$this->assertSame('3;4', (string) $parameters->parameter('b')->value());
+	}
+
+	public function testEscapedBackslashBeforeClosingQuoteDoesNotSwallowSeparator(): void
+	{
+		$parameters = $this->factory->create('a="x\\\\"; b=1');
+
+		$this->assertCount(2, $parameters);
+		$this->assertSame('x\\', (string) $parameters->parameter('a')->value());
+		$this->assertSame('1', (string) $parameters->parameter('b')->value());
+	}
+
+	/**
+	 * ows-only input corresponds to "type/subtype; " on the wire,
+	 * which the grammar allows as an empty parameter slot
+	 */
+	public function testOwsOnlyWireIsEmptyList(): void
+	{
+		$this->assertCount(0, $this->factory->create(" \t "));
+	}
+
+	public function testUnterminatedQuotedStringIsRejected(): void
+	{
+		$this->expectException(QuotedStringFactoryException::class);
+
+		$this->factory->create('a="x; b=1');
 	}
 
 	public function testValuelessParameterIsRejected(): void

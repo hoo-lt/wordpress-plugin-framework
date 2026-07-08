@@ -25,6 +25,6 @@ readonly class ParametersFactory implements ParametersFactoryInterface
 	{
 		preg_match_all('/(?:"(?:\\\\.|[^"\\\\])*+"|[^;])++/', $parameters, $matches);
 
-		return array_filter(array_map(fn($element) => trim($element, " \t"), $matches[0]), fn($element) => $element !== '');
+		return array_values(array_filter(array_map(fn($element) => trim($element, " \t"), $matches[0]), fn($element) => $element !== ''));
 	}
 }

@@ -55,6 +55,17 @@ final class ParameterFactoryTest extends TestCase
 		$this->assertSame('a "b" c', (string) $parameter->value());
 	}
 
+	/**
+	 * "=" is qdtext, so it is only a name/value separator outside quotes
+	 */
+	public function testEqualsInsideQuotedValue(): void
+	{
+		$parameter = $this->factory->create('filename="a=b"');
+
+		$this->assertSame('filename', (string) $parameter->name());
+		$this->assertSame('a=b', (string) $parameter->value());
+	}
+
 	public function testEmptyQuotedStringValueIsPresentButEmpty(): void
 	{
 		$this->assertSame('', (string) $this->factory->create('charset=""')->value());
