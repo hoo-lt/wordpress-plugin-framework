@@ -4,12 +4,15 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\ParametersFactoryInterface,
-	Http\Semantics\Token\Token,
-	Http\Semantics\Token\TokenInterface,
+	Http\Semantics\Semantics,
+	Http\Semantics\Subtype\Subtype,
+	Http\Semantics\Type\Type,
 };
 
 readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 {
+	protected const ESSENCE = '/\A' . Semantics::TYPE . '\/' . Semantics::SUBTYPE . '/';   // media-type essence: type "/" subtype — a field-value has no surrounding OWS (RFC 9110 §5.5)
+
 	public function __construct(
 		protected ParametersFactoryInterface $parametersFactory,
 	) {
@@ -17,43 +20,17 @@ readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 
 	public function create(string $mediaType): MediaTypeInterface
 	{
-		[
-			$typeSubtype,
-			$parameters,
-		] = array_pad(explode(';', $mediaType, 2), 2, null);
-
-		[
-			$type,
-			$subtype,
-		] = array_pad(explode('/', trim($typeSubtype, " \t"), 2), 2, '');
+		preg_match(self::ESSENCE, $mediaType, $essence);
 
 		return new MediaType(
-			$this->createType($type),
-			$this->createSubtype($subtype),
-			$this->parametersFactory->create($parameters ?? ''),
+			new Type(strtolower($essence['type'] ?? '')),         // type is case-insensitive
+			new Subtype(strtolower($essence['subtype'] ?? '')),   // subtype is case-insensitive
+			$this->parametersFactory->create($mediaType),
 		);
 	}
 
 	public function tryCreate(?string $mediaType): ?MediaTypeInterface
 	{
-		if ($mediaType === null) {
-			return null;
-		}
-
-		return $this->create($mediaType);
-	}
-
-	protected function createType(string $type): TokenInterface
-	{
-		return new Token(
-			strtolower($type),
-		);
-	}
-
-	protected function createSubtype(string $subtype): TokenInterface
-	{
-		return new Token(
-			strtolower($subtype),
-		);
+		return $mediaType === null ? null : $this->create($mediaType);
 	}
 }

@@ -3,7 +3,6 @@
 namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters;
 
 use ArrayIterator;
-use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter\ParameterInterface;
 use Traversable;
 
 readonly class Parameters implements ParametersInterface
@@ -13,11 +12,11 @@ readonly class Parameters implements ParametersInterface
 	) {
 	}
 
-	public function parameter(string $name): ?ParameterInterface
+	public function parameter(string $name): ?string
 	{
 		foreach ($this->parameters as $parameter) {
-			if (strtolower($parameter->name()) === strtolower($name)) {
-				return $parameter;
+			if ((string) $parameter->name() === strtolower($name)) {
+				return (string) $parameter->value();
 			}
 		}
 

@@ -3,24 +3,24 @@
 namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Semantics\QuotedString\QuotedStringInterface,
-	Http\Semantics\Token\TokenInterface,
+	Http\Semantics\Parameters\Parameter\Name\NameInterface,
+	Http\Semantics\Parameters\Parameter\Value\ValueInterface,
 };
 
 readonly class Parameter implements ParameterInterface
 {
 	public function __construct(
-		protected TokenInterface $name,
-		protected TokenInterface|QuotedStringInterface $value,
+		protected NameInterface $name,
+		protected ValueInterface $value,
 	) {
 	}
 
-	public function name(): TokenInterface
+	public function name(): string
 	{
 		return $this->name;
 	}
 
-	public function value(): TokenInterface|QuotedStringInterface
+	public function value(): string
 	{
 		return $this->value;
 	}
