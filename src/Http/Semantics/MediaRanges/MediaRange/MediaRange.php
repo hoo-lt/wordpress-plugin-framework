@@ -5,7 +5,6 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange;
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\Parameter\ParameterInterface,
 	Http\Semantics\Parameters\ParametersInterface,
-	Http\Semantics\Weight\WeightInterface,
 };
 
 readonly class MediaRange implements MediaRangeInterface
@@ -14,7 +13,7 @@ readonly class MediaRange implements MediaRangeInterface
 		protected string $type,
 		protected string $subtype,
 		protected ParametersInterface $parameters,
-		protected ?WeightInterface $weight = null,
+		protected ?float $weight = null,   // null = no q on the wire; float = q was present (RFC 9110 §12.4.2)
 	) {
 	}
 
@@ -38,7 +37,7 @@ readonly class MediaRange implements MediaRangeInterface
 		return $this->parameters->parameter($name);
 	}
 
-	public function weight(): ?WeightInterface
+	public function weight(): ?float
 	{
 		return $this->weight;
 	}

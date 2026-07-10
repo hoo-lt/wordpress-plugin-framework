@@ -25,6 +25,13 @@
                 "Hoo\\WordPressPluginFramework\\Http\\Semantics\\MediaType\\MediaTypeFactory::create",
                 "Hoo\\WordPressPluginFramework\\Http\\Semantics\\Parameters\\Parameter\\ParameterFactory::create"
             ]
+        },
+        // Equivalent mutant: dropping (float) leaves qvalue a numeric string, but MediaRange's
+        // ?float constructor coerces it identically (no strict_types), so no test can observe it.
+        "CastFloat": {
+            "ignore": [
+                "Hoo\\WordPressPluginFramework\\Http\\Semantics\\MediaRanges\\MediaRange\\MediaRangeFactory::create"
+            ]
         }
     }
 }

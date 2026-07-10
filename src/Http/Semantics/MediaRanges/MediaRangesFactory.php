@@ -13,13 +13,16 @@ readonly class MediaRangesFactory implements MediaRangesFactoryInterface
 	// List framing ( OWS "," OWS ) and empty elements are consumed here; the captured <element>
 	// is an exact media-range[weight] with no leading/trailing OWS. Trailing OWS is trimmed by
 	// forcing the last captured octet to be a non-OWS char, handing whitespace back to the outer OWS.
+	// Each quoted-string / non-comma choice is an atomic group so a comma inside a quoted-string is
+	// never re-split as list framing (RFC 9110 §5.6.4): backtracking may drop a whole quoted-string
+	// from the interior, but may never swap it for the [^,] branch and break it at an interior comma.
 	protected const ELEMENT = '/'
 		. Semantics::OWS                                                                                       // leading list OWS — consumed, never captured
 		. '(?<element>'
-		.     '(?:' . Semantics::QUOTED_STRING . '|[^,' . Semantics::SP . Semantics::HTAB . '])'               // first octet: never OWS
+		.     '(?>' . Semantics::QUOTED_STRING . '|[^,' . Semantics::SP . Semantics::HTAB . '])'               // first octet: never OWS
 		.     '(?:'
-		.         '(?:' . Semantics::QUOTED_STRING . '|[^,])*'                                                  // interior: internal OWS + params; commas only inside quoted-string
-		.         '(?:' . Semantics::QUOTED_STRING . '|[^,' . Semantics::SP . Semantics::HTAB . '])'            // last octet: never OWS → trailing OWS excluded
+		.         '(?>' . Semantics::QUOTED_STRING . '|[^,])*'                                                  // interior: internal OWS + params; commas only inside quoted-string
+		.         '(?>' . Semantics::QUOTED_STRING . '|[^,' . Semantics::SP . Semantics::HTAB . '])'            // last octet: never OWS → trailing OWS excluded
 		.     ')?'
 		. ')'
 		. Semantics::OWS . '(?:,|\z)'                                                                          // trailing list OWS + delimiter — consumed, never captured
