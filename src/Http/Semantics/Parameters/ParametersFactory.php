@@ -4,8 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\Parameter\Parameter,
-	Http\Semantics\Parameters\Parameter\Name\Name,
-	Http\Semantics\Parameters\Parameter\Value\Value,
 	Http\Semantics\Semantics,
 };
 
@@ -24,8 +22,8 @@ readonly class ParametersFactory implements ParametersFactoryInterface
 			$quoted = $parameter['quoted'] ?? '';   // '' when the token branch fired (unmatched group); a quoted-string is always ≥2 chars ("")
 
 			$parameters[] = new Parameter(
-				new Name(strtolower($parameter['name'])),                                  // parameter names are case-insensitive
-				new Value($quoted !== '' ? $this->unquote($quoted) : $parameter['token']),  // token verbatim; quoted-string unquoted
+				strtolower($parameter['name']),                                  // parameter names are case-insensitive
+				$quoted !== '' ? $this->unquote($quoted) : $parameter['token'],   // token verbatim; quoted-string unquoted
 			);
 		}
 

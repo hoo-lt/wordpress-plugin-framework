@@ -8,5 +8,5 @@ use IteratorAggregate;
 
 interface ParametersInterface extends IteratorAggregate, Countable
 {
-	public function parameter(string $name): ?string;
+	public function parameter(string $name): ?ParameterInterface;
 }

@@ -3,16 +3,15 @@
 namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
 use Hoo\WordPressPluginFramework\{
+	Http\Semantics\Parameters\Parameter\ParameterInterface,
 	Http\Semantics\Parameters\ParametersInterface,
-	Http\Semantics\Subtype\SubtypeInterface,
-	Http\Semantics\Type\TypeInterface,
 };
 
 readonly class MediaType implements MediaTypeInterface
 {
 	public function __construct(
-		protected TypeInterface $type,
-		protected SubtypeInterface $subtype,
+		protected string $type,
+		protected string $subtype,
 		protected ParametersInterface $parameters,
 	) {
 	}
@@ -32,7 +31,7 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->parameters;
 	}
 
-	public function parameter(string $name): ?string
+	public function parameter(string $name): ?ParameterInterface
 	{
 		return $this->parameters->parameter($name);
 	}

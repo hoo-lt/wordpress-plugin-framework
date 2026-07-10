@@ -5,16 +5,14 @@ namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange;
 use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Parameters\Parameter\ParameterInterface,
 	Http\Semantics\Parameters\ParametersInterface,
-	Http\Semantics\Subtype\SubtypeInterface,
-	Http\Semantics\Type\TypeInterface,
 	Http\Semantics\Weight\WeightInterface,
 };
 
 readonly class MediaRange implements MediaRangeInterface
 {
 	public function __construct(
-		protected TypeInterface $type,
-		protected SubtypeInterface $subtype,
+		protected string $type,
+		protected string $subtype,
 		protected ParametersInterface $parameters,
 		protected ?WeightInterface $weight = null,
 	) {
@@ -22,12 +20,12 @@ readonly class MediaRange implements MediaRangeInterface
 
 	public function type(): string
 	{
-		return (string) $this->type;
+		return $this->type;
 	}
 
 	public function subtype(): string
 	{
-		return (string) $this->subtype;
+		return $this->subtype;
 	}
 
 	public function parameters(): ParametersInterface

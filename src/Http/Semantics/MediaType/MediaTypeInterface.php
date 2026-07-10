@@ -12,5 +12,5 @@ interface MediaTypeInterface
 	public function type(): string;
 	public function subtype(): string;
 	public function parameters(): ParametersInterface;
-	public function parameter(string $name): ?string;
+	public function parameter(string $name): ?ParameterInterface;
 }
