@@ -44,39 +44,39 @@ final class MediaRangesFactoryTest extends TestCase
 	{
 		return [
 			// --- basic list framing -------------------------------------------------
-			'single element'              => ['text/html', [['text', 'html', null, []]]],
-			'two elements'                => ['text/html,application/json', [['text', 'html', null, []], ['application', 'json', null, []]]],
-			'OWS after comma'             => ['text/html, application/json', [['text', 'html', null, []], ['application', 'json', null, []]]],
-			'OWS around comma'            => ['text/html , application/json', [['text', 'html', null, []], ['application', 'json', null, []]]],
-			'HTAB after comma'            => ["text/html,\tapplication/json", [['text', 'html', null, []], ['application', 'json', null, []]]],
-			'leading and trailing OWS'    => [' text/html ', [['text', 'html', null, []]]],
+			'single element'              => ['text/html', [['text', 'html', 1.0, []]]],
+			'two elements'                => ['text/html,application/json', [['text', 'html', 1.0, []], ['application', 'json', 1.0, []]]],
+			'OWS after comma'             => ['text/html, application/json', [['text', 'html', 1.0, []], ['application', 'json', 1.0, []]]],
+			'OWS around comma'            => ['text/html , application/json', [['text', 'html', 1.0, []], ['application', 'json', 1.0, []]]],
+			'HTAB after comma'            => ["text/html,\tapplication/json", [['text', 'html', 1.0, []], ['application', 'json', 1.0, []]]],
+			'leading and trailing OWS'    => [' text/html ', [['text', 'html', 1.0, []]]],
 
 			// --- empty elements dropped (§5.6.1) -----------------------------------
-			'empty element in the middle' => ['text/html,,application/json', [['text', 'html', null, []], ['application', 'json', null, []]]],
-			'leading comma'               => [',text/html', [['text', 'html', null, []]]],
-			'trailing comma'              => ['text/html,', [['text', 'html', null, []]]],
+			'empty element in the middle' => ['text/html,,application/json', [['text', 'html', 1.0, []], ['application', 'json', 1.0, []]]],
+			'leading comma'               => [',text/html', [['text', 'html', 1.0, []]]],
+			'trailing comma'              => ['text/html,', [['text', 'html', 1.0, []]]],
 			'only commas'                 => [',,', []],
 			'blank commas with OWS'       => [' , , ', []],
 			'empty string'                => ['', []],
 
 			// --- weights per element (§12.4.2) -------------------------------------
 			'weights per element'         => ['text/html;q=0.5,application/json;q=0.8', [['text', 'html', 0.5, []], ['application', 'json', 0.8, []]]],
-			'trailing OWS before comma'   => ['text/*;q=0.5 , text/html', [['text', '*', 0.5, []], ['text', 'html', null, []]]],
+			'trailing OWS before comma'   => ['text/*;q=0.5 , text/html', [['text', '*', 0.5, []], ['text', 'html', 1.0, []]]],
 
 			// --- quoted comma is data, not a delimiter -----------------------------
-			'quoted comma inside element' => ['text/html;title="a,b",application/json', [['text', 'html', null, [['title', 'a,b']]], ['application', 'json', null, []]]],
-			'escaped quote before comma'  => ['t/h;x="a\",b",u/v', [['t', 'h', null, [['x', 'a",b']]], ['u', 'v', null, []]]],
-			'quoted end, then list OWS'   => ['t/h;x="a,b" ,u/v', [['t', 'h', null, [['x', 'a,b']]], ['u', 'v', null, []]]],
+			'quoted comma inside element' => ['text/html;title="a,b",application/json', [['text', 'html', 1.0, [['title', 'a,b']]], ['application', 'json', 1.0, []]]],
+			'escaped quote before comma'  => ['t/h;x="a\",b",u/v', [['t', 'h', 1.0, [['x', 'a",b']]], ['u', 'v', 1.0, []]]],
+			'quoted end, then list OWS'   => ['t/h;x="a,b" ,u/v', [['t', 'h', 1.0, [['x', 'a,b']]], ['u', 'v', 1.0, []]]],
 
 			// --- comma is always framing outside a quoted-string (§5.6.1) ----------
-			'comma inside a bad qvalue'   => ['text/html;q=0,5', [['text', 'html', 0.0, []], ['', '', null, []]]],   // "5" is its own (garbage) element
+			'comma inside a bad qvalue'   => ['text/html;q=0,5', [['text', 'html', 0.0, []], ['', '', 1.0, []]]],   // "5" is its own (garbage) element
 
 			// --- garbage containment ------------------------------------------------
-			'lone star is not a range'    => ['*', [['', '', null, []]]],                                            // Accept knows "*/*", never a bare "*"
-			'LF is not list OWS'          => ["text/html,\napplication/json", [['text', 'html', null, []], ['', '', null, []]]],   // strict: SP/HTAB only; the LF poisons its element
+			'lone star is not a range'    => ['*', [['', '', 1.0, []]]],                                            // Accept knows "*/*", never a bare "*"
+			'LF is not list OWS'          => ["text/html,\napplication/json", [['text', 'html', 1.0, []], ['', '', 1.0, []]]],   // strict: SP/HTAB only; the LF poisons its element
 
 			// --- realistic Accept, order preserved ---------------------------------
-			'graded wildcards'            => ['*/*;q=0.1, text/*;q=0.5, text/html', [['*', '*', 0.1, []], ['text', '*', 0.5, []], ['text', 'html', null, []]]],
+			'graded wildcards'            => ['*/*;q=0.1, text/*;q=0.5, text/html', [['*', '*', 0.1, []], ['text', '*', 0.5, []], ['text', 'html', 1.0, []]]],
 
 			// --- RFC 9110 §12.5.1's own elaborate example ---------------------------
 			'§12.5.1 example'             => [
@@ -84,7 +84,7 @@ final class MediaRangesFactoryTest extends TestCase
 				[
 					['text', '*', 0.3, []],
 					['text', 'plain', 0.7, []],
-					['text', 'plain', null, [['format', 'flowed']]],
+					['text', 'plain', 1.0, [['format', 'flowed']]],
 					['text', 'plain', 0.4, [['format', 'fixed']]],
 					['*', '*', 0.5, []],
 				],
@@ -113,7 +113,7 @@ final class MediaRangesFactoryTest extends TestCase
 	}
 
 	/**
-	 * @return list<array{0: string, 1: string, 2: ?float, 3: list<array{0: string, 1: string}>}>
+	 * @return list<array{0: string, 1: string, 2: float, 3: list<array{0: string, 1: string}>}>
 	 */
 	private static function structure(iterable $ranges): array
 	{
@@ -126,7 +126,7 @@ final class MediaRangesFactoryTest extends TestCase
 	}
 
 	/**
-	 * @return array{0: string, 1: string, 2: ?float, 3: list<array{0: string, 1: string}>}
+	 * @return array{0: string, 1: string, 2: float, 3: list<array{0: string, 1: string}>}
 	 */
 	private static function describe(MediaRangeInterface $range): array
 	{

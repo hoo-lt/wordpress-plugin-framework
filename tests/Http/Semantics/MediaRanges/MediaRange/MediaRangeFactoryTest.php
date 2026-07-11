@@ -4,8 +4,7 @@ namespace Hoo\WordPressPluginFramework\Tests\Http\Semantics\MediaRanges\MediaRan
 
 use Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange\MediaRange;
 use Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange\MediaRangeFactory;
-use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\ParametersFactory;
-use Hoo\WordPressPluginFramework\Http\Semantics\Parameters\ParametersInterface;
+use Hoo\WordPressPluginFramework\Http\Semantics\Parameter\ParameterFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -18,10 +17,11 @@ use PHPUnit\Framework\TestCase;
  *  - "Recipients SHOULD process any parameter named "q" as weight, regardless of parameter
  *    ordering." (§12.5.1) — a valid weight is never a media-range parameter (the media type
  *    registry disallows parameters named "q"); with duplicates, the first valid q wins — the
- *    same rule Parameters::parameter() applies to any duplicate name;
+ *    same rule MediaRange::parameter() applies to any duplicate name;
  *  - the weight grammar is bare ("q=" qvalue): a q whose value is quoted, out of range, or
  *    over-precise is no weight at all — it stays on the wire as a visible parameter;
- *  - weight absent on the wire → null, never a defaulted 1.0 (the q=1 default is negotiation's);
+ *  - weight absent on the wire decodes to 1.0 (§12.4.2: "If no 'q' parameter is present, the
+ *    default weight is 1") — the VO holds the decoded weight, and only qvalue exists on the wire;
  *  - no whitespace around "=" — "not even bad whitespace" (§5.6.6 Note): such a token is
  *    neither weight nor parameter;
  *  - quoted-string content is inviolable: a "q=..." inside quotes is data.
@@ -38,7 +38,7 @@ final class MediaRangeFactoryTest extends TestCase
 	}
 
 	#[DataProvider('mediaRangeProvider')]
-	public function testCreate(string $wire, string $type, string $subtype, ?float $weight, array $pairs): void
+	public function testCreate(string $wire, string $type, string $subtype, float $weight, array $pairs): void
 	{
 		$range = $this->factory->create($wire);
 
@@ -52,13 +52,13 @@ final class MediaRangeFactoryTest extends TestCase
 	{
 		return [
 			// --- essence ------------------------------------------------------------
-			'bare essence'                   => ['text/html', 'text', 'html', null, []],
-			'wildcard */*'                   => ['*/*', '*', '*', null, []],
-			'type with wildcard subtype'     => ['text/*', 'text', '*', null, []],
-			'essence lowercased'             => ['TEXT/HTML', 'text', 'html', null, []],
-			'essence and params lowercased'  => ['TEXT/HTML;CHARSET=UTF-8', 'text', 'html', null, [['charset', 'UTF-8']]],
-			'structured suffix subtype'      => ['application/vnd.api+json', 'application', 'vnd.api+json', null, []],
-			'star type, concrete subtype'    => ['*/html', '*', 'html', null, []],   // "*" is a token char: grammar admits it; ranking it is negotiation's concern
+			'bare essence'                   => ['text/html', 'text', 'html', 1.0, []],
+			'wildcard */*'                   => ['*/*', '*', '*', 1.0, []],
+			'type with wildcard subtype'     => ['text/*', 'text', '*', 1.0, []],
+			'essence lowercased'             => ['TEXT/HTML', 'text', 'html', 1.0, []],
+			'essence and params lowercased'  => ['TEXT/HTML;CHARSET=UTF-8', 'text', 'html', 1.0, [['charset', 'UTF-8']]],
+			'structured suffix subtype'      => ['application/vnd.api+json', 'application', 'vnd.api+json', 1.0, []],
+			'star type, concrete subtype'    => ['*/html', '*', 'html', 1.0, []],   // "*" is a token char: grammar admits it; ranking it is negotiation's concern
 
 			// --- weight present (§12.4.2) ------------------------------------------
 			'weight only'                    => ['text/html;q=0.5', 'text', 'html', 0.5, []],
@@ -78,8 +78,8 @@ final class MediaRangeFactoryTest extends TestCase
 			'weight SP both sides'           => ['text/html ; q=0.5', 'text', 'html', 0.5, []],
 			'weight HTAB both sides'         => ["text/html\t;\tq=0.5", 'text', 'html', 0.5, []],
 
-			// --- weight absent → null (never defaulted) ----------------------------
-			'no weight, one parameter'       => ['text/html;charset=utf-8', 'text', 'html', null, [['charset', 'utf-8']]],
+			// --- weight absent → decoded default 1.0 (§12.4.2) ---------------------
+			'no weight, one parameter'       => ['text/html;charset=utf-8', 'text', 'html', 1.0, [['charset', 'utf-8']]],
 
 			// --- q is the weight regardless of ordering (§12.5.1 SHOULD) -----------
 			'parameters then weight'         => ['text/html;charset=utf-8;q=0.8', 'text', 'html', 0.8, [['charset', 'utf-8']]],
@@ -92,32 +92,32 @@ final class MediaRangeFactoryTest extends TestCase
 			'weight without essence'         => [';q=0.5', '', '', 0.5, []],
 
 			// --- outside the qvalue grammar: no weight, stays a visible parameter --
-			'qvalue above one'               => ['text/html;q=1.5', 'text', 'html', null, [['q', '1.5']]],
-			'qvalue two'                     => ['text/html;q=2', 'text', 'html', null, [['q', '2']]],
-			'qvalue over one, zeros rule'    => ['text/html;q=1.001', 'text', 'html', null, [['q', '1.001']]],
-			'qvalue one, four zeros'         => ['text/html;q=1.0000', 'text', 'html', null, [['q', '1.0000']]],
-			'qvalue over-precise'            => ['text/html;q=0.1234', 'text', 'html', null, [['q', '0.1234']]],
-			'qvalue double zero'             => ['text/html;q=00.5', 'text', 'html', null, [['q', '00.5']]],
-			'qvalue padded integer'          => ['text/html;q=01', 'text', 'html', null, [['q', '01']]],
-			'qvalue no integer part'         => ['text/html;q=.5', 'text', 'html', null, [['q', '.5']]],
-			'qvalue negative'                => ['text/html;q=-0.5', 'text', 'html', null, [['q', '-0.5']]],
-			'qvalue trailing junk'           => ['text/html;q=0.5x', 'text', 'html', null, [['q', '0.5x']]],
-			'quoted qvalue is not a weight'  => ['text/html;q="0.5"', 'text', 'html', null, [['q', '0.5']]],   // weight grammar is bare ("q=" qvalue, §12.4.2)
+			'qvalue above one'               => ['text/html;q=1.5', 'text', 'html', 1.0, [['q', '1.5']]],
+			'qvalue two'                     => ['text/html;q=2', 'text', 'html', 1.0, [['q', '2']]],
+			'qvalue over one, zeros rule'    => ['text/html;q=1.001', 'text', 'html', 1.0, [['q', '1.001']]],
+			'qvalue one, four zeros'         => ['text/html;q=1.0000', 'text', 'html', 1.0, [['q', '1.0000']]],
+			'qvalue over-precise'            => ['text/html;q=0.1234', 'text', 'html', 1.0, [['q', '0.1234']]],
+			'qvalue double zero'             => ['text/html;q=00.5', 'text', 'html', 1.0, [['q', '00.5']]],
+			'qvalue padded integer'          => ['text/html;q=01', 'text', 'html', 1.0, [['q', '01']]],
+			'qvalue no integer part'         => ['text/html;q=.5', 'text', 'html', 1.0, [['q', '.5']]],
+			'qvalue negative'                => ['text/html;q=-0.5', 'text', 'html', 1.0, [['q', '-0.5']]],
+			'qvalue trailing junk'           => ['text/html;q=0.5x', 'text', 'html', 1.0, [['q', '0.5x']]],
+			'quoted qvalue is not a weight'  => ['text/html;q="0.5"', 'text', 'html', 1.0, [['q', '0.5']]],   // weight grammar is bare ("q=" qvalue, §12.4.2)
 
 			// --- no whitespace around "=" (§5.6.6 Note) — not weight, not parameter -
-			'space after equals'             => ['text/html;q= 0.5', 'text', 'html', null, []],
-			'space before equals'            => ['text/html;q =0.5', 'text', 'html', null, []],
+			'space after equals'             => ['text/html;q= 0.5', 'text', 'html', 1.0, []],
+			'space before equals'            => ['text/html;q =0.5', 'text', 'html', 1.0, []],
 
 			// --- "q" inside a quoted value is data, not the weight ------------------
 			'quoted q text is data'          => ['text/html;title="q=1";q=0.5', 'text', 'html', 0.5, [['title', 'q=1']]],
-			'quoted q before a delimiter'    => ['text/html;title="a;q=0.9;x"', 'text', 'html', null, [['title', 'a;q=0.9;x']]],   // a ";" right after the quoted qvalue must not fake a boundary
+			'quoted q before a delimiter'    => ['text/html;title="a;q=0.9;x"', 'text', 'html', 1.0, [['title', 'a;q=0.9;x']]],   // a ";" right after the quoted qvalue must not fake a boundary
 			'escaped quotes around fake q'   => ['text/html;title="a\";q=0.7\"b";q=0.2', 'text', 'html', 0.2, [['title', 'a";q=0.7"b']]],
 
 			// --- degenerate / robustness --------------------------------------------
-			'no slash'                       => ['not-a-range', '', '', null, []],
-			'empty string'                   => ['', '', '', null, []],
-			'trailing junk is ignored'       => ['text/html extra', 'text', 'html', null, []],
-			'valueless parameter dropped'    => ['text/html;flag', 'text', 'html', null, []],
+			'no slash'                       => ['not-a-range', '', '', 1.0, []],
+			'empty string'                   => ['', '', '', 1.0, []],
+			'trailing junk is ignored'       => ['text/html extra', 'text', 'html', 1.0, []],
+			'valueless parameter dropped'    => ['text/html;flag', 'text', 'html', 1.0, []],
 		];
 	}
 

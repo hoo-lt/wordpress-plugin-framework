@@ -43,6 +43,10 @@ final class Semantics
 	// RFC 9110 §5.6.6 — parameter = parameter-name "=" parameter-value
 	public const PARAMETER = self::PARAMETER_NAME . '=' . self::PARAMETER_VALUE;
 
+	// RFC 9110 §5.6.6 — parameters = *( OWS ";" OWS [ parameter ] ); one step of the repetition,
+	// its framing consumed, the parameter captured bare — the "*" is the caller's scan (preg_match_all)
+	public const PARAMETERS = self::OWS . ';' . self::OWS . '(?<parameter>' . self::PARAMETER . ')';
+
 	// RFC 9110 §12.4.2 — weight = OWS ";" OWS ( "q" / "Q" ) "=" qvalue
 	public const WEIGHT = self::OWS . ';' . self::OWS . '[Qq]=(?<qvalue>' . self::QVALUE . ')';
 }

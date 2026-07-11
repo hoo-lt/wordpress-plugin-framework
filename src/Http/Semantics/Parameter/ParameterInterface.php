@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameters\Parameter;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\Parameter;
 
 interface ParameterInterface
 {

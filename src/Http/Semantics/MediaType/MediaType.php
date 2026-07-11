@@ -2,17 +2,14 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
 
-use Hoo\WordPressPluginFramework\{
-	Http\Semantics\Parameters\Parameter\ParameterInterface,
-	Http\Semantics\Parameters\ParametersInterface,
-};
+use Hoo\WordPressPluginFramework\Http\Semantics\Parameter\ParameterInterface;
 
 readonly class MediaType implements MediaTypeInterface
 {
 	public function __construct(
 		protected string $type,
 		protected string $subtype,
-		protected ParametersInterface $parameters,
+		protected array $parameters,
 	) {
 	}
 
@@ -26,13 +23,19 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->subtype;
 	}
 
-	public function parameters(): ParametersInterface
+	public function parameters(): array
 	{
 		return $this->parameters;
 	}
 
 	public function parameter(string $name): ?ParameterInterface
 	{
-		return $this->parameters->parameter($name);
+		foreach ($this->parameters as $parameter) {
+			if ($parameter->name() === strtolower($name)) {
+				return $parameter;
+			}
+		}
+
+		return null;
 	}
 }

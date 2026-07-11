@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Semantics\Parameters\ParametersFactoryInterface,
+	Http\Semantics\Parameter\ParameterFactoryInterface,
 	Http\Semantics\Semantics,
 };
 
@@ -13,34 +13,46 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 	//   essence   — type "/" subtype, only at the very start;
 	//   weight    — a q parameter wherever it stands ("Recipients SHOULD process any parameter
 	//               named "q" as weight, regardless of parameter ordering");
-	//   parameter — any other media type parameter, its quoted value consumed whole, so the
-	//               scan can never resume inside quoted data.
+	//   parameter — any other media type parameter, captured bare — its framing consumed by the
+	//               scan, its quoted value consumed whole, so the scan can never resume inside
+	//               quoted data.
 	// Weight precedes parameter in the alternation: a valid q is never a media parameter
 	// (the media type registry disallows parameters named "q").
+	// The lookahead pins the qvalue to an element boundary — OWS ";" (the next parameter's
+	// framing, §5.6.6) or bare "\z": an element can never end in OWS, since list framing
+	// (§5.6.1) and field framing (§5.5) are excluded upstream.
 	protected const MEDIA_RANGE = '/'
 		. '\A' . Semantics::TYPE . '\/' . Semantics::SUBTYPE
-		. '|' . Semantics::WEIGHT . '(?=' . Semantics::OWS . '(?:;|\z))'
-		. '|(?<parameter>' . Semantics::OWS . ';' . Semantics::OWS . Semantics::PARAMETER . ')'
+		. '|' . Semantics::WEIGHT . '(?=' . Semantics::OWS . ';|\z)'
+		. '|' . Semantics::PARAMETERS
 		. '/';
 
 	public function __construct(
-		protected ParametersFactoryInterface $parametersFactory,
+		protected ParameterFactoryInterface $parameterFactory,
 	) {
 	}
 
 	public function create(string $mediaRange): MediaRangeInterface
 	{
-		preg_match_all(self::MEDIA_RANGE, $mediaRange, $matched);
+		preg_match_all(self::MEDIA_RANGE, $mediaRange, $facets, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
 
-		$parameters = implode($matched['parameter']);              // the media-parameter tokens, re-joined as a parameters wire
-		$qvalue = current(array_diff($matched['qvalue'], ['']));   // first weight on the wire; '' marks the non-weight tokens
+		$type = '';
+		$subtype = '';
+		$weight = null;
+		$parameters = [];
 
-		return new MediaRange(
-			strtolower(implode($matched['type'])),        // essence fires at most once (\A-anchored) — its column folds to it, or to empty-but-present
-			strtolower(implode($matched['subtype'])),
-			$this->parametersFactory->create($parameters),
-			$qvalue === false ? null : (float) $qvalue,   // strict ===: no weight on the wire → null, never truthiness
-		);
+		foreach ($facets as $facet) {
+			if ($facet['type'] !== null) {              // essence — at most once (\A-anchored)
+				$type = $facet['type'];
+				$subtype = $facet['subtype'];
+			} elseif ($facet['qvalue'] !== null) {      // weight — the first valid q wins
+				$weight ??= (float) $facet['qvalue'];   // ??= is null-strict: an explicit q=0 stays 0.0
+			} else {
+				$parameters[] = $this->parameterFactory->create($facet['parameter']);
+			}
+		}
+
+		return new MediaRange(strtolower($type), strtolower($subtype), $parameters, $weight ?? 1.0);   // absent weight decodes to 1 (§12.4.2)
 	}
 
 	public function tryCreate(?string $mediaRange): ?MediaRangeInterface
