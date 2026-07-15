@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\ContentType\MediaType;
 
 interface MediaTypeFactoryInterface
 {

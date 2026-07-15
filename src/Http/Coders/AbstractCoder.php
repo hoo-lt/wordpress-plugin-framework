@@ -2,30 +2,19 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders;
 
-use Hoo\WordPressPluginFramework\{
-	Http\Semantics\MediaType\MediaTypeInterface,
-	Http\Semantics\MediaType\MediaTypeFactoryInterface,
-};
+use Hoo\WordPressPluginFramework\Http\Semantics\ContentType\MediaType\MediaTypeInterface;
 
 abstract readonly class AbstractCoder implements CoderInterface
 {
-	public function __construct(
-		protected MediaTypeFactoryInterface $mediaTypeFactory,
-	) {
-	}
-
 	public function codes(MediaTypeInterface $mediaType): bool
 	{
-		$mediaTypes = $this->mediaTypes();
-		foreach ($mediaTypes as $mt) {
-			if (
+		// by essence only: coding capability is parameter-blind — precedence() would reject
+		// e.g. Content-Type: application/json;charset=utf-8 against the bare canonical form
+		return (bool) array_filter(
+			$this->mediaTypes(),
+			fn(MediaTypeInterface $mt): bool =>
 				$mt->type() === $mediaType->type() &&
-				$mt->subtype() === $mediaType->subtype()
-			) {
-				return true;
-			}
-		}
-
-		return false;
+				$mt->subtype() === $mediaType->subtype(),
+		);
 	}
 }

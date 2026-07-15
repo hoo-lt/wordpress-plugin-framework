@@ -5,11 +5,11 @@ namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 use Hoo\WordPressPluginFramework\{
 	Exceptions\Handler\ViewModels\ViewModel,
 	Exceptions\Interfaces\HasStatusCodeInterface,
-	Http\Coders\CoderFactoryInterface,
+	Http\Negotiation\NegotiatorInterface,
+	Http\Semantics\Accept\AcceptFactoryInterface,
 	Http\Server\Request\RequestInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
-	View\Model\ModelInterface as ViewModelInterface,
 	View\ViewFactoryInterface,
 };
 use Throwable;
@@ -17,7 +17,8 @@ use Throwable;
 readonly class Handler implements HandlerInterface
 {
 	public function __construct(
-		protected CoderFactoryInterface $coderFactory,
+		protected NegotiatorInterface $negotiator,
+		protected AcceptFactoryInterface $acceptFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected ViewFactoryInterface $viewFactory,
 	) {
@@ -26,8 +27,9 @@ readonly class Handler implements HandlerInterface
 	public function handle(RequestInterface $request, Throwable $throwable): ResponseInterface
 	{
 		$viewModel = ViewModel::createFromThrowable($throwable);
+		$body = $viewModel->toArray();
 
-		$contentType = $this->contentType($request);
+		$contentType = $this->contentType($request, $body);
 		if ($contentType === 'text/html') {
 			$view = $this->viewFactory->tryCreate('exception', $viewModel);
 			if ($view === null) {
@@ -36,8 +38,6 @@ readonly class Handler implements HandlerInterface
 
 			$body = $view->render();
 		}
-
-		$body = $viewModel->toArray();
 
 		return $this->responseFactory->create(
 			$this->statusCode($throwable),
@@ -53,17 +53,16 @@ readonly class Handler implements HandlerInterface
 		return $throwable instanceof HasStatusCodeInterface ? $throwable->getStatusCode() : 500;
 	}
 
-	protected function contentType(RequestInterface $request): string
+	protected function contentType(RequestInterface $request, array $body): string
 	{
-		$accept = $request->headers()?->accept();
-		if ($accept === null) {
+		$accept = $this->acceptFactory->tryCreate($request->headers()?->accept());
+
+		$mediaType = $this->negotiator->tryNegotiate($accept, $body);
+		if ($mediaType === null) {
+			// RFC 9110 §12.5.1 allows disregarding Accept; an error page defaults to the human-readable representation
 			return 'text/html';
 		}
 
-		if ($this->coderFactory->tryCreateEncoder($accept, []) === null) {
-			return 'text/html';
-		}
-
-		return $accept;
+		return "{$mediaType->type()}/{$mediaType->subtype()}";
 	}
 }

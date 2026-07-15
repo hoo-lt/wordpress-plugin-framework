@@ -6,7 +6,7 @@ use Hoo\WordPressPluginFramework\{
 	Helpers\KeyValue\HelperInterface,
 	Http\Coders\CoderFactoryInterface,
 	Http\Message\Body\Normalizer\NormalizerInterface,
-	Http\Semantics\MediaType\MediaTypeFactoryInterface,
+	Http\Semantics\ContentType\MediaType\MediaTypeFactoryInterface,
 };
 
 readonly class BodyFactory implements BodyFactoryInterface

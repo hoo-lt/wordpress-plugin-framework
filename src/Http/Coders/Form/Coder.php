@@ -10,7 +10,7 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class Coder extends AbstractCoder implements CoderInterface
 {
-	public function mediaTypes(): array
+	public function produces(): array
 	{
 		return [
 			$this->mediaTypeFactory->create('application/x-www-form-urlencoded'),

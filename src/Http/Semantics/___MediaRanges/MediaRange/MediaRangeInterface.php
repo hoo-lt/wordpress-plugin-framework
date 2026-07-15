@@ -12,5 +12,5 @@ interface MediaRangeInterface
 	public function parameters(): array;
 	public function parameter(string $name): ?ParameterInterface;
 
-	public function weight(): float;
+	public function q(): float;
 }

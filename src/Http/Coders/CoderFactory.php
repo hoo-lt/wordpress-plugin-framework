@@ -2,7 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Coders;
 
-use Hoo\WordPressPluginFramework\Http\Semantics\MediaType\MediaTypeInterface;
+use Hoo\WordPressPluginFramework\Http\Semantics\ContentType\MediaType\MediaTypeInterface;
 
 readonly class CoderFactory implements CoderFactoryInterface
 {

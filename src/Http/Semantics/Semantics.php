@@ -22,7 +22,7 @@ final class Semantics
 	//   quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
 	public const OBS_TEXT      = '\x80-\xFF';
 	public const QDTEXT        = '[' . self::HTAB . self::SP . '\x21\x23-\x5B\x5D-\x7E' . self::OBS_TEXT . ']';
-	public const QUOTED_PAIR   = '\\\\[' . self::HTAB . self::SP . self::VCHAR . self::OBS_TEXT . ']';
+	public const QUOTED_PAIR   = '\x5C[' . self::HTAB . self::SP . self::VCHAR . self::OBS_TEXT . ']';
 	public const QUOTED_STRING = self::DQUOTE . '(?:' . self::QDTEXT . '|' . self::QUOTED_PAIR . ')*+' . self::DQUOTE;
 
 	// RFC 9110 §12.4.2 — qvalue = ( "0" [ "." 0*3DIGIT ] ) / ( "1" [ "." 0*3("0") ] )
@@ -38,7 +38,7 @@ final class Semantics
 	public const PARAMETER_NAME = '(?<name>' . self::TOKEN . ')';
 
 	// RFC 9110 §5.6.6 — parameter-value = ( token / quoted-string ); named branches so the match tells which alternative fired
-	public const PARAMETER_VALUE = '(?:(?<quoted>' . self::QUOTED_STRING . ')|(?<token>' . self::TOKEN . '))';
+	public const PARAMETER_VALUE = '(?:(?<quoted_string>' . self::QUOTED_STRING . ')|(?<token>' . self::TOKEN . '))';
 
 	// RFC 9110 §5.6.6 — parameter = parameter-name "=" parameter-value
 	public const PARAMETER = self::PARAMETER_NAME . '=' . self::PARAMETER_VALUE;
@@ -48,5 +48,5 @@ final class Semantics
 	public const PARAMETERS = self::OWS . ';' . self::OWS . '(?<parameter>' . self::PARAMETER . ')';
 
 	// RFC 9110 §12.4.2 — weight = OWS ";" OWS ( "q" / "Q" ) "=" qvalue
-	public const WEIGHT = self::OWS . ';' . self::OWS . '[Qq]=(?<qvalue>' . self::QVALUE . ')';
+	public const WEIGHT = self::OWS . ';' . self::OWS . '[qQ]=(?<q>' . self::QVALUE . ')';
 }

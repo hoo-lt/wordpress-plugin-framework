@@ -6,6 +6,8 @@ use Hoo\WordPressPluginFramework\{
 	Http\Coders\AbstractCoder,
 	Http\Coders\CoderException,
 	Http\Coders\CoderInterface,
+	Http\Semantics\ContentType\MediaType\MediaType,
+	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 use Throwable;
 
@@ -14,8 +16,17 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 	public function mediaTypes(): array
 	{
 		return [
-			$this->mediaTypeFactory->create('application/json'),
+			new MediaType('application', 'json'),
 		];
+	}
+
+	public function codes(MediaTypeInterface $mediaType): bool
+	{
+		if (!parent::codes($mediaType)) {
+			return false;
+		}
+
+		return $mediaType->charset() === 'utf-8';
 	}
 
 	public function decodes(mixed $encoded): bool

@@ -9,7 +9,7 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class Coder extends AbstractCoder implements CoderInterface
 {
-	public function mediaTypes(): array
+	public function produces(): array
 	{
 		return [];
 	}

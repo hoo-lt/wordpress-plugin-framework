@@ -1,15 +1,16 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaType;
+namespace Hoo\WordPressPluginFramework\Http\Semantics\MediaRanges\MediaRange;
 
 use Hoo\WordPressPluginFramework\Http\Semantics\Parameter\ParameterInterface;
 
-readonly class MediaType implements MediaTypeInterface
+readonly class MediaRange implements MediaRangeInterface
 {
 	public function __construct(
 		protected string $type,
 		protected string $subtype,
 		protected array $parameters,
+		protected float $q,
 	) {
 	}
 
@@ -37,5 +38,10 @@ readonly class MediaType implements MediaTypeInterface
 		}
 
 		return null;
+	}
+
+	public function q(): float
+	{
+		return $this->q;
 	}
 }
