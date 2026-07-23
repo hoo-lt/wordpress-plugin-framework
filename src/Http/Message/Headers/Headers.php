@@ -63,7 +63,7 @@ readonly class Headers implements HeadersInterface
 		$normalizedHeaders = [];
 
 		foreach ($headers as $key => $header) {
-			$normalizedHeaders[strtolower($key)] = $header;
+			$normalizedHeaders[strtolower($key)] = trim($header, " \t");
 		}
 
 		return $normalizedHeaders;

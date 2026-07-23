@@ -71,7 +71,7 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 		return array_filter($this->coders, fn($coder) => $coder->encodes($decoded));
 	}
 
-	protected function mediaTypes(AcceptInterface $accept): array
+	protected function mediaTypes(?AcceptInterface $accept): array
 	{
 		$mediaTypes = [];
 
@@ -79,6 +79,10 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 			foreach ($coder->mediaTypes() as $mediaType) {
 				$mediaTypes[] = $mediaType;
 			}
+		}
+
+		if ($accept === null) {
+			return $mediaTypes;
 		}
 
 		foreach ($accept->mediaTypes() as $mediaType) {
@@ -94,9 +98,7 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 
 	protected function mediaType(?AcceptInterface $accept, array $coders): ?MediaTypeInterface
 	{
-		if ($accept !== null) {
-			$mediaTypes = $this->mediaTypes($accept);
-		}
+		$mediaTypes = $this->mediaTypes($accept);
 
 		if ($this->mediaType !== null) {
 			$mediaTypes[] = $this->mediaType;

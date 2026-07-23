@@ -16,6 +16,8 @@ readonly class MediaRange implements MediaRangeInterface
 		protected array $parameters = [],
 		protected float $q = 1.000,
 	) {
+		$this->validateType($type);
+		$this->validateSubtype($subtype);
 	}
 
 	public function type(): string
@@ -92,5 +94,19 @@ readonly class MediaRange implements MediaRangeInterface
 		}
 
 		return null;
+	}
+
+	protected function validateType(string $type): void
+	{
+		if ($type === '') {
+			throw new MediaRangeException('type is mandatory');
+		}
+	}
+
+	protected function validateSubtype(string $subtype): void
+	{
+		if ($subtype === '') {
+			throw new MediaRangeException('subtype is mandatory');
+		}
 	}
 }

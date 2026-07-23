@@ -9,6 +9,8 @@ readonly class MediaType implements MediaTypeInterface
 		protected string $subtype,
 		protected array $parameters = [],
 	) {
+		$this->validateType($type);
+		$this->validateSubtype($subtype);
 	}
 
 	public function type(): string
@@ -35,5 +37,27 @@ readonly class MediaType implements MediaTypeInterface
 	{
 		$charset = $this->parameter('charset');
 		return $charset === null ? null : strtolower($charset);
+	}
+
+	protected function validateType(string $type): void
+	{
+		if ($type === '') {
+			throw new MediaTypeException('type is mandatory');
+		}
+
+		if ($type === '*') {
+			throw new MediaTypeException('type must not be a wildcard');
+		}
+	}
+
+	protected function validateSubtype(string $subtype): void
+	{
+		if ($subtype === '') {
+			throw new MediaTypeException('subtype is mandatory');
+		}
+
+		if ($subtype === '*') {
+			throw new MediaTypeException('subtype must not be a wildcard');
+		}
 	}
 }

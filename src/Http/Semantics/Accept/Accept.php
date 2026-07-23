@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 
-readonly class Accept
+readonly class Accept implements AcceptInterface
 {
 	public function __construct(
 		protected array $mediaRanges,
