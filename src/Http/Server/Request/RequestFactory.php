@@ -29,7 +29,7 @@ readonly class RequestFactory implements RequestFactoryInterface
 		$headers = $this->headersFactory->create($headers);
 		$body = $this->bodyFactory->tryCreateFromEncoded(
 			$body,
-			$headers?->contentType(),
+			$headers->contentType(),
 		);
 
 		return new Request($this->uuid, $method, $url, $headers, $body);
