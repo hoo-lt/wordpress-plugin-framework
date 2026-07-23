@@ -15,12 +15,12 @@ readonly class Headers implements HeadersInterface
 		$this->headers = $this->normalizeHeaders($headers);
 	}
 
-	public function header(string $key): mixed
+	public function header(string $key): ?string
 	{
 		return $this->headers[strtolower($key)] ?? null;
 	}
 
-	public function withHeader(string $key, mixed $header): static
+	public function withHeader(string $key, string $header): static
 	{
 		$headers = $this->headers;
 		$headers[strtolower($key)] = $header;
@@ -50,12 +50,6 @@ readonly class Headers implements HeadersInterface
 	{
 		$accept = $this->headers['accept'] ?? null;
 		return $accept;
-	}
-
-	public function contentLength(): ?int
-	{
-		$contentLength = $this->headers['content-length'] ?? null;
-		return $contentLength;
 	}
 
 	public function contentType(): ?string

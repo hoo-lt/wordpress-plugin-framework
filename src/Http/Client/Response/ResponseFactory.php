@@ -15,9 +15,9 @@ readonly class ResponseFactory implements ResponseFactoryInterface
 	) {
 	}
 
-	public function create(int $statusCode, ?array $headers = null, ?string $body = null): ResponseInterface
+	public function create(int $statusCode, array $headers = [], ?string $body = null): ResponseInterface
 	{
-		$headers = $this->headersFactory->tryCreate($headers);
+		$headers = $this->headersFactory->create($headers);
 		$body = $this->bodyFactory->tryCreateFromEncoded(
 			$body,
 			$headers?->contentType(),

@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 
-readonly class Negotiator implements NegotiatorInterface
+readonly class ContentNegotiator implements ContentNegotiatorInterface
 {
 	public function __construct(
 		protected array $coders,
@@ -23,7 +23,7 @@ readonly class Negotiator implements NegotiatorInterface
 			}
 		}
 
-		throw new NegotiatorException('no coder for default media type');
+		throw new ContentNegotiatorException('no coder for default media type');
 	}
 
 	public function withMediaType(MediaTypeInterface $mediaType): static
@@ -40,7 +40,7 @@ readonly class Negotiator implements NegotiatorInterface
 	{
 		$coders = $this->coders($decoded);
 		if ($coders === []) {
-			throw new NegotiatorException('no coder encodes the payload');
+			throw new ContentNegotiatorException('no coder encodes the payload');
 		}
 
 		$mediaType = $this->mediaType($accept, $coders);

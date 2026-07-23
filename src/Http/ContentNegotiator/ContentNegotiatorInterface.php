@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 
-interface NegotiatorInterface
+interface ContentNegotiatorInterface
 {
 	public function negotiate(?AcceptInterface $accept, mixed $decoded): MediaTypeInterface;
 	public function tryNegotiate(?AcceptInterface $accept, mixed $decoded): ?MediaTypeInterface;

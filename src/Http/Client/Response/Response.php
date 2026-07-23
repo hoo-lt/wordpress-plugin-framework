@@ -12,7 +12,7 @@ readonly class Response implements ResponseInterface
 {
 	public function __construct(
 		protected int $statusCode,
-		protected ?HeadersInterface $headers,
+		protected HeadersInterface $headers,
 		protected ?BodyInterface $body,
 	) {
 		$this->validateStatusCode($statusCode);
@@ -28,7 +28,7 @@ readonly class Response implements ResponseInterface
 		return new static($statusCode, $this->headers, $this->body);
 	}
 
-	public function headers(): ?HeadersInterface
+	public function headers(): HeadersInterface
 	{
 		return $this->headers;
 	}
@@ -36,11 +36,6 @@ readonly class Response implements ResponseInterface
 	public function withHeaders(HeadersInterface $headers): static
 	{
 		return new static($this->statusCode, $headers, $this->body);
-	}
-
-	public function withoutHeaders(): static
-	{
-		return new static($this->statusCode, null, $this->body);
 	}
 
 	public function header(string $key): mixed

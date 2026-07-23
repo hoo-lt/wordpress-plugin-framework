@@ -9,9 +9,8 @@ use Hoo\WordPressPluginFramework\{
 
 interface MessageInterface
 {
-	public function headers(): ?HeadersInterface;
+	public function headers(): HeadersInterface;
 	public function withHeaders(HeadersInterface $headers): static;
-	public function withoutHeaders(): static;
 
 	public function header(string $key): mixed;
 

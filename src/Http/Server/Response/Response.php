@@ -14,7 +14,7 @@ readonly class Response extends ClientResponse implements ResponseInterface
 	public function __construct(
 		protected UuidInterface $uuid,
 		int $statusCode,
-		?HeadersInterface $headers,
+		HeadersInterface $headers,
 		?BodyInterface $body,
 	) {
 		parent::__construct($statusCode, $headers, $body);
@@ -33,11 +33,6 @@ readonly class Response extends ClientResponse implements ResponseInterface
 	public function withHeaders(HeadersInterface $headers): static
 	{
 		return new static($this->uuid, $this->statusCode, $headers, $this->body);
-	}
-
-	public function withoutHeaders(): static
-	{
-		return new static($this->uuid, $this->statusCode, null, $this->body);
 	}
 
 	public function withBody(BodyInterface $body): static

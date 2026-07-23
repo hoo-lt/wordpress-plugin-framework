@@ -15,7 +15,7 @@ readonly class Request implements RequestInterface
 	public function __construct(
 		protected Method $method,
 		protected UrlInterface $url,
-		protected ?HeadersInterface $headers = null,
+		protected HeadersInterface $headers,
 		protected ?BodyInterface $body = null,
 	) {
 	}
@@ -52,7 +52,7 @@ readonly class Request implements RequestInterface
 		return $query instanceof KeyValueInterface ? $query->value($key) : null;
 	}
 
-	public function headers(): ?HeadersInterface
+	public function headers(): HeadersInterface
 	{
 		return $this->headers;
 	}
@@ -60,11 +60,6 @@ readonly class Request implements RequestInterface
 	public function withHeaders(HeadersInterface $headers): static
 	{
 		return new static($this->method, $this->url, $headers, $this->body);
-	}
-
-	public function withoutHeaders(): static
-	{
-		return new static($this->method, $this->url, null, $this->body);
 	}
 
 	public function header(string $key): mixed

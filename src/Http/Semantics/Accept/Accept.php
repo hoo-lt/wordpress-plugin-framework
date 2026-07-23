@@ -35,7 +35,7 @@ readonly class Accept
 		return $mediaTypes;
 	}
 
-	public function q(MediaTypeInterface $mediaType): ?float
+	public function q(MediaTypeInterface $mediaType): float
 	{
 		foreach (Precedence::cases() as $precedence) {
 			foreach ($this->mediaRanges as $mediaRange) {
@@ -45,6 +45,6 @@ readonly class Accept
 			}
 		}
 
-		return null;
+		return 0.000;
 	}
 }

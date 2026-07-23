@@ -18,7 +18,7 @@ readonly class Request extends ClientRequest implements RequestInterface
 		protected UuidInterface $uuid,
 		Method $method,
 		UrlInterface $url,
-		?HeadersInterface $headers = null,
+		HeadersInterface $headers,
 		?BodyInterface $body = null,
 		protected ?RoutesInterface $routes = null,
 	) {
@@ -43,11 +43,6 @@ readonly class Request extends ClientRequest implements RequestInterface
 	public function withHeaders(HeadersInterface $headers): static
 	{
 		return new static($this->uuid, $this->method, $this->url, $headers, $this->body, $this->routes);
-	}
-
-	public function withoutHeaders(): static
-	{
-		return new static($this->uuid, $this->method, $this->url, null, $this->body, $this->routes);
 	}
 
 	public function withBody(BodyInterface $body): static

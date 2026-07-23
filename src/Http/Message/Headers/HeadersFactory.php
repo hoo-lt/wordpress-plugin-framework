@@ -8,13 +8,4 @@ readonly class HeadersFactory implements HeadersFactoryInterface
 	{
 		return new Headers($headers);
 	}
-
-	public function tryCreate(?array $headers): ?HeadersInterface
-	{
-		if ($headers === null) {
-			return null;
-		}
-
-		return $this->create($headers);
-	}
 }
