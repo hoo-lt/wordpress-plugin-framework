@@ -21,18 +21,10 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 	public function createFromDecoded(object|array|string|float|int|bool $body, ?string $contentType = null): BodyInterface
 	{
+		$mediaType = $this->mediaTypeFactory->create($contentType);
+		$encoder = $this->coderFactory->createEncoder($body, $mediaType);
+
 		$body = $this->normalizer->normalize($body);
-
-		$mediaType = $this->mediaTypeFactory->tryCreate($contentType);
-		if ($mediaType === null) {
-			throw new BodyFactoryException('the content type is required');
-		}
-
-		$encoder = $this->coderFactory->tryCreateEncoder($body, $mediaType);
-		if ($encoder === null) {
-			throw new BodyFactoryException("no coder encodes {$contentType} content type");
-		}
-
 		if (
 			is_array($body) ||
 			is_object($body)
@@ -54,15 +46,8 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface
 	{
-		$mediaType = $this->mediaTypeFactory->tryCreate($contentType);
-		if ($mediaType === null) {
-			throw new BodyFactoryException('the content type is required');
-		}
-
-		$decoder = $this->coderFactory->tryCreateDecoder($body, $mediaType);
-		if ($decoder === null) {
-			throw new BodyFactoryException("no coder decodes {$contentType} content type");
-		}
+		$mediaType = $this->mediaTypeFactory->create($contentType);
+		$decoder = $this->coderFactory->createDecoder($body, $mediaType);
 
 		$body = $decoder->decode($body);
 		if (
