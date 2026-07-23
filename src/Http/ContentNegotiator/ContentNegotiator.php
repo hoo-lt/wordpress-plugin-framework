@@ -51,21 +51,6 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 		return $mediaType;
 	}
 
-	public function tryNegotiate(?AcceptInterface $accept, mixed $decoded): ?MediaTypeInterface
-	{
-		$coders = $this->coders($decoded);
-		if ($coders === []) {
-			return null;
-		}
-
-		$mediaType = $this->mediaType($accept, $coders);
-		if ($mediaType === null) {
-			return null;
-		}
-
-		return $mediaType;
-	}
-
 	protected function coders(mixed $decoded): array
 	{
 		return array_filter($this->coders, fn($coder) => $coder->encodes($decoded));

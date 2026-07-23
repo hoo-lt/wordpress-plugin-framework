@@ -10,5 +10,4 @@ use Hoo\WordPressPluginFramework\{
 interface ContentNegotiatorInterface
 {
 	public function negotiate(?AcceptInterface $accept, mixed $decoded): MediaTypeInterface;
-	public function tryNegotiate(?AcceptInterface $accept, mixed $decoded): ?MediaTypeInterface;
 }
