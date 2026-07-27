@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\MiddlewareInterface
+	Pipeline\Middlewares\MiddlewaresInterface
 };
 
 interface PipelineInterface
@@ -13,11 +13,9 @@ interface PipelineInterface
 	public function request(): RequestInterface;
 	public function withRequest(RequestInterface $request): static;
 
-	public function middlewares(): array;
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
+	public function middlewares(): ?MiddlewaresInterface;
+	public function withMiddlewares(?MiddlewaresInterface $middlewares): static;
 	public function withoutMiddlewares(): static;
-
-	public function withMiddleware(MiddlewareInterface $middleware): static;
 
 	public function catch(Closure $closure): static;
 

@@ -6,6 +6,7 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
+	Pipeline\Middlewares\MiddlewaresInterface,
 };
 use Throwable;
 
@@ -13,7 +14,7 @@ readonly class Pipeline implements PipelineInterface
 {
 	public function __construct(
 		protected RequestInterface $request,
-		protected array $middlewares = [],
+		protected ?MiddlewaresInterface $middlewares = null,
 		protected ?Closure $closure = null,
 	) {
 	}
@@ -28,24 +29,19 @@ readonly class Pipeline implements PipelineInterface
 		return new static($request, $this->middlewares, $this->closure);
 	}
 
-	public function middlewares(): array
+	public function middlewares(): ?MiddlewaresInterface
 	{
 		return $this->middlewares;
 	}
 
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
+	public function withMiddlewares(?MiddlewaresInterface $middlewares): static
 	{
 		return new static($this->request, $middlewares, $this->closure);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->request, [], $this->closure);
-	}
-
-	public function withMiddleware(MiddlewareInterface $middleware): static
-	{
-		return $this->withMiddlewares(...$this->middlewares, $middleware);
+		return new static($this->request, null, $this->closure);
 	}
 
 	public function catch(Closure $closure): static
@@ -55,7 +51,29 @@ readonly class Pipeline implements PipelineInterface
 
 	public function __invoke(Closure $closure): mixed
 	{
-		return array_reduce(array_reverse($this->middlewares), fn(Closure $closure, MiddlewareInterface $middleware) => fn(RequestInterface $request) => $this->tryCatch(fn() => $middleware($request, $closure), $request), fn(RequestInterface $request) => $this->tryCatch(fn() => $closure($request), $request))($this->request);
+		$closure = $this->closure($closure);
+
+		if ($this->middlewares === null) {
+			return $closure($this->request);
+		}
+
+		return array_reduce(
+			array_reverse(
+				iterator_to_array($this->middlewares),
+			),
+			$this->middleware(...),
+			$closure,
+		)($this->request);
+	}
+
+	protected function closure(Closure $closure): mixed
+	{
+		return fn(RequestInterface $request) => $this->tryCatch(fn() => $closure($request), $request);
+	}
+
+	protected function middleware(Closure $closure, MiddlewareInterface $middleware): mixed
+	{
+		return fn(RequestInterface $request) => $this->tryCatch(fn() => $middleware($request, $closure), $request);
 	}
 
 	protected function tryCatch(Closure $closure, RequestInterface $request): mixed
