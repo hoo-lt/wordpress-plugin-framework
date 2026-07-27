@@ -4,6 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Negotiator;
 
 use Exception;
 
-class ContentNegotiatorException extends Exception
+class NegotiatorException extends Exception
 {
 }

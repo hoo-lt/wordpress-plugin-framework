@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 
-readonly class ContentNegotiator implements ContentNegotiatorInterface
+readonly class Negotiator implements NegotiatorInterface
 {
 	public function __construct(
 		protected array $coders,
@@ -17,13 +17,9 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 			return;
 		}
 
-		foreach ($this->coders as $coder) {
-			if ($coder->codes($this->mediaType)) {
-				return;
-			}
+		if (!$this->codes($this->mediaType, $this->coders)) {
+			throw new NegotiatorException('no coder for default media type');
 		}
-
-		throw new ContentNegotiatorException('no coder for default media type');
 	}
 
 	public function withMediaType(MediaTypeInterface $mediaType): static
@@ -40,7 +36,7 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 	{
 		$coders = $this->coders($decoded);
 		if ($coders === []) {
-			throw new ContentNegotiatorException('no coder encodes the payload');
+			throw new NegotiatorException('no coder encodes the payload');
 		}
 
 		$mediaType = $this->mediaType($accept, $coders);
@@ -56,47 +52,48 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 		return array_filter($this->coders, fn($coder) => $coder->encodes($decoded));
 	}
 
-	protected function mediaTypes(?AcceptInterface $accept): array
+	protected function mediaType(?AcceptInterface $accept, array $coders): ?MediaTypeInterface
 	{
 		$mediaTypes = [];
 
-		foreach ($this->coders as $coder) {
+		if (
+			$this->mediaType !== null &&
+			$this->codes($this->mediaType, $coders)
+		) {
+			$mediaTypes[] = $this->mediaType;
+		}
+
+		foreach ($coders as $coder) {
 			foreach ($coder->mediaTypes() as $mediaType) {
 				$mediaTypes[] = $mediaType;
 			}
 		}
 
 		if ($accept === null) {
-			return $mediaTypes;
+			return $mediaTypes[0] ?? null;
 		}
 
 		foreach ($accept->mediaTypes() as $mediaType) {
-			$mediaTypes[] = $mediaType;
+			if ($this->codes($mediaType, $coders)) {
+				$mediaTypes[] = $mediaType;
+			}
 		}
 
 		$mediaTypes = array_filter($mediaTypes, fn($mediaType) => $accept->q($mediaType) > 0);
 
 		usort($mediaTypes, fn($a, $b) => $accept->q($b) <=> $accept->q($a));
 
-		return $mediaTypes;
+		return $mediaTypes[0] ?? null;
 	}
 
-	protected function mediaType(?AcceptInterface $accept, array $coders): ?MediaTypeInterface
+	protected function codes(MediaTypeInterface $mediaType, array $coders): bool
 	{
-		$mediaTypes = $this->mediaTypes($accept);
-
-		if ($this->mediaType !== null) {
-			$mediaTypes[] = $this->mediaType;
-		}
-
-		foreach ($mediaTypes as $mediaType) {
-			foreach ($coders as $coder) {
-				if ($coder->codes($mediaType)) {
-					return $mediaType;
-				}
+		foreach ($coders as $coder) {
+			if ($coder->codes($mediaType)) {
+				return true;
 			}
 		}
 
-		return null;
+		return false;
 	}
 }
