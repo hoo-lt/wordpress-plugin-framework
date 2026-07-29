@@ -46,7 +46,12 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
 
     public function withValidator(ValidatorInterface $validator): static
     {
-        return $this->withValidators(...$this->validators, $validator);
+        return $this->withValidators(
+            ...[
+                ...$this->validators,
+                $validator,
+            ],
+        );
     }
 
     public function body(string $key, Closure $closure): static

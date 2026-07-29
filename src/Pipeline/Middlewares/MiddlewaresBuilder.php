@@ -40,7 +40,12 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
 	{
-		return $this->withMiddlewares(...$this->middlewares, $middleware);
+		return $this->withMiddlewares(
+			...[
+				...$this->middlewares,
+				$middleware,
+			],
+		);
 	}
 
 	public function currentUserCan(Capability $capability): static

@@ -5,13 +5,13 @@ namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Filter;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookInterface,
-	Pipeline\PipelineInterface,
+	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class Hook implements HookInterface
 {
 	public function __construct(
-		protected PipelineInterface $pipeline,
+		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $name,
 		protected Closure $closure,
 		protected int $priority = 10,
@@ -22,9 +22,16 @@ readonly class Hook implements HookInterface
 	{
 		add_filter(
 			$this->name,
-			fn(...$args) => ($this->pipeline)(fn($request) => ($this->closure)($request, ...$args)),
+			$this->callback(...),
 			$this->priority,
 			PHP_INT_MAX,
 		);
+	}
+
+	protected function callback(...$args): mixed
+	{
+		$pipeline = $this->pipelineFactory->createFromServer();
+
+		return $pipeline(fn($request) => ($this->closure)($request, ...$args));
 	}
 }

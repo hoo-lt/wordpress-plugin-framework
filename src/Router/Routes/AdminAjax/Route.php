@@ -7,14 +7,14 @@ use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
-	Pipeline\PipelineInterface,
+	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class Route implements RouteInterface
 {
 	public function __construct(
 		protected ResponseFactoryInterface $responseFactory,
-		protected PipelineInterface $pipeline,
+		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $action,
 		protected Closure $closure,
 	) {
@@ -49,7 +49,9 @@ readonly class Route implements RouteInterface
 
 	protected function callback(): void
 	{
-		$response = ($this->pipeline)(($this->closure)(...));
+		$pipeline = $this->pipelineFactory->createFromServer();
+
+		$response = $pipeline(($this->closure)(...));
 		if (!$response instanceof ResponseInterface) {
 			$response = $this->createResponse($response);
 		}

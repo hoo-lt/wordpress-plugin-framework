@@ -4,6 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
+	Exceptions\Handler\HandlerInterface,
 	Http\Server\Request\RequestInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 	Pipeline\Middlewares\MiddlewaresInterface,
@@ -15,38 +16,8 @@ readonly class Pipeline implements PipelineInterface
 	public function __construct(
 		protected RequestInterface $request,
 		protected ?MiddlewaresInterface $middlewares = null,
-		protected ?Closure $closure = null,
+		protected ?HandlerInterface $handler = null,
 	) {
-	}
-
-	public function request(): RequestInterface
-	{
-		return $this->request;
-	}
-
-	public function withRequest(RequestInterface $request): static
-	{
-		return new static($request, $this->middlewares, $this->closure);
-	}
-
-	public function middlewares(): ?MiddlewaresInterface
-	{
-		return $this->middlewares;
-	}
-
-	public function withMiddlewares(?MiddlewaresInterface $middlewares): static
-	{
-		return new static($this->request, $middlewares, $this->closure);
-	}
-
-	public function withoutMiddlewares(): static
-	{
-		return new static($this->request, null, $this->closure);
-	}
-
-	public function catch(Closure $closure): static
-	{
-		return new static($this->request, $this->middlewares, $closure);
 	}
 
 	public function __invoke(Closure $closure): mixed
@@ -81,11 +52,11 @@ readonly class Pipeline implements PipelineInterface
 		try {
 			return $closure();
 		} catch (Throwable $throwable) {
-			if ($this->closure === null) {
+			if ($this->handler === null) {
 				throw $throwable;
 			}
 
-			return ($this->closure)($request, $throwable);
+			return $this->handler->handle($request, $throwable);
 		}
 	}
 }

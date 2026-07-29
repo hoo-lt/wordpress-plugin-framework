@@ -110,7 +110,7 @@ readonly class Server implements ServerInterface
 		return $this->input;
 	}
 
-	public function headers(): ?array
+	public function headers(): array
 	{
 		$headers = [];
 
@@ -136,10 +136,6 @@ readonly class Server implements ServerInterface
 
 		if (isset($this->server['CONTENT_TYPE'])) {
 			$headers['content-type'] = $this->server['CONTENT_TYPE'];
-		}
-
-		if ($headers === []) {
-			return null;
 		}
 
 		return $headers;

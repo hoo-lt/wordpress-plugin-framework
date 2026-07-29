@@ -19,7 +19,7 @@ readonly class HookerFactory implements HookerFactoryInterface
 		);
 	}
 
-	public function buildHooks(Closure $closure): array
+	protected function buildHooks(Closure $closure): array
 	{
 		$hooksBuilder = $closure($this->hooksBuilder);
 		if (!$hooksBuilder instanceof HooksBuilderInterface) {

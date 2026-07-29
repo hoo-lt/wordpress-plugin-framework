@@ -13,6 +13,6 @@ interface ServerInterface
 	public function path(): string;
 	public function query(): ?string;
 
-	public function headers(): ?array;
+	public function headers(): array;
 	public function body(): ?string;
 }

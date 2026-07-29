@@ -5,10 +5,9 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Http\Server\Request\Routes\RoutesFactoryInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
-	Pipeline\PipelineInterface,
+	Pipeline\PipelineFactoryInterface,
 	Http\Method\Method,
 };
 use WP_REST_Request;
@@ -18,8 +17,7 @@ readonly class Route implements RouteInterface
 {
 	public function __construct(
 		protected ResponseFactoryInterface $responseFactory,
-		protected PipelineInterface $pipeline,
-		protected RoutesFactoryInterface $routesFactory,
+		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
@@ -82,15 +80,13 @@ readonly class Route implements RouteInterface
 
 	protected function callback(WP_REST_Request $request): WP_REST_Response
 	{
-		$routes = $this->routesFactory->create(
-			$request->get_url_params(),
+		$pipeline = $this->pipelineFactory->create(
+			$this->method($request),
+			$this->url($request),
+			$this->headers($request),
+			$this->body($request),
+			$this->routes($request),
 		);
-
-		$pipeline = $this->pipeline
-			->withRequest(
-				$this->pipeline->request()
-					->withRoutes($routes)
-			);
 
 		$response = $pipeline(($this->closure)(...));
 		if (!$response instanceof ResponseInterface) {
@@ -107,6 +103,42 @@ readonly class Route implements RouteInterface
 	protected function permissionCallback(WP_REST_Request $request): bool
 	{
 		return true;
+	}
+
+	protected function method(WP_REST_Request $request): string
+	{
+		return $request->get_method();
+	}
+
+	protected function url(WP_REST_Request $request): string
+	{
+		return add_query_arg(
+			$request->get_query_params(),
+			rest_url(
+				$request->get_route(),
+			),
+		);
+	}
+
+	protected function headers(WP_REST_Request $request): array
+	{
+		$headers = [];
+
+		foreach ($request->get_headers() as $key => $values) {
+			$headers[str_replace('_', '-', $key)] = implode(',', $values);
+		}
+
+		return $headers;
+	}
+
+	protected function body(WP_REST_Request $request): ?string
+	{
+		return $request->get_body();
+	}
+
+	protected function routes(WP_REST_Request $request): array
+	{
+		return $request->get_url_params();
 	}
 
 	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface

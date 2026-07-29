@@ -19,7 +19,7 @@ readonly class RouterFactory implements RouterFactoryInterface
 		);
 	}
 
-	public function buildRoutes(Closure $closure): array
+	protected function buildRoutes(Closure $closure): array
 	{
 		$routesBuilder = $closure($this->routesBuilder);
 		if (!$routesBuilder instanceof RoutesBuilderInterface) {
