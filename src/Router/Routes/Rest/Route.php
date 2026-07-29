@@ -5,91 +5,92 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HooksBuilderInterface,
 	Http\Server\Request\Routes\RoutesFactoryInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
-	Pipeline\Middlewares\MiddlewareInterface,
-	Exceptions\Handler\HandlerInterface,
 	Http\Method\Method,
 };
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_REST_Server;
 
 readonly class Route implements RouteInterface
 {
 	public function __construct(
-		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
-		protected HandlerInterface $handler,
 		protected RoutesFactoryInterface $routesFactory,
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
 		protected Method $method,
-		protected array $middlewares = [],
 	) {
 	}
 
-	public function middlewares(): array
+	public function __invoke(): void
 	{
-		return $this->middlewares;
+		add_action(
+			'rest_api_init',
+			$this->restApiInit(...),
+			10,
+			0,
+		);
+
+		add_filter(
+			'rest_pre_serve_request',
+			$this->restPreServeRequest(...),
+			10,
+			3,
+		);
 	}
 
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
+	public function up(): void
 	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, $middlewares);
+
 	}
 
-	public function withoutMiddlewares(): static
+	public function down(): void
 	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->routeNamespace, $this->route, $this->closure, $this->method, []);
+
 	}
 
-	public function withMiddleware(MiddlewareInterface $middleware): static
+	protected function restApiInit(): void
 	{
-		return $this->withMiddlewares(...$this->middlewares, $middleware);
+		register_rest_route(
+			$this->routeNamespace,
+			$this->route,
+			[
+				'methods' => [
+					$this->method->value,
+				],
+				'callback' => $this->callback(...),
+				'permission_callback' => $this->permissionCallback(...),
+			],
+		);
 	}
 
-	public function hooksBuilder(): HooksBuilderInterface
+	protected function restPreServeRequest(bool $served, WP_REST_Response $response, WP_REST_Request $request): bool
 	{
-		return $this->hooksBuilder
-			->action('rest_api_init', fn(WP_REST_Server $server): bool => register_rest_route(
-				$this->routeNamespace,
-				$this->route,
-				[
-					'methods' => [
-						$this->method->value,
-					],
-					'callback' => $this->callback(...),
-					'permission_callback' => $this->permissionCallback(...),
-				]
-			))->filter('rest_pre_serve_request', function (bool $served, WP_REST_Response $response, WP_REST_Request $request, WP_REST_Server $server): bool {
-				if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
-					return $served;
-				}
+		if ($request->get_route() !== "/{$this->routeNamespace}/{$this->route}") {
+			return $served;
+		}
 
-				echo $response->get_data();
+		echo $response->get_data();
 
-				return true;
-			});
+		return true;
 	}
 
 	protected function callback(WP_REST_Request $request): WP_REST_Response
 	{
+		$routes = $this->routesFactory->create(
+			$request->get_url_params(),
+		);
+
 		$pipeline = $this->pipeline
 			->withRequest(
-				$this->pipeline->request()->withRoutes(
-					$this->routesFactory->create(
-						$request->get_url_params(),
-					),
-				),
-			)
-			->withMiddlewares(...$this->middlewares)
-			->catch($this->handler->handle(...));
+				$this->pipeline->request()
+					->withRoutes($routes)
+			);
 
 		$response = $pipeline(($this->closure)(...));
 		if (!$response instanceof ResponseInterface) {
@@ -103,12 +104,12 @@ readonly class Route implements RouteInterface
 		);
 	}
 
-	protected function permissionCallback(): bool
+	protected function permissionCallback(WP_REST_Request $request): bool
 	{
 		return true;
 	}
 
-	protected function createResponse(array|string|null $body): ResponseInterface
+	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface
 	{
 		return $this->responseFactory->create(
 			200,

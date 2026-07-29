@@ -5,61 +5,51 @@ namespace Hoo\WordPressPluginFramework\Router\Routes\AdminAjax;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Router\Routes\RouteInterface,
-	Hooker\Hooks\HooksBuilderInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
-	Pipeline\Middlewares\MiddlewareInterface,
-	Exceptions\Handler\HandlerInterface,
 };
 
 readonly class Route implements RouteInterface
 {
 	public function __construct(
-		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
-		protected HandlerInterface $handler,
 		protected string $action,
 		protected Closure $closure,
-		protected array $middlewares = [],
 	) {
 	}
 
-	public function middlewares(): array
+	public function __invoke(): void
 	{
-		return $this->middlewares;
+		add_action(
+			"wp_ajax_{$this->action}",
+			$this->callback(...),
+			10,
+			0,
+		);
+
+		add_action(
+			"wp_ajax_nopriv_{$this->action}",
+			$this->callback(...),
+			10,
+			0,
+		);
 	}
 
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
+	public function up(): void
 	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, $middlewares);
-	}
 
-	public function withoutMiddlewares(): static
-	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->action, $this->closure, []);
 	}
-
-	public function withMiddleware(MiddlewareInterface $middleware): static
+	
+	public function down(): void
 	{
-		return $this->withMiddlewares(...$this->middlewares, $middleware);
-	}
 
-	public function hooksBuilder(): HooksBuilderInterface
-	{
-		return $this->hooksBuilder
-			->action("wp_ajax_{$this->action}", $this->callback(...))
-			->action("wp_ajax_nopriv_{$this->action}", $this->callback(...));
 	}
 
 	protected function callback(): void
 	{
-		$pipeline = $this->pipeline
-			->withMiddlewares(...$this->middlewares)
-			->catch($this->handler->handle(...));
-
-		$response = $pipeline(($this->closure)(...));
+		$response = ($this->pipeline)(($this->closure)(...));
 		if (!$response instanceof ResponseInterface) {
 			$response = $this->createResponse($response);
 		}
@@ -71,12 +61,12 @@ readonly class Route implements RouteInterface
 		exit();
 	}
 
-	protected function createResponse(array|string|null $body): ResponseInterface
+	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface
 	{
 		return $this->responseFactory->create(
 			200,
 			[
-				'Content-Type' => is_array($body) ? 'application/json' : 'text/html',
+				'Content-Type' => is_array($body) || is_object($body) ? 'application/json' : 'text/html',
 			],
 			$body,
 		);
@@ -92,10 +82,6 @@ readonly class Route implements RouteInterface
 	protected function headers(ResponseInterface $response): void
 	{
 		$headers = $response->headers();
-		if ($headers === null) {
-			return;
-		}
-
 		foreach ($headers as $key => $header) {
 			header("{$key}: {$header}");
 		}

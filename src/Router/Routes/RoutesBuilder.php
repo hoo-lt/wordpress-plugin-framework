@@ -4,24 +4,22 @@ namespace Hoo\WordPressPluginFramework\Router\Routes;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Hooker\Hooks\HooksBuilderInterface,
 	Http\Method\Method,
 	Http\Server\Request\Routes\RoutesFactoryInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineInterface,
 	Exceptions\Handler\HandlerInterface,
-	Pipeline\Middlewares\MiddlewaresBuilder,
+	Pipeline\Middlewares\MiddlewaresFactoryInterface,
 };
 
 readonly class RoutesBuilder implements RoutesBuilderInterface
 {
 	public function __construct(
-		protected HooksBuilderInterface $hooksBuilder,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineInterface $pipeline,
 		protected HandlerInterface $handler,
 		protected RoutesFactoryInterface $routesFactory,
-		protected MiddlewaresBuilder $middlewaresBuilder,
+		protected MiddlewaresFactoryInterface $middlewaresFactory,
 		protected array $routes = [],
 	) {
 	}
@@ -33,12 +31,12 @@ readonly class RoutesBuilder implements RoutesBuilderInterface
 
 	public function withRoutes(RouteInterface ...$routes): static
 	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->middlewaresBuilder, $routes);
+		return new static($this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->middlewaresFactory, $routes);
 	}
 
 	public function withoutRoutes(): static
 	{
-		return new static($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->middlewaresBuilder, []);
+		return new static($this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $this->middlewaresFactory, []);
 	}
 
 	public function withRoute(RouteInterface $route): static
@@ -46,30 +44,30 @@ readonly class RoutesBuilder implements RoutesBuilderInterface
 		return $this->withRoutes(...$this->routes, $route);
 	}
 
-	public function adminAjax(string $action, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
+	public function adminAjax(string $action, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withRoute(
-			new AdminAjax\Route($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $action, $closure, $middlewares)
+			new AdminAjax\Route($this->responseFactory, $pipeline, $action, $closure)
 		);
 	}
 
-	public function feed(string $name, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
+	public function feed(string $name, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withRoute(
-			new Feed\Route($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $name, $closure, $middlewares)
+			new Feed\Route($this->responseFactory, $pipeline, $name, $closure)
 		);
 	}
 
-	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresBuilderClosure = null): static
+	public function rest(string $routeNamespace, string $route, Closure $closure, Method $method, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withRoute(
-			new Rest\Route($this->hooksBuilder, $this->responseFactory, $this->pipeline, $this->handler, $this->routesFactory, $routeNamespace, $route, $closure, $method, $middlewares)
+			new Rest\Route($this->responseFactory, $pipeline, $this->routesFactory, $routeNamespace, $route, $closure, $method)
 		);
 	}
 
@@ -78,22 +76,15 @@ readonly class RoutesBuilder implements RoutesBuilderInterface
 		return $this->routes;
 	}
 
-	protected function buildMiddlewares(Closure $closures): array
+	protected function pipeline(?Closure $closure): PipelineInterface
 	{
-		$middlewaresBuilder = $closures($this->middlewaresBuilder);
-		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
-			throw new RoutesBuilderException('The middlewares builder closure must return an instance of MiddlewaresBuilder.');
-		}
-
-		return $middlewaresBuilder->build();
-	}
-
-	protected function tryBuildMiddlewares(?Closure $closures): array
-	{
-		if ($closures === null) {
-			return [];
-		}
-
-		return $this->buildMiddlewares($closures);
+		$middlewares = $this->middlewaresFactory->tryCreate($closure);
+		return $middlewares !== null
+			? $this->pipeline
+				->withMiddlewares($middlewares)
+				->catch($this->handler->handle(...))
+			: $this->pipeline
+				->withoutMiddlewares()
+				->catch($this->handler->handle(...));
 	}
 }

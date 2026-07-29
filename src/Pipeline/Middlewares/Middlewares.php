@@ -27,7 +27,7 @@ readonly class Middlewares implements MiddlewaresInterface
 	{
 		$middlewaresBuilder = ($this->closure)($this->middlewaresBuilder);
 		if (!$middlewaresBuilder instanceof MiddlewaresBuilderInterface) {
-			throw new MiddlewaresBuilderException('The middlewares builder closure must return an instance of MiddlewaresBuilder.');
+			throw new MiddlewaresException('closure must return middlewares builder instance');
 		}
 
 		return $middlewaresBuilder->build();

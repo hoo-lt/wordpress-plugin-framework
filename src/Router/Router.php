@@ -2,16 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Hoo\WordPressPluginFramework\{
-	Hooker\HookerInterface,
-	Router\Routes\RouteInterface,
-};
-
 readonly class Router implements RouterInterface
 {
 	public function __construct(
-		protected HookerInterface $hooker,
-		protected array $routes = [],
+		protected array $routes,
 	) {
 	}
 
@@ -20,39 +14,17 @@ readonly class Router implements RouterInterface
 		return $this->routes;
 	}
 
-	public function withRoutes(RouteInterface ...$routes): static
-	{
-		return new static($this->hooker, $routes);
-	}
-
-	public function withoutRoutes(): static
-	{
-		return new static($this->hooker, []);
-	}
-
-	public function withRoute(RouteInterface $route): static
-	{
-		return $this->withRoutes(...$this->routes, $route);
-	}
-
 	public function __invoke(): void
 	{
 		foreach ($this->routes as $route) {
-			$hooks = $route->hooksBuilder()->build();
-
-			$hooker = $this->hooker->withHooks(...$hooks);
-			$hooker();
+			$route();
 		}
 	}
 
 	public function up(): void
 	{
 		foreach ($this->routes as $route) {
-			$hooks = $route->hooksBuilder()->build();
-			foreach ($hooks as $hook) {
-				$closure = $hook->closure();
-				$closure();
-			}
+			$route->up();
 		}
 
 		flush_rewrite_rules();
@@ -60,6 +32,10 @@ readonly class Router implements RouterInterface
 
 	public function down(): void
 	{
+		foreach ($this->routes as $route) {
+			$route->down();
+		}
+
 		flush_rewrite_rules();
 	}
 }

@@ -2,12 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
 
-use Closure;
-use Hoo\WordPressPluginFramework\Pipeline\Middlewares\MiddlewaresInterface;
-
 interface HookInterface
 {
-	public function closure(): Closure;
-
 	public function __invoke(): void;
 }

@@ -2,15 +2,9 @@
 
 namespace Hoo\WordPressPluginFramework\Router;
 
-use Hoo\WordPressPluginFramework\Router\Routes\RouteInterface;
-
 interface RouterInterface
 {
 	public function routes(): array;
-	public function withRoutes(RouteInterface ...$routes): static;
-	public function withoutRoutes(): static;
-
-	public function withRoute(RouteInterface $route): static;
 
 	public function __invoke(): void;
 

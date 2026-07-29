@@ -2,18 +2,10 @@
 
 namespace Hoo\WordPressPluginFramework\Router\Routes;
 
-use Hoo\WordPressPluginFramework\{
-	Hooker\Hooks\HooksBuilderInterface,
-	Pipeline\Middlewares\MiddlewareInterface,
-};
-
 interface RouteInterface
 {
-	public function middlewares(): array;
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static;
-	public function withoutMiddlewares(): static;
+	public function __invoke(): void;
 
-	public function withMiddleware(MiddlewareInterface $middleware): static;
-
-	public function hooksBuilder(): HooksBuilderInterface;
+	public function up(): void;
+	public function down(): void;
 }

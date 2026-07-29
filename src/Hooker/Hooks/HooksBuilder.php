@@ -5,14 +5,14 @@ namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\PipelineInterface,
-	Pipeline\Middlewares\MiddlewaresFactory,
+	Pipeline\Middlewares\MiddlewaresFactoryInterface,
 };
 
 readonly class HooksBuilder implements HooksBuilderInterface
 {
 	public function __construct(
 		protected PipelineInterface $pipeline,
-		protected MiddlewaresFactory $middlewaresFactory,
+		protected MiddlewaresFactoryInterface $middlewaresFactory,
 		protected array $hooks = [],
 	) {
 	}
@@ -39,42 +39,52 @@ readonly class HooksBuilder implements HooksBuilderInterface
 
 	public function action(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withHook(
-			new Action\Hook($this->pipeline, $name, $closure, $priority, $middlewares),
+			new Action\Hook($pipeline, $name, $closure, $priority),
 		);
 	}
 
 	public function filter(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withHook(
-			new Filter\Hook($this->pipeline, $name, $closure, $priority, $middlewares),
+			new Filter\Hook($pipeline, $name, $closure, $priority),
 		);
 	}
 
 	public function activation(string $file, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withHook(
-			new Activation\Hook($this->pipeline, $file, $closure, $middlewares),
+			new Activation\Hook($pipeline, $file, $closure),
 		);
 	}
 
 	public function deactivation(string $file, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
+		$pipeline = $this->pipeline($middlewaresClosure);
 
 		return $this->withHook(
-			new Deactivation\Hook($this->pipeline, $file, $closure, $middlewares),
+			new Deactivation\Hook($pipeline, $file, $closure),
 		);
 	}
 
 	public function build(): array
 	{
 		return $this->hooks;
+	}
+
+	protected function pipeline(?Closure $closure): PipelineInterface
+	{
+		$middlewares = $this->middlewaresFactory->tryCreate($closure);
+		return $middlewares !== null
+			? $this->pipeline
+				->withMiddlewares($middlewares)
+			: $this->pipeline
+				->withoutMiddlewares();
 	}
 }
