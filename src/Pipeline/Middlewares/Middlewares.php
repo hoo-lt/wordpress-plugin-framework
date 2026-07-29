@@ -19,11 +19,11 @@ readonly class Middlewares implements MiddlewaresInterface
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator(
-			$this->middlewares ??= $this->build(),
+			$this->middlewares ??= $this->middlewares(),
 		);
 	}
 
-	protected function build(): array
+	protected function middlewares(): array
 	{
 		$middlewaresBuilder = ($this->closure)($this->middlewaresBuilder);
 		if (!$middlewaresBuilder instanceof MiddlewaresBuilderInterface) {

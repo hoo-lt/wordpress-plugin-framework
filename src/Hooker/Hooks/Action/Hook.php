@@ -7,7 +7,7 @@ use Hoo\WordPressPluginFramework\{
 	Hooker\Hooks\HookInterface,
 	Http\Server\Request\RequestInterface,
 	Pipeline\PipelineInterface,
-	Pipeline\Middlewares\MiddlewareInterface
+	Pipeline\Middlewares\MiddlewaresInterface,
 };
 
 readonly class Hook implements HookInterface
@@ -16,29 +16,9 @@ readonly class Hook implements HookInterface
 		protected PipelineInterface $pipeline,
 		protected string $name,
 		protected Closure $closure,
-		protected int $priority = 10,
-		protected array $middlewares = [],
+		protected int $priority,
+		protected ?MiddlewaresInterface $middlewares,
 	) {
-	}
-
-	public function middlewares(): array
-	{
-		return $this->middlewares;
-	}
-
-	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
-	{
-		return new static($this->pipeline, $this->name, $this->closure, $this->priority, $middlewares);
-	}
-
-	public function withoutMiddlewares(): static
-	{
-		return new static($this->pipeline, $this->name, $this->closure, $this->priority, []);
-	}
-
-	public function withMiddleware(MiddlewareInterface $middleware): static
-	{
-		return $this->withMiddlewares(...$this->middlewares, $middleware);
 	}
 
 	public function closure(): Closure
@@ -51,10 +31,10 @@ readonly class Hook implements HookInterface
 		add_action(
 			$this->name,
 			fn(mixed ...$args) => $this->pipeline
-				->withMiddlewares(...$this->middlewares)
+				->withMiddlewares($this->middlewares)
 			(fn(RequestInterface $request) => ($this->closure)($request, ...$args)),
 			$this->priority,
-			PHP_INT_MAX
+			PHP_INT_MAX,
 		);
 	}
 }

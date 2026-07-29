@@ -5,14 +5,14 @@ namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Pipeline\PipelineInterface,
-	Pipeline\Middlewares\MiddlewaresBuilder,
+	Pipeline\Middlewares\MiddlewaresFactory,
 };
 
 readonly class HooksBuilder implements HooksBuilderInterface
 {
 	public function __construct(
 		protected PipelineInterface $pipeline,
-		protected MiddlewaresBuilder $middlewaresBuilder,
+		protected MiddlewaresFactory $middlewaresFactory,
 		protected array $hooks = [],
 	) {
 	}
@@ -24,12 +24,12 @@ readonly class HooksBuilder implements HooksBuilderInterface
 
 	public function withHooks(HookInterface ...$hooks): static
 	{
-		return new static($this->pipeline, $this->middlewaresBuilder, $hooks);
+		return new static($this->pipeline, $this->middlewaresFactory, $hooks);
 	}
 
 	public function withoutHooks(): static
 	{
-		return new static($this->pipeline, $this->middlewaresBuilder, []);
+		return new static($this->pipeline, $this->middlewaresFactory, []);
 	}
 
 	public function withHook(HookInterface $hook): static
@@ -37,36 +37,36 @@ readonly class HooksBuilder implements HooksBuilderInterface
 		return $this->withHooks(...$this->hooks, $hook);
 	}
 
-	public function action(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresBuilderClosure = null): static
+	public function action(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
 
 		return $this->withHook(
 			new Action\Hook($this->pipeline, $name, $closure, $priority, $middlewares),
 		);
 	}
 
-	public function filter(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresBuilderClosure = null): static
+	public function filter(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
 
 		return $this->withHook(
 			new Filter\Hook($this->pipeline, $name, $closure, $priority, $middlewares),
 		);
 	}
 
-	public function activation(string $file, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
+	public function activation(string $file, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
 
 		return $this->withHook(
 			new Activation\Hook($this->pipeline, $file, $closure, $middlewares),
 		);
 	}
 
-	public function deactivation(string $file, Closure $closure, ?Closure $middlewaresBuilderClosure = null): static
+	public function deactivation(string $file, Closure $closure, ?Closure $middlewaresClosure = null): static
 	{
-		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+		$middlewares = $this->middlewaresFactory->tryCreate($middlewaresClosure);
 
 		return $this->withHook(
 			new Deactivation\Hook($this->pipeline, $file, $closure, $middlewares),
@@ -76,24 +76,5 @@ readonly class HooksBuilder implements HooksBuilderInterface
 	public function build(): array
 	{
 		return $this->hooks;
-	}
-
-	protected function buildMiddlewares(Closure $closures): array
-	{
-		$middlewaresBuilder = $closures($this->middlewaresBuilder);
-		if (!$middlewaresBuilder instanceof MiddlewaresBuilder) {
-			throw new HooksBuilderException('The middlewares builder closure must return an instance of MiddlewaresBuilder.');
-		}
-
-		return $middlewaresBuilder->build();
-	}
-
-	protected function tryBuildMiddlewares(?Closure $closures): array
-	{
-		if ($closures === null) {
-			return [];
-		}
-
-		return $this->buildMiddlewares($closures);
 	}
 }
