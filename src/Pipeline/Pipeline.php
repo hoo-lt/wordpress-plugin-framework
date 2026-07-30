@@ -22,41 +22,24 @@ readonly class Pipeline implements PipelineInterface
 
 	public function __invoke(Closure $closure): mixed
 	{
-		$closure = $this->closure($closure);
-
-		if ($this->middlewares === null) {
-			return $closure($this->request);
+		if ($this->middlewares !== null) {
+			$closure = array_reduce(
+				array_reverse(
+					iterator_to_array($this->middlewares),
+				),
+				fn(Closure $closure, MiddlewareInterface $middleware): Closure => fn(RequestInterface $request): mixed => $middleware($request, $closure),
+				$closure,
+			);
 		}
 
-		return array_reduce(
-			array_reverse(
-				iterator_to_array($this->middlewares),
-			),
-			$this->middleware(...),
-			$closure,
-		)($this->request);
-	}
-
-	protected function closure(Closure $closure): mixed
-	{
-		return fn(RequestInterface $request) => $this->tryCatch(fn() => $closure($request), $request);
-	}
-
-	protected function middleware(Closure $closure, MiddlewareInterface $middleware): mixed
-	{
-		return fn(RequestInterface $request) => $this->tryCatch(fn() => $middleware($request, $closure), $request);
-	}
-
-	protected function tryCatch(Closure $closure, RequestInterface $request): mixed
-	{
 		try {
-			return $closure();
+			return $closure($this->request);
 		} catch (Throwable $throwable) {
 			if ($this->handler === null) {
 				throw $throwable;
 			}
 
-			return $this->handler->handle($request, $throwable);
+			return $this->handler->handle($this->request, $throwable);
 		}
 	}
 }

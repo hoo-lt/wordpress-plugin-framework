@@ -15,11 +15,11 @@ readonly class RouterFactory implements RouterFactoryInterface
 	public function create(Closure $closure): RouterInterface
 	{
 		return new Router(
-			$this->buildRoutes($closure),
+			$this->routes($closure),
 		);
 	}
 
-	protected function buildRoutes(Closure $closure): array
+	protected function routes(Closure $closure): array
 	{
 		$routesBuilder = $closure($this->routesBuilder);
 		if (!$routesBuilder instanceof RoutesBuilderInterface) {

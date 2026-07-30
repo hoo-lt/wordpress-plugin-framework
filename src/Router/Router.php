@@ -9,11 +9,6 @@ readonly class Router implements RouterInterface
 	) {
 	}
 
-	public function routes(): array
-	{
-		return $this->routes;
-	}
-
 	public function __invoke(): void
 	{
 		foreach ($this->routes as $route) {

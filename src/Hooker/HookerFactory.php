@@ -15,11 +15,11 @@ readonly class HookerFactory implements HookerFactoryInterface
 	public function create(Closure $closure): HookerInterface
 	{
 		return new Hooker(
-			$this->buildHooks($closure),
+			$this->hooks($closure),
 		);
 	}
 
-	protected function buildHooks(Closure $closure): array
+	protected function hooks(Closure $closure): array
 	{
 		$hooksBuilder = $closure($this->hooksBuilder);
 		if (!$hooksBuilder instanceof HooksBuilderInterface) {
