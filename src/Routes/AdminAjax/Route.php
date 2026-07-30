@@ -5,18 +5,26 @@ namespace Hoo\WordPressPluginFramework\Routes\AdminAjax;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
+	Http\Server\Request\RequestInterface,
+	Http\Server\Request\RequestFactoryInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
+	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class Route implements RouteInterface
 {
+	protected RequestInterface $request;
+	protected PipelineInterface $pipeline;
+
 	public function __construct(
+		protected RequestFactoryInterface $requestFactory,
 		protected ResponseFactoryInterface $responseFactory,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $action,
 		protected Closure $closure,
+		protected ?Closure $middlewaresBuilderClosure = null,
 	) {
 	}
 
@@ -41,7 +49,7 @@ readonly class Route implements RouteInterface
 	{
 
 	}
-	
+
 	public function down(): void
 	{
 
@@ -49,7 +57,7 @@ readonly class Route implements RouteInterface
 
 	protected function callback(): void
 	{
-		$pipeline = $this->pipelineFactory->createFromServer();
+		$pipeline = $this->pipeline();
 
 		$response = $pipeline(($this->closure)(...));
 		if (!$response instanceof ResponseInterface) {
@@ -61,6 +69,18 @@ readonly class Route implements RouteInterface
 		$this->body($response);
 
 		exit();
+	}
+
+	protected function pipeline(): PipelineInterface
+	{
+		$request = $this->request();
+
+		return $this->pipeline ??= $this->pipelineFactory->create($request, $this->middlewaresBuilderClosure);
+	}
+
+	protected function request(): RequestInterface
+	{
+		return $this->request ??= $this->requestFactory->createFromServer();
 	}
 
 	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface

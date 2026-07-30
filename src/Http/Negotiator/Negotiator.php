@@ -3,48 +3,49 @@
 namespace Hoo\WordPressPluginFramework\Http\Negotiator;
 
 use Hoo\WordPressPluginFramework\{
+	Http\Exceptions\NotAcceptable\Exception as NotAcceptableException,
+	Http\Semantics\Accept\AcceptFactoryInterface,
 	Http\Semantics\Accept\AcceptInterface,
+	Http\Semantics\ContentType\MediaType\MediaTypeFactoryInterface,
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
 
 readonly class Negotiator implements NegotiatorInterface
 {
-	public function __construct(
-		protected array $coders,
-		protected ?MediaTypeInterface $mediaType = null,
-	) {
-		if ($this->mediaType === null) {
-			return;
-		}
+	protected MediaTypeInterface $mediaType;
 
+	public function __construct(
+		protected AcceptFactoryInterface $acceptFactory,
+		MediaTypeFactoryInterface $mediaTypeFactory,
+		string $mediaType,
+		protected array $coders,
+	) {
+		$this->mediaType = $mediaTypeFactory->create($mediaType);
 		if (!$this->codes($this->mediaType, $this->coders)) {
 			throw new NegotiatorException('no coder for default media type');
 		}
 	}
 
-	public function withMediaType(MediaTypeInterface $mediaType): static
+	public function negotiate(?string $accept, mixed $decoded): MediaTypeInterface
 	{
-		return new static($this->coders, $mediaType);
+		$mediaType = $this->tryNegotiate($accept, $decoded);
+		if ($mediaType === null) {
+			throw new NotAcceptableException('no acceptable representation', 'negotiator_error');
+		}
+
+		return $mediaType;
 	}
 
-	public function withoutMediaType(): static
-	{
-		return new static($this->coders, null);
-	}
-
-	public function negotiate(?AcceptInterface $accept, mixed $decoded): MediaTypeInterface
+	public function tryNegotiate(?string $accept, mixed $decoded): ?MediaTypeInterface
 	{
 		$coders = $this->coders($decoded);
 		if ($coders === []) {
 			throw new NegotiatorException('no coder encodes the payload');
 		}
 
-		$mediaType = $this->mediaType($accept, $coders);
-		if ($mediaType === null) {
-			throw new NotAcceptableException('no acceptable representation');
-		}
+		$accept = $this->acceptFactory->tryCreate($accept);
 
-		return $mediaType;
+		return $this->mediaType($accept, $coders);
 	}
 
 	protected function coders(mixed $decoded): array
@@ -56,10 +57,7 @@ readonly class Negotiator implements NegotiatorInterface
 	{
 		$mediaTypes = [];
 
-		if (
-			$this->mediaType !== null &&
-			$this->codes($this->mediaType, $coders)
-		) {
+		if ($this->codes($this->mediaType, $coders)) {
 			$mediaTypes[] = $this->mediaType;
 		}
 

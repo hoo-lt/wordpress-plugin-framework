@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Exceptions\BadRequest;
+namespace Hoo\WordPressPluginFramework\Http\Exceptions\NotAcceptable;
 
 use Hoo\WordPressPluginFramework\Http;
 
@@ -10,6 +10,6 @@ class Exception extends Http\Exceptions\Exception
 		string $message,
 		string $code,
 	) {
-		parent::__construct($message, $code, 400);
+		parent::__construct($message, $code, 406);
 	}
 }

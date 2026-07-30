@@ -10,10 +10,6 @@ class Exception extends Http\Exceptions\Exception
 		string $message,
 		string $code,
 	) {
-		parent::__construct(
-			$message,
-			$code,
-			403,
-		);
+		parent::__construct($message, $code, 403);
 	}
 }
