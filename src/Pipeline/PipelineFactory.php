@@ -2,68 +2,42 @@
 
 namespace Hoo\WordPressPluginFramework\Pipeline;
 
+use Closure;
 use Hoo\WordPressPluginFramework\{
-	Exceptions\Handler\HandlerInterface,
-	Http\Server\Request\RequestFactoryInterface,
 	Http\Server\Request\RequestInterface,
-	Pipeline\Middlewares\MiddlewaresInterface,
+	Pipeline\Middlewares\MiddlewaresBuilderInterface,
 };
 
 readonly class PipelineFactory implements PipelineFactoryInterface
 {
 	public function __construct(
-		protected RequestFactoryInterface $requestFactory,
-		protected ?MiddlewaresInterface $middlewares = null,
-		protected ?HandlerInterface $handler = null,
+		protected MiddlewaresBuilderInterface $middlewaresBuilder,
 	) {
 	}
 
-	public function middlewares(): ?MiddlewaresInterface
+	public function create(RequestInterface $request, ?Closure $middlewaresBuilderClosure = null): PipelineInterface
 	{
-		return $this->middlewares;
+		$middlewares = $this->tryBuildMiddlewares($middlewaresBuilderClosure);
+
+		return new Pipeline($request, $middlewares);
 	}
 
-	public function withMiddlewares(?MiddlewaresInterface $middlewares): static
+	protected function buildMiddlewares(Closure $closure): array
 	{
-		return new static($this->requestFactory, $middlewares, $this->handler);
+		$middlewaresBuilder = $closure($this->middlewaresBuilder);
+		if (!$middlewaresBuilder instanceof MiddlewaresBuilderInterface) {
+			throw new PipelineFactoryException('closure must return middlewares builder instance');
+		}
+
+		return $middlewaresBuilder->build();
 	}
 
-	public function withoutMiddlewares(): static
+	protected function tryBuildMiddlewares(?Closure $closure): array
 	{
-		return new static($this->requestFactory, null, $this->handler);
-	}
+		if ($closure === null) {
+			return [];
+		}
 
-	public function handler(): ?HandlerInterface
-	{
-		return $this->handler;
-	}
-
-	public function withHandler(HandlerInterface $handler): static
-	{
-		return new static($this->requestFactory, $this->middlewares, $handler);
-	}
-
-	public function withoutHandler(): static
-	{
-		return new static($this->requestFactory, $this->middlewares, null);
-	}
-
-	public function create(string $method, string $url, array $headers = [], ?string $body = null, ?array $routes = null): PipelineInterface
-	{
-		return $this->pipeline(
-			$this->requestFactory->create($method, $url, $headers, $body, $routes),
-		);
-	}
-
-	public function createFromServer(): PipelineInterface
-	{
-		return $this->pipeline(
-			$this->requestFactory->createFromServer(),
-		);
-	}
-
-	protected function pipeline(RequestInterface $request): PipelineInterface
-	{
-		return new Pipeline($request, $this->middlewares, $this->handler);
+		return $this->buildMiddlewares($closure);
 	}
 }

@@ -6,5 +6,5 @@ use Closure;
 
 interface HookerFactoryInterface
 {
-	public function create(Closure $closure): HookerInterface;
+	public function create(Closure $hooksBuilderClosure): HookerInterface;
 }
