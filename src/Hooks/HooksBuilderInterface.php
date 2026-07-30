@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hooker\Hooks;
+namespace Hoo\WordPressPluginFramework\Hooks;
 
 use Closure;
 

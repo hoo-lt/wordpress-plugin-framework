@@ -1,20 +1,19 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hooker;
+namespace Hoo\WordPressPluginFramework\Hooks;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HooksBuilderInterface;
 
-readonly class HookerFactory implements HookerFactoryInterface
+readonly class HooksFactory implements HooksFactoryInterface
 {
 	public function __construct(
 		protected HooksBuilderInterface $hooksBuilder,
 	) {
 	}
 
-	public function create(Closure $hooksBuilderClosure): HookerInterface
+	public function create(Closure $hooksBuilderClosure): HooksInterface
 	{
-		return new Hooker(
+		return new Hooks(
 			$this->buildHooks($hooksBuilderClosure),
 		);
 	}
@@ -23,7 +22,7 @@ readonly class HookerFactory implements HookerFactoryInterface
 	{
 		$hooksBuilder = $closure($this->hooksBuilder);
 		if (!$hooksBuilder instanceof HooksBuilderInterface) {
-			throw new HookerFactoryException('closure must return hooks builder instance');
+			throw new HooksFactoryException('closure must return hooks builder instance');
 		}
 
 		return $hooksBuilder->build();

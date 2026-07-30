@@ -1,20 +1,19 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router;
+namespace Hoo\WordPressPluginFramework\Routes;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Router\Routes\RoutesBuilderInterface;
 
-readonly class RouterFactory implements RouterFactoryInterface
+readonly class RoutesFactory implements RoutesFactoryInterface
 {
 	public function __construct(
 		protected RoutesBuilderInterface $routesBuilder,
 	) {
 	}
 
-	public function create(Closure $closure): RouterInterface
+	public function create(Closure $closure): RoutesInterface
 	{
-		return new Router(
+		return new Routes(
 			$this->routes($closure),
 		);
 	}
@@ -23,7 +22,7 @@ readonly class RouterFactory implements RouterFactoryInterface
 	{
 		$routesBuilder = $closure($this->routesBuilder);
 		if (!$routesBuilder instanceof RoutesBuilderInterface) {
-			throw new RouterFactoryException('closure must return routes builder instance');
+			throw new RoutesFactoryException('closure must return routes builder instance');
 		}
 
 		return $routesBuilder->build();

@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hooker;
+namespace Hoo\WordPressPluginFramework\Hooks;
 
-readonly class Hooker implements HookerInterface
+readonly class Hooks implements HooksInterface
 {
 	public function __construct(
 		protected array $hooks,

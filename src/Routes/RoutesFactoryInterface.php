@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router;
+namespace Hoo\WordPressPluginFramework\Routes;
 
 use Closure;
 
-interface RouterFactoryInterface
+interface RoutesFactoryInterface
 {
-	public function create(Closure $closure): RouterInterface;
+	public function create(Closure $closure): RoutesInterface;
 }

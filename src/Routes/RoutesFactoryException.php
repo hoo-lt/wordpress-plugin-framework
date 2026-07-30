@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router;
+namespace Hoo\WordPressPluginFramework\Routes;
 
 use Exception;
 
-class RouterFactoryException extends Exception
+class RoutesFactoryException extends Exception
 {
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router\Routes;
+namespace Hoo\WordPressPluginFramework\Routes;
 
 interface RouteInterface
 {

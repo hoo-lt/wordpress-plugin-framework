@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router;
+namespace Hoo\WordPressPluginFramework\Routes;
 
-readonly class Router implements RouterInterface
+readonly class Routes implements RoutesInterface
 {
 	public function __construct(
 		protected array $routes,

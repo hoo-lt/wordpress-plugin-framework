@@ -8,8 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 	Pipeline\Middlewares\LogExecutionTime\MiddlewareFactoryInterface as LogExecutionTimeMiddlewareFactoryInterface,
 	Pipeline\Middlewares\Transaction\MiddlewareFactoryInterface as TransactionMiddlewareFactoryInterface,
-	Pipeline\Middlewares\Validate\Validators\ValidatorsBuilderInterface,
-	Pipeline\Middlewares\Validate\Middleware as ValidateMiddleware,
+	Pipeline\Middlewares\Validate\MiddlewareFactoryInterface as ValidateMiddlewareFactoryInterface,
 	Pipeline\Middlewares\VerifyNonce\Middleware as VerifyNonceMiddleware,
 };
 
@@ -18,7 +17,7 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 	public function __construct(
 		protected LogExecutionTimeMiddlewareFactoryInterface $logExecutionTimeMiddlewareFactory,
 		protected TransactionMiddlewareFactoryInterface $transactionMiddlewareFactory,
-		protected ValidatorsBuilderInterface $validatorsBuilder,
+		protected ValidateMiddlewareFactoryInterface $validateMiddlewareFactory,
 		protected array $middlewares = [],
 	) {
 	}
@@ -30,12 +29,12 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function withMiddlewares(MiddlewareInterface ...$middlewares): static
 	{
-		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validatorsBuilder, $middlewares);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, $middlewares);
 	}
 
 	public function withoutMiddlewares(): static
 	{
-		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validatorsBuilder, []);
+		return new static($this->logExecutionTimeMiddlewareFactory, $this->transactionMiddlewareFactory, $this->validateMiddlewareFactory, []);
 	}
 
 	public function withMiddleware(MiddlewareInterface $middleware): static
@@ -79,15 +78,8 @@ readonly class MiddlewaresBuilder implements MiddlewaresBuilderInterface
 
 	public function validate(Closure $closure): static
 	{
-		$validatorsBuilder = $closure($this->validatorsBuilder);
-		if (!$validatorsBuilder instanceof ValidatorsBuilderInterface) {
-			throw new MiddlewaresBuilderException('must return Validators Builder instance');
-		}
-
 		return $this->withMiddleware(
-			new ValidateMiddleware(
-				$validatorsBuilder->build(),
-			),
+			$this->validateMiddlewareFactory->create($closure),
 		);
 	}
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router;
+namespace Hoo\WordPressPluginFramework\Routes;
 
-interface RouterInterface
+interface RoutesInterface
 {
 	public function __invoke(): void;
 

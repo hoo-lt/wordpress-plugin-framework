@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Action;
+namespace Hoo\WordPressPluginFramework\Hooks\Filter;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Hooker\Hooks\HookInterface,
+	Hooks\HookInterface,
 	Http\Server\Request\RequestInterface,
 	Http\Server\Request\RequestFactoryInterface,
 	Pipeline\PipelineInterface,
@@ -28,7 +28,7 @@ readonly class Hook implements HookInterface
 
 	public function __invoke(): void
 	{
-		add_action(
+		add_filter(
 			$this->name,
 			$this->callback(...),
 			$this->priority,

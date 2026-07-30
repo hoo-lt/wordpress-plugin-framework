@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router\Routes\AdminAjax;
+namespace Hoo\WordPressPluginFramework\Routes\AdminAjax;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Router\Routes\RouteInterface,
+	Routes\RouteInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineFactoryInterface,

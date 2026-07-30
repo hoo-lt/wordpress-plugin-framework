@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Hooker\Hooks\Deactivation;
+namespace Hoo\WordPressPluginFramework\Hooks\Activation;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Hooker\Hooks\HookInterface;
+use Hoo\WordPressPluginFramework\Hooks\HookInterface;
 
 readonly class Hook implements HookInterface
 {
@@ -15,6 +15,6 @@ readonly class Hook implements HookInterface
 
 	public function __invoke(): void
 	{
-		register_deactivation_hook($this->file, $this->closure);
+		register_activation_hook($this->file, $this->closure);
 	}
 }

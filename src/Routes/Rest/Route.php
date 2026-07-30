@@ -1,10 +1,10 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Router\Routes\Rest;
+namespace Hoo\WordPressPluginFramework\Routes\Rest;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Router\Routes\RouteInterface,
+	Routes\RouteInterface,
 	Http\Server\Response\ResponseInterface,
 	Http\Server\Response\ResponseFactoryInterface,
 	Pipeline\PipelineFactoryInterface,
