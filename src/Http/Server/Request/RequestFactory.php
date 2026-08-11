@@ -4,49 +4,73 @@ namespace Hoo\WordPressPluginFramework\Http\Server\Request;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Body\BodyFactoryInterface,
+	Http\Message\Body\BodyInterface,
 	Http\Message\Headers\HeadersFactoryInterface,
+	Http\Message\Headers\HeadersInterface,
 	Http\Method\Method,
-	Http\Server\Request\Routes\RoutesFactoryInterface,
 	Http\Server\ServerInterface,
 	Http\Url\UrlFactoryInterface,
+	Http\Url\UrlInterface,
 	Uuid\UuidInterface,
 };
 
 readonly class RequestFactory implements RequestFactoryInterface
 {
-	protected RequestInterface $request;
+	protected const CONTENT_TYPE = 'application/octet-stream';
 
 	public function __construct(
 		protected UuidInterface $uuid,
+		protected ServerInterface $server,
 		protected UrlFactoryInterface $urlFactory,
 		protected HeadersFactoryInterface $headersFactory,
 		protected BodyFactoryInterface $bodyFactory,
-		protected RoutesFactoryInterface $routesFactory,
-		protected ServerInterface $server,
 	) {
 	}
 
-	public function create(string $method, string $url, array $headers = [], ?string $body = null, ?array $routes = null): RequestInterface
+	public function create(): RequestInterface
 	{
-		$method = Method::from($method);
-		$url = $this->urlFactory->create($url);
-		$headers = $this->headersFactory->create($headers);
-		$body = $this->bodyFactory->tryCreateFromEncoded(
-			$body,
-			$headers->contentType(),
+		return new Request(
+			$this->uuid,
+			$this->createMethod(),
+			$this->createUrl(),
+			$this->createHeaders(),
+			$this->tryCreateBody(),
 		);
-		$routes = $this->routesFactory->tryCreate($routes);
-
-		return new Request($this->uuid, $method, $url, $headers, $body, $routes);
 	}
 
-	public function createFromServer(): RequestInterface
+	protected function createMethod(): Method
 	{
-		return $this->request ??= $this->create(
-			$this->server->method(),
-			$this->server->url(),
-			$this->server->headers(),
-			$this->server->body(),
-		);
+		$method = $this->server->method();
+
+		return Method::create($method);
+	}
+
+	protected function createUrl(): UrlInterface
+	{
+		$url = $this->server->url();
+
+		return $this->urlFactory->create($url);
+	}
+
+	protected function createHeaders(): HeadersInterface
+	{
+		$headers = $this->server->headers();
+
+		return $this->headersFactory->create($headers);
+	}
+
+	protected function tryCreateBody(): ?BodyInterface
+	{
+		$body = $this->server->body();
+		if ($body === null) {
+			return null;
+		}
+
+		$contentType = $this->server->contentType();
+		if ($contentType === null) {
+			$contentType = self::CONTENT_TYPE;
+		}
+
+		return $this->bodyFactory->createFromEncoded($body, $contentType);
 	}
 }

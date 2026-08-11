@@ -13,10 +13,8 @@ interface ValidatorsBuilderInterface
     public function withValidator(ValidatorInterface $validator): static;
 
     public function body(string $key, Closure $closure): static;
-    public function bodyQuery(string $key, Closure $closure): static;
     public function query(string $key, Closure $closure): static;
-    public function header(string $key, Closure $closure): static;
-    public function route(string $key, Closure $closure): static;
+    public function header(string $name, Closure $closure): static;
 
     public function condition(Closure $expressionValidatorsClosure, ?Closure $ifStatementValidatorsClosure = null, ?Closure $elseStatementValidatorsClosure = null): static;
 

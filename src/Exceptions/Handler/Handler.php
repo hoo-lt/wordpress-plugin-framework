@@ -8,8 +8,8 @@ use Hoo\WordPressPluginFramework\{
 	Http\Negotiation\NegotiatorInterface,
 	Http\Semantics\Accept\AcceptFactoryInterface,
 	Http\Server\Request\RequestInterface,
-	Http\Server\Response\ResponseInterface,
-	Http\Server\Response\ResponseFactoryInterface,
+	Http\Response\ResponseInterface,
+	Http\Response\ResponseFactoryInterface,
 	View\ViewFactoryInterface,
 };
 use Throwable;

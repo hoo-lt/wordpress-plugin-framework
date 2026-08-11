@@ -12,7 +12,7 @@ interface MessageInterface
 	public function headers(): HeadersInterface;
 	public function withHeaders(HeadersInterface $headers): static;
 
-	public function header(string $key): mixed;
+	public function header(string $name): mixed;
 
 	public function body(): ?BodyInterface;
 	public function withBody(BodyInterface $body): static;

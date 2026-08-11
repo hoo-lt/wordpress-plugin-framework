@@ -19,7 +19,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function createFromDecoded(object|array|string|float|int|bool $body, ?string $contentType = null): BodyInterface
+	public function createFromDecoded(mixed $body, string $contentType): BodyInterface
 	{
 		$mediaType = $this->mediaTypeFactory->create($contentType);
 		$encoder = $this->coderFactory->createEncoder($body, $mediaType);
@@ -35,19 +35,10 @@ readonly class BodyFactory implements BodyFactoryInterface
 		return new Body($encoder, $body);
 	}
 
-	public function tryCreateFromDecoded(object|array|string|float|int|bool|null $body, ?string $contentType = null): ?BodyInterface
-	{
-		if ($body === null) {
-			return null;
-		}
-
-		return $this->createFromDecoded($body, $contentType);
-	}
-
-	public function createFromEncoded(string $body, ?string $contentType = null): BodyInterface
+	public function createFromEncoded(string $body, string $contentType): BodyInterface
 	{
 		$mediaType = $this->mediaTypeFactory->create($contentType);
-		$decoder = $this->coderFactory->createDecoder($body, $mediaType);
+		$decoder = $this->coderFactory->createDecoder($mediaType);
 
 		$body = $decoder->decode($body);
 		if (
@@ -58,14 +49,5 @@ readonly class BodyFactory implements BodyFactoryInterface
 		}
 
 		return new Body($decoder, $body);
-	}
-
-	public function tryCreateFromEncoded(?string $body, ?string $contentType = null): ?BodyInterface
-	{
-		if ($body === null) {
-			return null;
-		}
-
-		return $this->createFromEncoded($body, $contentType);
 	}
 }

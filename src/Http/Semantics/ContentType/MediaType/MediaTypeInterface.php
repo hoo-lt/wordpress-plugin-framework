@@ -2,12 +2,15 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Semantics\ContentType\MediaType;
 
-interface MediaTypeInterface
+use Stringable;
+use Traversable;
+
+interface MediaTypeInterface extends Stringable
 {
 	public function type(): string;
 	public function subtype(): string;
 
-	public function parameters(): array;
+	public function parameters(): Traversable;
 	public function parameter(string $name): ?string;
 
 	public function charset(): ?string;

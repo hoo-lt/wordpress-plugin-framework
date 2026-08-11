@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Server\Request\RequestInterface,
-	Http\Server\Response\ResponseInterface,
+	Http\Response\ResponseInterface,
 };
 use Throwable;
 

@@ -140,17 +140,54 @@ end to end, with no fatal errors.
 
 Fill the gaps that stop the framework from handling real plugin work.
 
-- [ ] **Cron** — first-class scheduled-task registration (alongside `hook()` /
-      `route()`), wired through the same controller + middleware pipeline.
+The declaration model — hooks, routes, HTTP, database — covers *where* code enters
+and *where* data lives. What it does not yet cover is *when* code runs: on a
+schedule, across request boundaries, or on a version change. This milestone closes
+that axis.
+
 - [ ] **Complete the database layer** — today it is select-only. Add full CRUD
       (insert/update/delete), a query abstraction, and a path for plain SQL, so the
-      DB layer is a complete way to work with custom tables.
+      DB layer is a complete way to work with custom tables. Everything below
+      depends on this.
+- [ ] **Cron** — first-class scheduled-task registration (alongside `hook()` /
+      `route()`), wired through the same controller + middleware pipeline.
+- [ ] **Background jobs** — cron answers "run at 03:00"; it does not answer "process
+      100k products across request boundaries". Add a `job()` declaration backed by a
+      queue table: payload, claim/lock, batching, retry, resume. The trigger differs;
+      the execution path is the existing pipeline, so `transaction()`,
+      `logExecutionTime()` and `validate()` apply to a job unchanged.
+- [ ] **Plugin lifecycle beyond activation** — two seams are currently unrepresented:
+      - **Update.** WordPress does *not* re-run the activation hook when a plugin is
+        updated, so migrations tied to `activation()` silently never run on upgrade.
+        Add a version-transition seam (stored version compared on `plugins_loaded`,
+        or `upgrader_process_complete`).
+      - **Uninstall.** `register_uninstall_hook()` stores the callback **in the
+        database**, so it cannot be a `Closure` — the `activation()`/`deactivation()`
+        shape does not transfer. Ship an `uninstall.php` in the scaffold that boots
+        the autoloader and container itself, since the plugin is not loaded at
+        deletion time.
 - [ ] **Current user** — a `User` object representing the current WordPress user,
       injectable into controllers/services (so domain code reads identity through a
       typed object instead of `wp_get_current_user()` / globals).
+- [ ] **`adminPost()` route** — `adminAjax()` exists, but classic (non-AJAX) admin
+      form submissions go through `admin-post.php`. With this one route type the
+      whole admin-page pattern is covered by existing primitives: `admin_menu` via
+      `action()`, the form as a view, the submit as a route with `verifyNonce()` and
+      `validate()` in front of it.
+- [ ] **Hook error policy** — routes handle exceptions; hooks propagate them, which
+      means an uncaught exception in a hook can white-screen the host site. Add a
+      third policy: log and continue, with filters returning the untouched value. A
+      guest in someone else's lifecycle should degrade, not take the page down.
 
-**Exit:** a non-trivial plugin (scheduled job + custom-table CRUD + auth) can be
-built without dropping to raw WordPress APIs. **Tag `alpha.2`.**
+Smaller items in the same milestone: a nonce **generator** to pair with
+`verifyNonce()`; a plain WordPress logger (the only implementation today is
+WooCommerce-bound); typed plugin settings with defaults and versioning (the sibling
+of database migrations); and an explicit in-or-out decision on multisite (network
+activation runs once, migrations need to walk the blogs).
+
+**Exit:** a non-trivial plugin (scheduled job, batched background work, custom-table
+CRUD, auth, an admin screen) can be built without dropping to raw WordPress APIs, and
+it survives install → update → uninstall with no manual steps. **Tag `alpha.2`.**
 
 ### `alpha.3` — self-contained container
 

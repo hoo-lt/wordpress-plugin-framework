@@ -17,56 +17,7 @@ readonly class Client implements ClientInterface
 		protected ResponseFactoryInterface $responseFactory,
 	) {
 	}
-
-	public function get(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('GET', $url, $headers, $body),
-		);
-	}
-
-	public function head(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('HEAD', $url, $headers, $body),
-		);
-	}
-
-	public function post(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('POST', $url, $headers, $body),
-		);
-	}
-
-	public function put(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('PUT', $url, $headers, $body),
-		);
-	}
-
-	public function patch(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('PATCH', $url, $headers, $body),
-		);
-	}
-
-	public function delete(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('DELETE', $url, $headers, $body),
-		);
-	}
-
-	public function options(string $url, ?array $headers = null, array|string|null $body = null): ResponseInterface
-	{
-		return $this->request(
-			$this->requestFactory->create('OPTIONS', $url, $headers, $body),
-		);
-	}
-
+	
 	public function request(RequestInterface $request): ResponseInterface
 	{
 		$response = wp_safe_remote_request(

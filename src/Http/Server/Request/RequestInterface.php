@@ -3,18 +3,22 @@
 namespace Hoo\WordPressPluginFramework\Http\Server\Request;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Client\Request\RequestInterface as ClientRequestInterface,
-	Http\Server\Request\Routes\RoutesInterface,
+	Http\Message\MessageInterface,
+	Http\Method\Method,
+	Http\Url\UrlInterface,
 	Uuid\UuidInterface,
 };
 
-interface RequestInterface extends ClientRequestInterface
+interface RequestInterface extends MessageInterface
 {
 	public function uuid(): UuidInterface;
 
-	public function routes(): ?RoutesInterface;
-	public function withRoutes(RoutesInterface $routes): static;
-	public function withoutRoutes(): static;
+	public function method(): Method;
+	public function withMethod(Method $method): static;
 
-	public function route(string $key): mixed;
+	public function url(): UrlInterface;
+	public function withUrl(UrlInterface $url): static;
+
+	public function queryValues(string $key): ?array;
+	public function queryValue(string $key): mixed;
 }

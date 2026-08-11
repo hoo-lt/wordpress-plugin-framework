@@ -62,9 +62,9 @@ readonly class Request implements RequestInterface
 		return new static($this->method, $this->url, $headers, $this->body);
 	}
 
-	public function header(string $key): mixed
+	public function header(string $name): mixed
 	{
-		return $this->headers()?->header($key);
+		return $this->headers()->header($name);
 	}
 
 	public function body(): ?BodyInterface
@@ -92,35 +92,5 @@ readonly class Request implements RequestInterface
 	{
 		$body = $this->body();
 		return $body instanceof KeyValueInterface ? $body->value($key) : null;
-	}
-
-	public function bodyQueryValues(string $key): ?array
-	{
-		$bodyValues = $this->bodyValues($key);
-		if ($bodyValues !== null) {
-			return $bodyValues;
-		}
-
-		$queryValues = $this->queryValues($key);
-		if ($queryValues !== null) {
-			return $queryValues;
-		}
-
-		return null;
-	}
-
-	public function bodyQueryValue(string $key): mixed
-	{
-		$bodyValue = $this->bodyValue($key);
-		if ($bodyValue !== null) {
-			return $bodyValue;
-		}
-
-		$queryValue = $this->queryValue($key);
-		if ($queryValue !== null) {
-			return $queryValue;
-		}
-
-		return null;
 	}
 }

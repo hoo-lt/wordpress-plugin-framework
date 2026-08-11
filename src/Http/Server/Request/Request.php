@@ -3,26 +3,23 @@
 namespace Hoo\WordPressPluginFramework\Http\Server\Request;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Client\Request\Request as ClientRequest,
 	Http\Message\Body\BodyInterface,
 	Http\Method\Method,
 	Http\Message\Headers\HeadersInterface,
+	Http\KeyValue\KeyValueInterface,
 	Http\Url\UrlInterface,
-	Http\Server\Request\Routes\RoutesInterface,
 	Uuid\UuidInterface,
 };
 
-readonly class Request extends ClientRequest implements RequestInterface
+readonly class Request implements RequestInterface
 {
 	public function __construct(
 		protected UuidInterface $uuid,
-		Method $method,
-		UrlInterface $url,
-		HeadersInterface $headers,
-		?BodyInterface $body = null,
-		protected ?RoutesInterface $routes = null,
+		protected Method $method,
+		protected UrlInterface $url,
+		protected HeadersInterface $headers,
+		protected ?BodyInterface $body = null,
 	) {
-		parent::__construct($method, $url, $headers, $body);
 	}
 
 	public function uuid(): UuidInterface
@@ -30,48 +27,77 @@ readonly class Request extends ClientRequest implements RequestInterface
 		return $this->uuid;
 	}
 
+	public function method(): Method
+	{
+		return $this->method;
+	}
+
 	public function withMethod(Method $method): static
 	{
-		return new static($this->uuid, $method, $this->url, $this->headers, $this->body, $this->routes);
+		return new static($this->uuid, $method, $this->url, $this->headers, $this->body);
+	}
+
+	public function url(): UrlInterface
+	{
+		return $this->url;
 	}
 
 	public function withUrl(UrlInterface $url): static
 	{
-		return new static($this->uuid, $this->method, $url, $this->headers, $this->body, $this->routes);
+		return new static($this->uuid, $this->method, $url, $this->headers, $this->body);
+	}
+
+	public function queryValues(string $key): ?array
+	{
+		$query = $this->url()->query();
+		return $query instanceof KeyValueInterface ? $query->values($key) : null;
+	}
+
+	public function queryValue(string $key): mixed
+	{
+		$query = $this->url()->query();
+		return $query instanceof KeyValueInterface ? $query->value($key) : null;
+	}
+
+	public function headers(): HeadersInterface
+	{
+		return $this->headers;
 	}
 
 	public function withHeaders(HeadersInterface $headers): static
 	{
-		return new static($this->uuid, $this->method, $this->url, $headers, $this->body, $this->routes);
+		return new static($this->uuid, $this->method, $this->url, $headers, $this->body);
+	}
+
+	public function header(string $name): mixed
+	{
+		return $this->headers()->header($name);
+	}
+
+	public function body(): ?BodyInterface
+	{
+		return $this->body;
 	}
 
 	public function withBody(BodyInterface $body): static
 	{
-		return new static($this->uuid, $this->method, $this->url, $this->headers, $body, $this->routes);
+		return new static($this->uuid, $this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
-		return new static($this->uuid, $this->method, $this->url, $this->headers, null, $this->routes);
+		return new static($this->uuid, $this->method, $this->url, $this->headers, null);
 	}
 
-	public function routes(): ?RoutesInterface
+	public function bodyValues(string $key): ?array
 	{
-		return $this->routes;
+		$body = $this->body();
+		return $body instanceof KeyValueInterface ? $body->values($key) : null;
 	}
 
-	public function withRoutes(RoutesInterface $routes): static
+	public function bodyValue(string $key): mixed
 	{
-		return new static($this->uuid, $this->method, $this->url, $this->headers, $this->body, $routes);
-	}
-
-	public function withoutRoutes(): static
-	{
-		return new static($this->uuid, $this->method, $this->url, $this->headers, $this->body, null);
-	}
-
-	public function route(string $key): mixed
-	{
-		return $this->routes()?->route($key);
+		$body = $this->body();
+		return $body instanceof KeyValueInterface ? $body->value($key) : null;
 	}
 }

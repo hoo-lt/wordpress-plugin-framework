@@ -45,8 +45,8 @@ readonly class Semantics
 	public const PARAMETER = self::PARAMETER_NAME . '=' . self::PARAMETER_VALUE;
 
 	// RFC 9110 §5.6.6 — parameters = *( OWS ";" OWS [ parameter ] ); one step of the repetition,
-	// its framing consumed, the parameter captured bare — the "*" is the caller's scan (preg_match_all)
-	public const PARAMETERS = self::OWS . ';' . self::OWS . '(?<parameter>' . self::PARAMETER . ')';
+	// captured with its framing so the caller can hand the run on verbatim — the "*" is the caller's scan (preg_match_all)
+	public const PARAMETERS = '(?<parameters>' . self::OWS . ';' . self::OWS . self::PARAMETER . ')';
 
 	// RFC 9110 §12.4.2 — weight = OWS ";" OWS ( "q" / "Q" ) "=" qvalue
 	public const WEIGHT = self::OWS . ';' . self::OWS . '[qQ]=(?<q>' . self::QVALUE . ')';

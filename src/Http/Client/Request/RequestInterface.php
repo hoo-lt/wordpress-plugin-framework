@@ -18,7 +18,4 @@ interface RequestInterface extends MessageInterface
 
 	public function queryValues(string $key): ?array;
 	public function queryValue(string $key): mixed;
-
-	public function bodyQueryValues(string $key): ?array;
-	public function bodyQueryValue(string $key): mixed;
 }

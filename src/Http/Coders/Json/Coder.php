@@ -29,17 +29,8 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 		return $mediaType->charset() === 'utf-8';
 	}
 
-	public function decodes(mixed $encoded): bool
+	public function decode(string $encoded): mixed
 	{
-		return is_string($encoded);
-	}
-
-	public function decode(mixed $encoded): mixed
-	{
-		if (!$this->decodes($encoded)) {
-			throw new CoderException('failed to decode');
-		}
-
 		try {
 			return json_decode($encoded, false, 512, JSON_THROW_ON_ERROR);
 		} catch (Throwable $throwable) {

@@ -11,13 +11,10 @@ readonly class CoderFactory implements CoderFactoryInterface
 	) {
 	}
 
-	public function createDecoder(mixed $encoded, MediaTypeInterface $mediaType): CoderInterface
+	public function createDecoder(MediaTypeInterface $mediaType): CoderInterface
 	{
 		foreach ($this->coders as $coder) {
-			if (
-				$coder->decodes($encoded) &&
-				$coder->codes($mediaType)
-			) {
+			if ($coder->codes($mediaType)) {
 				return $coder;
 			}
 		}

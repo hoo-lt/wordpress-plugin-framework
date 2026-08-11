@@ -38,9 +38,9 @@ readonly class Response implements ResponseInterface
 		return new static($this->statusCode, $headers, $this->body);
 	}
 
-	public function header(string $key): mixed
+	public function header(string $name): mixed
 	{
-		return $this->headers()?->header($key);
+		return $this->headers()->header($name);
 	}
 
 	public function body(): ?BodyInterface

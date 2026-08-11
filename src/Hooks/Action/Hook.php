@@ -6,18 +6,16 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooks\HookInterface,
 	Http\Server\Request\RequestInterface,
-	Http\Server\Request\RequestFactoryInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class Hook implements HookInterface
 {
-	protected RequestInterface $request;
 	protected PipelineInterface $pipeline;
 
 	public function __construct(
-		protected RequestFactoryInterface $requestFactory,
+		protected RequestInterface $request,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $name,
 		protected Closure $closure,
@@ -45,13 +43,6 @@ readonly class Hook implements HookInterface
 
 	protected function pipeline(): PipelineInterface
 	{
-		$request = $this->request();
-
-		return $this->pipeline ??= $this->pipelineFactory->create($request, $this->middlewaresBuilderClosure);
-	}
-
-	protected function request(): RequestInterface
-	{
-		return $this->request ??= $this->requestFactory->createFromServer();
+		return $this->pipeline ??= $this->pipelineFactory->create($this->request, $this->middlewaresBuilderClosure);
 	}
 }

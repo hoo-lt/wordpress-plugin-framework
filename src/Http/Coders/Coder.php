@@ -22,17 +22,8 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 		return array_map($this->mediaTypeFactory->create(...), $this->mediaTypes);
 	}
 
-	public function decodes(mixed $encoded): bool
+	public function decode(string $encoded): string
 	{
-		return is_string($encoded);
-	}
-
-	public function decode(mixed $encoded): string
-	{
-		if (!$this->decodes($encoded)) {
-			throw new CoderException('failed to decode');
-		}
-
 		return $encoded;
 	}
 

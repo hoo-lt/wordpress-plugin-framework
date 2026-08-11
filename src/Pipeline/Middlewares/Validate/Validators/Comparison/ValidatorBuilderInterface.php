@@ -28,10 +28,8 @@ interface ValidatorBuilderInterface
 	public function withoutB(): static;
 
 	public function body(string $key): static;
-	public function bodyQuery(string $key): static;
 	public function query(string $key): static;
-	public function header(string $key): static;
-	public function route(string $key): static;
+	public function header(string $name): static;
 
 	public function equal(): static;
 	public function notEqual(): static;
@@ -41,10 +39,8 @@ interface ValidatorBuilderInterface
 	public function greaterThanOrEqual(): static;
 
 	public function toBody(string $key): static;
-	public function toBodyQuery(string $key): static;
 	public function toQuery(string $key): static;
-	public function toHeader(string $key): static;
-	public function toRoute(string $key): static;
+	public function toHeader(string $name): static;
 
 	public function build(): ValidatorInterface;
 }

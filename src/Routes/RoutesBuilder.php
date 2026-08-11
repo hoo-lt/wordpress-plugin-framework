@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Routes;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Method\Method,
-	Http\Server\Response\ResponseFactoryInterface,
+	Http\Response\ResponseFactoryInterface,
 	Pipeline\PipelineFactoryInterface,
 	Exceptions\Handler\HandlerInterface,
 	Pipeline\Middlewares\MiddlewaresFactoryInterface,

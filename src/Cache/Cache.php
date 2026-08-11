@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Cache;
 
 use Closure;
+use Hoo\WordPressPluginFramework\Value\Value;
 
 readonly class Cache implements CacheInterface
 {
@@ -15,18 +16,18 @@ readonly class Cache implements CacheInterface
 	{
 		$value = get_transient($key);
 		if ($value !== false) {
-			if (!$value instanceof Value\Value) {
+			if (!$value instanceof Value) {
 				throw new CacheException('corrupted cache value');
 			}
 
-			return $value();
+			return $value->value;
 		}
 
-		$value = new Value\Value($closure());
+		$value = new Value($closure());
 
 		set_transient($key, $value, $ttl ?? $this->ttl);
 
-		return $value();
+		return $value->value;
 	}
 
 	public function forget(string $key): void

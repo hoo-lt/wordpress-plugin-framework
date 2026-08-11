@@ -6,11 +6,10 @@ use Closure;
 use Hoo\WordPressPluginFramework\{
     Pipeline\Middlewares\Validate\Validators\Condition\Validator as ConditionValidator,
     Pipeline\Middlewares\Validate\Validators\Rule\ValidatorFactoryInterface as RuleValidatorFactoryInterface,
+    Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
     Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as Body,
-    Pipeline\Middlewares\Validate\KeyValue\BodyQuery\KeyValue as BodyQuery,
     Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as Query,
     Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as Header,
-    Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as Route,
     Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\DateTime\ComparatorFactoryInterface as DateTimeComparatorFactoryInterface,
     Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\Float\Comparator as FloatComparator,
     Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\Int\Comparator as IntComparator,
@@ -56,51 +55,32 @@ readonly class ValidatorsBuilder implements ValidatorsBuilderInterface
 
     public function body(string $key, Closure $closure): static
     {
-        return $this->withValidator(
-            $this->ruleValidatorFactory->create(
-                new Body($key),
-                $closure,
-            ),
-        );
-    }
-
-    public function bodyQuery(string $key, Closure $closure): static
-    {
-        return $this->withValidator(
-            $this->ruleValidatorFactory->create(
-                new BodyQuery($key),
-                $closure,
-            ),
+        return $this->withRuleValidator(
+            new Body($key),
+            $closure,
         );
     }
 
     public function query(string $key, Closure $closure): static
     {
-        return $this->withValidator(
-            $this->ruleValidatorFactory->create(
-                new Query($key),
-                $closure,
-            ),
+        return $this->withRuleValidator(
+            new Query($key),
+            $closure,
         );
     }
 
-    public function header(string $key, Closure $closure): static
+    public function header(string $name, Closure $closure): static
     {
-        return $this->withValidator(
-            $this->ruleValidatorFactory->create(
-                new Header($key),
-                $closure,
-            ),
+        return $this->withRuleValidator(
+            new Header($name),
+            $closure,
         );
     }
 
-    public function route(string $key, Closure $closure): static
+    protected function withRuleValidator(KeyValueInterface $keyValue, Closure $closure): static
     {
         return $this->withValidator(
-            $this->ruleValidatorFactory->create(
-                new Route($key),
-                $closure,
-            ),
+            $this->ruleValidatorFactory->create($keyValue, $closure),
         );
     }
 

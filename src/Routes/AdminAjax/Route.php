@@ -5,22 +5,24 @@ namespace Hoo\WordPressPluginFramework\Routes\AdminAjax;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
+	Http\Server\Responder\ResponderInterface,
+	Http\Server\Responder\ResponderFactoryInterface,
 	Http\Server\Request\RequestInterface,
-	Http\Server\Request\RequestFactoryInterface,
-	Http\Server\Response\ResponseInterface,
-	Http\Server\Response\ResponseFactoryInterface,
+	Http\Response\ResponseInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class Route implements RouteInterface
 {
-	protected RequestInterface $request;
+	protected const string MEDIA_TYPE = 'application/json';
+
+	protected ResponderInterface $responder;
 	protected PipelineInterface $pipeline;
 
 	public function __construct(
-		protected RequestFactoryInterface $requestFactory,
-		protected ResponseFactoryInterface $responseFactory,
+		protected RequestInterface $request,
+		protected ResponderFactoryInterface $responderFactory,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $action,
 		protected Closure $closure,
@@ -58,11 +60,12 @@ readonly class Route implements RouteInterface
 	protected function callback(): void
 	{
 		$pipeline = $this->pipeline();
+		$responder = $this->responder();
 
-		$response = $pipeline(($this->closure)(...));
-		if (!$response instanceof ResponseInterface) {
-			$response = $this->createResponse($response);
-		}
+		$response = $responder->respond(
+			$this->request,
+			$pipeline(($this->closure)(...)),
+		);
 
 		$this->statusCode($response);
 		$this->headers($response);
@@ -73,44 +76,33 @@ readonly class Route implements RouteInterface
 
 	protected function pipeline(): PipelineInterface
 	{
-		$request = $this->request();
-
-		return $this->pipeline ??= $this->pipelineFactory->create($request, $this->middlewaresBuilderClosure);
+		return $this->pipeline ??= $this->pipelineFactory->create($this->request, $this->middlewaresBuilderClosure);
 	}
 
-	protected function request(): RequestInterface
+	protected function responder(): ResponderInterface
 	{
-		return $this->request ??= $this->requestFactory->createFromServer();
-	}
-
-	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface
-	{
-		return $this->responseFactory->create(
-			200,
-			[
-				'Content-Type' => is_array($body) || is_object($body) ? 'application/json' : 'text/html',
-			],
-			$body,
-		);
+		return $this->responder ??= $this->responderFactory->create(self::MEDIA_TYPE);
 	}
 
 	protected function statusCode(ResponseInterface $response): void
 	{
-		http_response_code(
-			$response->statusCode(),
-		);
+		$statusCode = $response->statusCode();
+
+		http_response_code($statusCode);
 	}
 
 	protected function headers(ResponseInterface $response): void
 	{
 		$headers = $response->headers();
-		foreach ($headers as $key => $header) {
-			header("{$key}: {$header}");
+		foreach ($headers as $name => $header) {
+			header("{$name}: {$header}");
 		}
 	}
 
 	protected function body(ResponseInterface $response): void
 	{
-		echo (string) $response->body();
+		$body = $response->body();
+
+		echo $body;
 	}
 }

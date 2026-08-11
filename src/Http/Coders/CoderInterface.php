@@ -10,8 +10,7 @@ interface CoderInterface
 
 	public function codes(MediaTypeInterface $mediaType): bool;
 
-	public function decodes(mixed $encoded): bool;
-	public function decode(mixed $encoded): mixed;
+	public function decode(string $encoded): mixed;
 
 	public function encodes(mixed $decoded): bool;
 	public function encode(mixed $decoded): string;

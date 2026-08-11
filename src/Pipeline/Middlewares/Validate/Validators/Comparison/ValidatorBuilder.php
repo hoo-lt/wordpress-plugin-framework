@@ -4,10 +4,8 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate\Validators\
 
 use Hoo\WordPressPluginFramework\{
 	Pipeline\Middlewares\Validate\KeyValue\Body\KeyValue as Body,
-	Pipeline\Middlewares\Validate\KeyValue\BodyQuery\KeyValue as BodyQuery,
 	Pipeline\Middlewares\Validate\KeyValue\Query\KeyValue as Query,
 	Pipeline\Middlewares\Validate\KeyValue\Header\KeyValue as Header,
-	Pipeline\Middlewares\Validate\KeyValue\Route\KeyValue as Route,
 	Pipeline\Middlewares\Validate\KeyValue\KeyValueInterface,
 	Pipeline\Middlewares\Validate\Validators\Comparison\Comparators\ComparatorInterface,
 	Pipeline\Middlewares\Validate\Validators\Comparison\Operator\Operator,
@@ -92,13 +90,6 @@ readonly class ValidatorBuilder implements ValidatorBuilderInterface
 		);
 	}
 
-	public function bodyQuery(string $key): static
-	{
-		return $this->withA(
-			new BodyQuery($key),
-		);
-	}
-
 	public function query(string $key): static
 	{
 		return $this->withA(
@@ -106,17 +97,10 @@ readonly class ValidatorBuilder implements ValidatorBuilderInterface
 		);
 	}
 
-	public function header(string $key): static
+	public function header(string $name): static
 	{
 		return $this->withA(
-			new Header($key),
-		);
-	}
-
-	public function route(string $key): static
-	{
-		return $this->withA(
-			new Route($key),
+			new Header($name),
 		);
 	}
 
@@ -169,13 +153,6 @@ readonly class ValidatorBuilder implements ValidatorBuilderInterface
 		);
 	}
 
-	public function toBodyQuery(string $key): static
-	{
-		return $this->withB(
-			new BodyQuery($key),
-		);
-	}
-
 	public function toQuery(string $key): static
 	{
 		return $this->withB(
@@ -183,17 +160,10 @@ readonly class ValidatorBuilder implements ValidatorBuilderInterface
 		);
 	}
 
-	public function toHeader(string $key): static
+	public function toHeader(string $name): static
 	{
 		return $this->withB(
-			new Header($key),
-		);
-	}
-
-	public function toRoute(string $key): static
-	{
-		return $this->withB(
-			new Route($key),
+			new Header($name),
 		);
 	}
 

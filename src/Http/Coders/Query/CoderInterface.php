@@ -6,5 +6,5 @@ use Hoo\WordPressPluginFramework\Http;
 
 interface CoderInterface extends Http\Coders\CoderInterface
 {
-    public function decode(mixed $encoded): array;
+    public function decode(string $encoded): array;
 }

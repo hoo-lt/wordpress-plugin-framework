@@ -4,14 +4,14 @@ namespace Hoo\WordPressPluginFramework\Hooks;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Server\Request\RequestFactoryInterface,
+	Http\Server\Request\RequestInterface,
 	Pipeline\PipelineFactoryInterface,
 };
 
 readonly class HooksBuilder implements HooksBuilderInterface
 {
 	public function __construct(
-		protected RequestFactoryInterface $requestFactory,
+		protected RequestInterface $request,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected array $hooks = [],
 	) {
@@ -24,12 +24,12 @@ readonly class HooksBuilder implements HooksBuilderInterface
 
 	public function withHooks(HookInterface ...$hooks): static
 	{
-		return new static($this->requestFactory, $this->pipelineFactory, $hooks);
+		return new static($this->request, $this->pipelineFactory, $hooks);
 	}
 
 	public function withoutHooks(): static
 	{
-		return new static($this->requestFactory, $this->pipelineFactory, []);
+		return new static($this->request, $this->pipelineFactory, []);
 	}
 
 	public function withHook(HookInterface $hook): static
@@ -45,14 +45,14 @@ readonly class HooksBuilder implements HooksBuilderInterface
 	public function action(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresBuilderClosure = null): static
 	{
 		return $this->withHook(
-			new Action\Hook($this->requestFactory, $this->pipelineFactory, $name, $closure, $priority, $middlewaresBuilderClosure),
+			new Action\Hook($this->request, $this->pipelineFactory, $name, $closure, $priority, $middlewaresBuilderClosure),
 		);
 	}
 
 	public function filter(string $name, Closure $closure, int $priority = 10, ?Closure $middlewaresBuilderClosure = null): static
 	{
 		return $this->withHook(
-			new Filter\Hook($this->requestFactory, $this->pipelineFactory, $name, $closure, $priority, $middlewaresBuilderClosure),
+			new Filter\Hook($this->request, $this->pipelineFactory, $name, $closure, $priority, $middlewaresBuilderClosure),
 		);
 	}
 

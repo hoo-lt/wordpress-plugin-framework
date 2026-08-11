@@ -5,8 +5,10 @@ namespace Hoo\WordPressPluginFramework\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
-	Http\Server\Response\ResponseInterface,
-	Http\Server\Response\ResponseFactoryInterface,
+	Http\Server\Responder\ResponderInterface,
+	Http\Server\Responder\ResponderFactoryInterface,
+	Http\Server\Request\RequestInterface,
+	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 	Http\Method\Method,
 };
@@ -15,13 +17,20 @@ use WP_REST_Response;
 
 readonly class Route implements RouteInterface
 {
+	protected const string MEDIA_TYPE = 'application/json';
+
+	protected ResponderInterface $responder;
+	protected PipelineInterface $pipeline;
+
 	public function __construct(
-		protected ResponseFactoryInterface $responseFactory,
+		protected RequestInterface $request,
+		protected ResponderFactoryInterface $responderFactory,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $routeNamespace,
 		protected string $route,
 		protected Closure $closure,
 		protected Method $method,
+		protected ?Closure $middlewaresBuilderClosure = null,
 	) {
 	}
 
@@ -80,18 +89,13 @@ readonly class Route implements RouteInterface
 
 	protected function callback(WP_REST_Request $request): WP_REST_Response
 	{
-		$pipeline = $this->pipelineFactory->create(
-			$this->method($request),
-			$this->url($request),
-			$this->headers($request),
-			$this->body($request),
-			$this->routes($request),
-		);
+		$pipeline = $this->pipeline();
+		$responder = $this->responder();
 
-		$response = $pipeline(($this->closure)(...));
-		if (!$response instanceof ResponseInterface) {
-			$response = $this->createResponse($response);
-		}
+		$response = $responder->respond(
+			$this->request,
+			$pipeline(($this->closure)(...)),
+		);
 
 		return new WP_REST_Response(
 			(string) $response->body(),
@@ -100,55 +104,19 @@ readonly class Route implements RouteInterface
 		);
 	}
 
+	protected function pipeline(): PipelineInterface
+	{
+		return $this->pipeline ??= $this->pipelineFactory->create($this->request, $this->middlewaresBuilderClosure);
+	}
+
+	protected function responder(): ResponderInterface
+	{
+		return $this->responder ??= $this->responderFactory->create(self::MEDIA_TYPE);
+	}
+
+
 	protected function permissionCallback(WP_REST_Request $request): bool
 	{
 		return true;
-	}
-
-	protected function method(WP_REST_Request $request): string
-	{
-		return $request->get_method();
-	}
-
-	protected function url(WP_REST_Request $request): string
-	{
-		return add_query_arg(
-			$request->get_query_params(),
-			rest_url(
-				$request->get_route(),
-			),
-		);
-	}
-
-	protected function headers(WP_REST_Request $request): array
-	{
-		$headers = [];
-
-		foreach ($request->get_headers() as $key => $values) {
-			$headers[str_replace('_', '-', $key)] = implode(',', $values);
-		}
-
-		return $headers;
-	}
-
-	protected function body(WP_REST_Request $request): ?string
-	{
-		return $request->get_body();
-	}
-
-	protected function routes(WP_REST_Request $request): array
-	{
-		return $request->get_url_params();
-	}
-
-	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface
-	{
-		return $this->responseFactory->create(
-			200,
-			[
-				'Content-Type' => 'application/json',
-			],
-			$body,
-		);
 	}
 }

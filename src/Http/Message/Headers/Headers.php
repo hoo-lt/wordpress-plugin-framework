@@ -15,23 +15,23 @@ readonly class Headers implements HeadersInterface
 		$this->headers = $this->normalizeHeaders($headers);
 	}
 
-	public function header(string $key): ?string
+	public function header(string $name): ?string
 	{
-		return $this->headers[strtolower($key)] ?? null;
+		return $this->headers[strtolower($name)] ?? null;
 	}
 
-	public function withHeader(string $key, string $header): static
+	public function withHeader(string $name, string $header): static
 	{
 		$headers = $this->headers;
-		$headers[strtolower($key)] = $header;
+		$headers[strtolower($name)] = $header;
 
 		return new static($headers);
 	}
 
-	public function withoutHeader(string $key): static
+	public function withoutHeader(string $name): static
 	{
 		$headers = $this->headers;
-		unset($headers[strtolower($key)]);
+		unset($headers[strtolower($name)]);
 
 		return new static($headers);
 	}
@@ -52,6 +52,12 @@ readonly class Headers implements HeadersInterface
 		return $accept;
 	}
 
+	public function contentLength(): ?int
+	{
+		$contentLength = $this->headers['content-length'] ?? null;
+		return $contentLength;
+	}
+
 	public function contentType(): ?string
 	{
 		$contentType = $this->headers['content-type'] ?? null;
@@ -62,8 +68,8 @@ readonly class Headers implements HeadersInterface
 	{
 		$normalizedHeaders = [];
 
-		foreach ($headers as $key => $header) {
-			$normalizedHeaders[strtolower($key)] = trim($header, " \t");
+		foreach ($headers as $name => $header) {
+			$normalizedHeaders[strtolower($name)] = trim($header, " \t");
 		}
 
 		return $normalizedHeaders;

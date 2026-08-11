@@ -6,13 +6,15 @@ use Hoo\WordPressPluginFramework\{
 	Http\Semantics\Accept\MediaRange\Precedence\Precedence,
 	Http\Semantics\ContentType\MediaType\MediaTypeInterface,
 };
+use Stringable;
+use Traversable;
 
-interface MediaRangeInterface
+interface MediaRangeInterface extends Stringable
 {
 	public function type(): string;
 	public function subtype(): string;
 
-	public function parameters(): array;
+	public function parameters(): Traversable;
 	public function parameter(string $name): ?string;
 
 	public function charset(): ?string;

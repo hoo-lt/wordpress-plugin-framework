@@ -5,18 +5,29 @@ namespace Hoo\WordPressPluginFramework\Routes\Feed;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
-	Http\Server\Response\ResponseInterface,
-	Http\Server\Response\ResponseFactoryInterface,
+	Http\Server\Responder\ResponderInterface,
+	Http\Server\Responder\ResponderFactoryInterface,
+	Http\Server\Request\RequestInterface,
+	Http\Response\ResponseInterface,
+	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 };
 
+
 readonly class Route implements RouteInterface
 {
+	protected const string MEDIA_TYPE = 'application/xml';
+
+	protected ResponderInterface $responder;
+	protected PipelineInterface $pipeline;
+
 	public function __construct(
-		protected ResponseFactoryInterface $responseFactory,
+		protected RequestInterface $request,
+		protected ResponderFactoryInterface $responderFactory,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $name,
 		protected Closure $closure,
+		protected ?Closure $middlewaresBuilderClosure = null,
 	) {
 	}
 
@@ -50,12 +61,13 @@ readonly class Route implements RouteInterface
 
 	protected function callback(): void
 	{
-		$pipeline = $this->pipelineFactory->createFromServer();
+		$pipeline = $this->pipeline();
+		$responder = $this->responder();
 
-		$response = $pipeline(($this->closure)(...));
-		if (!$response instanceof ResponseInterface) {
-			$response = $this->createResponse($response);
-		}
+		$response = $responder->respond(
+			$this->request,
+			$pipeline(($this->closure)(...)),
+		);
 
 		$this->statusCode($response);
 		$this->headers($response);
@@ -64,15 +76,14 @@ readonly class Route implements RouteInterface
 		exit();
 	}
 
-	protected function createResponse(object|array|string|float|int|bool|null $body): ResponseInterface
+	protected function pipeline(): PipelineInterface
 	{
-		return $this->responseFactory->create(
-			200,
-			[
-				'Content-Type' => 'application/xml',
-			],
-			$body,
-		);
+		return $this->pipeline ??= $this->pipelineFactory->create($this->request, $this->middlewaresBuilderClosure);
+	}
+
+	protected function responder(): ResponderInterface
+	{
+		return $this->responder ??= $this->responderFactory->create(self::MEDIA_TYPE);
 	}
 
 	protected function statusCode(ResponseInterface $response): void
@@ -85,8 +96,8 @@ readonly class Route implements RouteInterface
 	protected function headers(ResponseInterface $response): void
 	{
 		$headers = $response->headers();
-		foreach ($headers as $key => $header) {
-			header("{$key}: {$header}");
+		foreach ($headers as $name => $header) {
+			header("{$name}: {$header}");
 		}
 	}
 

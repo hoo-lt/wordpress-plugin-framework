@@ -6,6 +6,6 @@ use Hoo\WordPressPluginFramework\Http\Semantics\ContentType\MediaType\MediaTypeI
 
 interface CoderFactoryInterface
 {
-	public function createDecoder(mixed $encoded, MediaTypeInterface $mediaType): CoderInterface;
+	public function createDecoder(MediaTypeInterface $mediaType): CoderInterface;
 	public function createEncoder(mixed $decoded, MediaTypeInterface $mediaType): CoderInterface;
 }

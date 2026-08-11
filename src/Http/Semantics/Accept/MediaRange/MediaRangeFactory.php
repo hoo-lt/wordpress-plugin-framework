@@ -2,10 +2,18 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Semantics\Accept\MediaRange;
 
-use Hoo\WordPressPluginFramework\Http\Semantics\Semantics;
+use Hoo\WordPressPluginFramework\{
+	Http\Semantics\Parameters\ParametersFactoryInterface,
+	Http\Semantics\Semantics,
+};
 
 readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 {
+	public function __construct(
+		protected ParametersFactoryInterface $parametersFactory,
+	) {
+	}
+
 	public function create(string $mediaRange): MediaRangeInterface
 	{
 		$mediaRange = $this->tryCreate($mediaRange);
@@ -26,24 +34,24 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 
 		$type = '';
 		$subtype = '';
-		$parameters = [];
+		$parameters = '';
 		$q = 1.000;
 
 		foreach ($matches as $match) {
 			if ($match['type'] !== null) {
-				$type = strtolower($match['type']);
+				$type = $match['type'];
 			}
 
 			if ($match['subtype'] !== null) {
-				$subtype = strtolower($match['subtype']);
+				$subtype = $match['subtype'];
 			}
 
 			if ($match['q'] !== null) {
 				$q = $match['q'];
 			}
 
-			if ($match['parameter'] !== null) {
-				$parameters[strtolower($match['name'])] = $match['quoted_string'] !== null ? preg_replace('/\A' . Semantics::DQUOTE . '|\x5C(.)|' . Semantics::DQUOTE . '\z/s', '$1', $match['quoted_string']) : $match['token'];
+			if ($match['parameters'] !== null) {
+				$parameters .= $match['parameters'];
 			}
 		}
 
@@ -54,6 +62,6 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 			return null;
 		}
 
-		return new MediaRange($type, $subtype, $parameters, $q);
+		return new MediaRange($type, $subtype, $this->parametersFactory->create($parameters), $q);
 	}
 }

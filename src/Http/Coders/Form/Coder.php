@@ -17,17 +17,8 @@ readonly class Coder extends AbstractCoder implements CoderInterface
 		];
 	}
 
-	public function decodes(mixed $encoded): bool
+	public function decode(string $encoded): array
 	{
-		return is_string($encoded);
-	}
-
-	public function decode(mixed $encoded): array
-	{
-		if (!$this->decodes($encoded)) {
-			throw new CoderException('failed to decode');
-		}
-
 		parse_str($encoded, $decoded);
 		return $decoded;
 	}
