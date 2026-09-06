@@ -3,7 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Pipeline;
 
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Server\Request\RequestInterface;
+use Hoo\WordPressPluginFramework\Http\Request\RequestInterface;
 
 readonly class Pipeline implements PipelineInterface
 {

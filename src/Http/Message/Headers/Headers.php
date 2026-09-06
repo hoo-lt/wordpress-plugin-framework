@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Message\Headers;
 
 use ArrayIterator;
+use Hoo\WordPressPluginFramework\Http\Abnf\Rfc9110;
 use Traversable;
 
 readonly class Headers implements HeadersInterface
@@ -10,25 +11,31 @@ readonly class Headers implements HeadersInterface
 	protected array $headers;
 
 	public function __construct(
-		array $headers,
+		array $headers = [],
 	) {
+		$this->validateHeaders($headers);
 		$this->headers = $this->normalizeHeaders($headers);
 	}
 
-	public function header(string $name): ?string
+	public function has(string $name): bool
+	{
+		return isset($this->headers[strtolower($name)]);
+	}
+
+	public function get(string $name): ?string
 	{
 		return $this->headers[strtolower($name)] ?? null;
 	}
 
-	public function withHeader(string $name, string $header): static
+	public function with(string $name, string $value): static
 	{
 		$headers = $this->headers;
-		$headers[strtolower($name)] = $header;
+		$headers[strtolower($name)] = $value;
 
 		return new static($headers);
 	}
 
-	public function withoutHeader(string $name): static
+	public function without(string $name): static
 	{
 		$headers = $this->headers;
 		unset($headers[strtolower($name)]);
@@ -46,32 +53,21 @@ readonly class Headers implements HeadersInterface
 		return count($this->headers);
 	}
 
-	public function accept(): ?string
-	{
-		$accept = $this->headers['accept'] ?? null;
-		return $accept;
-	}
-
-	public function contentLength(): ?int
-	{
-		$contentLength = $this->headers['content-length'] ?? null;
-		return $contentLength;
-	}
-
-	public function contentType(): ?string
-	{
-		$contentType = $this->headers['content-type'] ?? null;
-		return $contentType;
-	}
-
 	protected function normalizeHeaders(array $headers): array
 	{
-		$normalizedHeaders = [];
+		return array_change_key_case($headers, CASE_LOWER);
+	}
 
-		foreach ($headers as $name => $header) {
-			$normalizedHeaders[strtolower($name)] = trim($header, " \t");
+	protected function validateHeaders(array $headers): void
+	{
+		foreach ($headers as $name => $value) {
+			if (preg_match('/\A' . Rfc9110::FIELD_NAME . '\z/', $name) !== 1) {
+				throw new HeadersException("invalid field name \"{$name}\"");
+			}
+
+			if (preg_match('/\A' . Rfc9110::FIELD_VALUE . '\z/', $value) !== 1) {
+				throw new HeadersException("invalid field value for \"{$name}\"");
+			}
 		}
-
-		return $normalizedHeaders;
 	}
 }

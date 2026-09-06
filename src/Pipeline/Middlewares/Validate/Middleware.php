@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\Validate;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Server\Request\RequestInterface,
+	Http\Request\RequestInterface,
 	Collections\Message\Collection as MessageCollection,
 	Pipeline\Middlewares\MiddlewareInterface,
 };

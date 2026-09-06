@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\LogExecutionTime;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Server\Request\RequestInterface,
+	Http\Request\RequestInterface,
 	Loggers\LoggerInterface,
 	Pipeline\Middlewares\MiddlewareInterface,
 };

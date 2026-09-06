@@ -5,9 +5,9 @@ namespace Hoo\WordPressPluginFramework\Routes\Rest;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
-	Http\Server\Responder\ResponderInterface,
-	Http\Server\Responder\ResponderFactoryInterface,
-	Http\Server\Request\RequestInterface,
+	Http\Responder\ResponderInterface,
+	Http\Responder\ResponderFactoryInterface,
+	Http\Request\RequestInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
 	Http\Method\Method,

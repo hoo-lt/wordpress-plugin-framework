@@ -5,9 +5,11 @@ namespace Hoo\WordPressPluginFramework\Hooks\Filter;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Hooks\HookInterface,
-	Http\Server\Request\RequestInterface,
+	Http\Request\RequestInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
+	Renderer\RendererInterface,
+	View\ViewInterface,
 };
 
 readonly class Hook implements HookInterface
@@ -16,6 +18,7 @@ readonly class Hook implements HookInterface
 
 	public function __construct(
 		protected RequestInterface $request,
+		protected RendererInterface $renderer,
 		protected PipelineFactoryInterface $pipelineFactory,
 		protected string $name,
 		protected Closure $closure,
@@ -36,9 +39,12 @@ readonly class Hook implements HookInterface
 
 	protected function callback(...$args): mixed
 	{
-		$pipeline = $this->pipeline();
+		$view = $this->pipeline()(fn($request) => ($this->closure)($request, ...$args));
+		if ($view instanceof ViewInterface) {
+			return $this->renderer->render($view);
+		}
 
-		return $pipeline(fn($request) => ($this->closure)($request, ...$args));
+		return $view;
 	}
 
 	protected function pipeline(): PipelineInterface

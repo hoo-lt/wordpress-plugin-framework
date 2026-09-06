@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline;
 
 use Closure;
 use Hoo\WordPressPluginFramework\{
-	Http\Server\Request\RequestInterface,
+	Http\Request\RequestInterface,
 	Pipeline\Middlewares\MiddlewaresBuilderInterface,
 };
 

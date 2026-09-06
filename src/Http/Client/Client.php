@@ -3,10 +3,10 @@
 namespace Hoo\WordPressPluginFramework\Http\Client;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Client\Request\RequestInterface,
-	Http\Client\Request\RequestFactoryInterface,
-	Http\Client\Response\ResponseInterface,
-	Http\Client\Response\ResponseFactoryInterface,
+	Http\Request\RequestInterface,
+	Http\Request\RequestFactoryInterface,
+	Http\Response\ResponseInterface,
+	Http\Response\ResponseFactoryInterface,
 };
 use WP_Error;
 

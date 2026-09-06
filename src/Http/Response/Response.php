@@ -15,7 +15,7 @@ readonly class Response implements ResponseInterface
 		protected UuidInterface $uuid,
 		protected int $statusCode,
 		protected HeadersInterface $headers,
-		protected ?BodyInterface $body,
+		protected ?BodyInterface $body = null,
 	) {
 		$this->validateStatusCode($statusCode);
 	}
@@ -40,7 +40,7 @@ readonly class Response implements ResponseInterface
 		return $this->headers;
 	}
 
-	public function withHeaders(HeadersInterface $headers): static
+	public function withHeaders(HeadersInterface $headers): static //maybe Closure for better DX?
 	{
 		return new static($this->uuid, $this->statusCode, $headers, $this->body);
 	}

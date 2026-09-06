@@ -3,51 +3,52 @@
 namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 use Hoo\WordPressPluginFramework\{
-	Helpers\KeyValue\HelperInterface,
-	Http\Coders\CoderFactoryInterface,
-	Http\Message\Body\Normalizer\NormalizerInterface,
-	Http\Semantics\ContentType\MediaType\MediaTypeFactoryInterface,
+	Http\Accessor\AccessorInterface,
+	Http\Decoders\DecodersInterface,
+	Http\Encoders\EncodersInterface,
+	Http\Normalizers\NormalizersInterface,
 };
 
 readonly class BodyFactory implements BodyFactoryInterface
 {
 	public function __construct(
-		protected HelperInterface $helper,
-		protected CoderFactoryInterface $coderFactory,
-		protected NormalizerInterface $normalizer,
-		protected MediaTypeFactoryInterface $mediaTypeFactory,
+		protected AccessorInterface $accessor,
+		protected DecodersInterface $decoders,
+		protected EncodersInterface $encoders,
+		protected NormalizersInterface $normalizers,
 	) {
 	}
 
-	public function createFromDecoded(mixed $body, string $contentType): BodyInterface
+	public function create(string $contentType, mixed $body): BodyInterface
 	{
-		$mediaType = $this->mediaTypeFactory->create($contentType);
-		$encoder = $this->coderFactory->createEncoder($body, $mediaType);
+		$encoder = $this->encoders->get($contentType, $body);
 
-		$body = $this->normalizer->normalize($body);
-		if (
-			is_array($body) ||
-			is_object($body)
-		) {
-			return new KeyValue\Body($this->helper, $encoder, $body);
-		}
-
-		return new Body($encoder, $body);
+		return new Body($this->accessor, $encoder, $body);
 	}
 
-	public function createFromEncoded(string $body, string $contentType): BodyInterface
+	public function createFromEncoded(string $contentType, mixed $body): BodyInterface
 	{
-		$mediaType = $this->mediaTypeFactory->create($contentType);
-		$decoder = $this->coderFactory->createDecoder($mediaType);
+		$body = $this->decode($contentType, $body);
 
-		$body = $decoder->decode($body);
-		if (
-			is_array($body) ||
-			is_object($body)
-		) {
-			return new KeyValue\Body($this->helper, $decoder, $body);
-		}
+		return $this->create($contentType, $body);
+	}
 
-		return new Body($decoder, $body);
+	public function createFromUnnormalized(string $contentType, mixed $body): BodyInterface
+	{
+		$body = $this->normalize($body);
+
+		return $this->create($contentType, $body);
+	}
+
+	protected function decode(string $contentType, mixed $body): mixed
+	{
+		$decoder = $this->decoders->get($contentType, $body);
+		return $decoder->decode($body);
+	}
+
+	protected function normalize(mixed $body): mixed
+	{
+		$normalizer = $this->normalizers->get($body);
+		return $normalizer === null ? $body : $normalizer->normalize($body);
 	}
 }

@@ -4,6 +4,8 @@ namespace Hoo\WordPressPluginFramework\Http\Server;
 
 readonly class Server implements ServerInterface
 {
+	protected const HEADER = '/^HTTP_/';
+
 	public function __construct(
 		protected array $globals,
 		protected string $input,
@@ -29,13 +31,13 @@ readonly class Server implements ServerInterface
 		$headers = [];
 
 		foreach ($this->globals['_SERVER'] as $name => $value) {
-			if (!str_starts_with($name, 'HTTP_')) {
+			if (!preg_match(self::HEADER, $name)) {
 				continue;
 			}
 
-			$name = str_replace([
-				'HTTP_',
-				'_'
+			$name = preg_replace([
+				self::HEADER,
+				'/_/'
 			], [
 				'',
 				'-'

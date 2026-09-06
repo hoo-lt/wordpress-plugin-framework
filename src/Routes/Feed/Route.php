@@ -5,9 +5,9 @@ namespace Hoo\WordPressPluginFramework\Routes\Feed;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Routes\RouteInterface,
-	Http\Server\Responder\ResponderInterface,
-	Http\Server\Responder\ResponderFactoryInterface,
-	Http\Server\Request\RequestInterface,
+	Http\Responder\ResponderInterface,
+	Http\Responder\ResponderFactoryInterface,
+	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,
 	Pipeline\PipelineInterface,
 	Pipeline\PipelineFactoryInterface,
@@ -96,8 +96,8 @@ readonly class Route implements RouteInterface
 	protected function headers(ResponseInterface $response): void
 	{
 		$headers = $response->headers();
-		foreach ($headers as $name => $header) {
-			header("{$name}: {$header}");
+		foreach ($headers as $name => $value) {
+			header("{$name}: {$value}");
 		}
 	}
 

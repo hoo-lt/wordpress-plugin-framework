@@ -6,7 +6,6 @@ use Hoo\WordPressPluginFramework\View\Model\ModelInterface;
 
 interface ViewInterface
 {
-	public function model(): ?ModelInterface;
-	
-	public function render(): string;
+	public function file(): string;
+	public function model(): ModelInterface;
 }

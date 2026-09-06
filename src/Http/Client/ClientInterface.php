@@ -3,8 +3,8 @@
 namespace Hoo\WordPressPluginFramework\Http\Client;
 
 use Hoo\WordPressPluginFramework\{
-	Http\Client\Request\RequestInterface,
-	Http\Client\Response\ResponseInterface,
+	Http\Request\RequestInterface,
+	Http\Response\ResponseInterface,
 };
 
 interface ClientInterface

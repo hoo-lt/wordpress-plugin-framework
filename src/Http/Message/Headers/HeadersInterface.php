@@ -7,12 +7,9 @@ use IteratorAggregate;
 
 interface HeadersInterface extends IteratorAggregate, Countable
 {
-	public function header(string $name): ?string;
-	public function withHeader(string $name, string $header): static;
-	public function withoutHeader(string $name): static;
+	public function has(string $name): bool;
+	public function get(string $name): ?string;
 
-	public function accept(): ?string;
-	public function contentLength(): ?int;
-	public function contentType(): ?string;
-
+	public function with(string $name, string $value): static;
+	public function without(string $name): static;
 }

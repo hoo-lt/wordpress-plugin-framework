@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Pipeline\Middlewares\CurrentUserCan;
 use Closure;
 use Hoo\WordPressPluginFramework\{
 	Http\Exceptions\Forbidden\Exception as ForbiddenException,
-	Http\Server\Request\RequestInterface,
+	Http\Request\RequestInterface,
 	Pipeline\Middlewares\CurrentUserCan\Capability\Capability,
 	Pipeline\Middlewares\MiddlewareInterface,
 };
