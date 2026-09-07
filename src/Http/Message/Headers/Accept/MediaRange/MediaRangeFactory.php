@@ -8,7 +8,7 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 {
 	public function create(string $mediaRange): MediaRangeInterface
 	{
-		if (!preg_match('@\A' . Rfc9110::MEDIA_RANGE . '\z@', $mediaRange, $match)) {
+		if (preg_match('@\A' . Rfc9110::MEDIA_RANGE . '\z@', $mediaRange, $match) !== 1) {
 			throw new MediaRangeException('invalid media range');
 		}
 
