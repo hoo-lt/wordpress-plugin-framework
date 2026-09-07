@@ -21,19 +21,13 @@ readonly class AcceptFactory implements AcceptFactoryInterface
 		$mediaRanges = [];
 
 		foreach ($matches as $match) {
-			$mediaRange = $this->mediaRangeFactory->tryCreate($match['media_range']);
-			if ($mediaRange === null) {
-				continue;
-			}
-
-			$mediaRanges[] = $mediaRange;
+			$mediaRanges[] = $this->mediaRangeFactory->create($match['media_range']);
 		}
 
 		return new Accept($mediaRanges);
 	}
 
-	public function tryCreate(?string $accept): ?AcceptInterface
-	{
+	public function tryCreate(?string $accept): ?AcceptInterface {
 		if ($accept === null) {
 			return null;
 		}

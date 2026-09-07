@@ -30,16 +30,6 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->subtype;
 	}
 
-	protected function normalizeType(string $type): string
-	{
-		return strtolower($type);
-	}
-
-	protected function normalizeSubtype(string $subtype): string
-	{
-		return strtolower($subtype);
-	}
-
 	protected function validateType(string $type): void
 	{
 		if (!preg_match('@\A' . Rfc9110::TYPE . '\z@', $type)) {
@@ -60,5 +50,15 @@ readonly class MediaType implements MediaTypeInterface
 		if ($subtype === '*') {
 			throw new MediaTypeException('subtype must not be a wildcard');
 		}
+	}
+
+	protected function normalizeType(string $type): string
+	{
+		return strtolower($type);
+	}
+
+	protected function normalizeSubtype(string $subtype): string
+	{
+		return strtolower($subtype);
 	}
 }

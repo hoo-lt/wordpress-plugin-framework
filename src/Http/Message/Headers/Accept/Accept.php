@@ -29,6 +29,6 @@ readonly class Accept implements AcceptInterface
 			}
 		}
 
-		return 0.000;
+		return 0;
 	}
 }

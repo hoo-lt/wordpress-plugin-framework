@@ -76,25 +76,10 @@ readonly class MediaRange implements MediaRangeInterface
 		if (
 			$this->type === '*'
 		) {
-			return Precedence::WildcardType;
+			return Precedence::WildcardTypeWildcardSubtype;
 		}
 
 		return null;
-	}
-
-	protected function normalizeType(string $type): string
-	{
-		return strtolower($type);
-	}
-
-	protected function normalizeSubtype(string $subtype): string
-	{
-		return strtolower($subtype);
-	}
-
-	protected function normalizeQ(string $q): float
-	{
-		return (float) $q;
 	}
 
 	protected function validateType(string $type): void
@@ -116,5 +101,20 @@ readonly class MediaRange implements MediaRangeInterface
 		if (!preg_match('@\A' . Rfc9110::QVALUE . '\z@', $q)) {
 			throw new MediaRangeException('invalid q');
 		}
+	}
+
+	protected function normalizeType(string $type): string
+	{
+		return strtolower($type);
+	}
+
+	protected function normalizeSubtype(string $subtype): string
+	{
+		return strtolower($subtype);
+	}
+
+	protected function normalizeQ(string $q): float
+	{
+		return (float) $q;
 	}
 }

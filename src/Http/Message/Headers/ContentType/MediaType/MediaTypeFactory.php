@@ -8,7 +8,7 @@ readonly class MediaTypeFactory implements MediaTypeFactoryInterface
 {
 	public function create(string $mediaType): MediaTypeInterface
 	{
-		if (!preg_match('@\A' . Rfc9110::MEDIA_TYPE . '\z@', $mediaType, $match)) {
+		if (preg_match('@\A' . Rfc9110::MEDIA_TYPE . '\z@', $mediaType, $match) !== 1) {
 			throw new MediaTypeException('invalid media type');
 		}
 

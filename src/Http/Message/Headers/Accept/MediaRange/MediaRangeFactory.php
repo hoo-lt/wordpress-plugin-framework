@@ -8,22 +8,8 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 {
 	public function create(string $mediaRange): MediaRangeInterface
 	{
-		$mediaRange = $this->tryCreate($mediaRange);
-		if ($mediaRange === null) {
-			throw new MediaRangeException('invalid media range');
-		}
-
-		return $mediaRange;
-	}
-
-	public function tryCreate(?string $mediaRange): ?MediaRangeInterface
-	{
-		if ($mediaRange === null) {
-			return null;
-		}
-
 		if (!preg_match('@\A' . Rfc9110::MEDIA_RANGE . '\z@', $mediaRange, $match)) {
-			return null;
+			throw new MediaRangeException('invalid media range');
 		}
 
 		return new MediaRange($match['type'], $match['subtype'], $this->q($mediaRange));
@@ -31,7 +17,7 @@ readonly class MediaRangeFactory implements MediaRangeFactoryInterface
 
 	protected function q(string $mediaRange): string
 	{
-		preg_match_all('@' . Rfc9110::PARAMETER . '@', $mediaRange, $parameters, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
+		preg_match_all('@' . Rfc9110::PARAMETER . '@', $mediaRange, $parameters, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL); //replace with weight?
 
 		foreach ($parameters as $parameter) {
 			if (strcasecmp($parameter['parameter_name'], 'q') !== 0) {
