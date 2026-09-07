@@ -6,10 +6,8 @@ use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Accept\MediaRange\Precedence\Precedence,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
-use Stringable;
-use Traversable;
 
-interface MediaRangeInterface extends Stringable
+interface MediaRangeInterface
 {
 	public function type(): string;
 	public function subtype(): string;

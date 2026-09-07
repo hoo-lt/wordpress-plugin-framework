@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Abnf;
 
 readonly class Rfc5234
 {
-	// RFC 5234 §B.1 — core rules
 	public const ALPHA = '(?:[\x41-\x5A]|[\x61-\x7A])';
 	public const BIT = '(?:0|1)';
 	public const CHAR = '[\x01-\x7F]';

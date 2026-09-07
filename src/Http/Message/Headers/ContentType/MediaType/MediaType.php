@@ -2,8 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType;
 
-use Hoo\WordPressPluginFramework\Http\Message\Headers\Parameters\ParametersInterface;
-use Traversable;
+use Hoo\WordPressPluginFramework\Http\Abnf\Rfc9110;
 
 readonly class MediaType implements MediaTypeInterface
 {
@@ -31,11 +30,6 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->subtype;
 	}
 
-	public function __toString(): string
-	{
-		return "{$this->type}/{$this->subtype}";
-	}
-
 	protected function normalizeType(string $type): string
 	{
 		return strtolower($type);
@@ -48,8 +42,8 @@ readonly class MediaType implements MediaTypeInterface
 
 	protected function validateType(string $type): void
 	{
-		if ($type === '') {
-			throw new MediaTypeException('type is mandatory');
+		if (!preg_match('@\A' . Rfc9110::TYPE . '\z@', $type)) {
+			throw new MediaTypeException('invalid type');
 		}
 
 		if ($type === '*') {
@@ -59,8 +53,8 @@ readonly class MediaType implements MediaTypeInterface
 
 	protected function validateSubtype(string $subtype): void
 	{
-		if ($subtype === '') {
-			throw new MediaTypeException('subtype is mandatory');
+		if (!preg_match('@\A' . Rfc9110::SUBTYPE . '\z@', $subtype)) {
+			throw new MediaTypeException('invalid subtype');
 		}
 
 		if ($subtype === '*') {

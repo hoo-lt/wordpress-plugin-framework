@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Headers\Accept;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Accept\MediaRange\MediaRangeFactoryInterface,
-	Http\Abnf\Rfc5234,
 	Http\Abnf\Rfc9110,
 };
 
@@ -17,7 +16,7 @@ readonly class AcceptFactory implements AcceptFactoryInterface
 
 	public function create(string $accept): AcceptInterface
 	{
-		preg_match_all('/(?<media_range>(?>' . Rfc9110::QUOTED_STRING . '|[^,' . Rfc5234::WSP . '])(?:(?>' . Rfc9110::QUOTED_STRING . '|[^,])*(?>' . Rfc9110::QUOTED_STRING . '|[^,' . Rfc5234::WSP . ']))?)(?:' . Rfc9110::OWS . ',' . Rfc9110::OWS . '|\z)/', $accept, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL);
+		preg_match_all('@' . Rfc9110::MEDIA_RANGE . '@', $accept, $matches, PREG_SET_ORDER);
 
 		$mediaRanges = [];
 

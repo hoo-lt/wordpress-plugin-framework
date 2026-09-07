@@ -6,23 +6,28 @@ use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Accept\MediaRange\Precedence\Precedence,
 	Http\Message\Headers\ContentType\MediaType\MediaType,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
+	Http\Abnf\Rfc9110,
 };
 
 readonly class MediaRange implements MediaRangeInterface
 {
 	protected string $type;
 	protected string $subtype;
+	protected float $q;
 
 	public function __construct(
 		string $type,
 		string $subtype,
-		protected float $q = 1.000,
+		string $q = '1',
 	) {
 		$this->validateType($type);
 		$this->type = $this->normalizeType($type);
 
 		$this->validateSubtype($subtype);
 		$this->subtype = $this->normalizeSubtype($subtype);
+
+		$this->validateQ($q);
+		$this->q = $this->normalizeQ($q);
 	}
 
 	public function type(): string
@@ -38,11 +43,6 @@ readonly class MediaRange implements MediaRangeInterface
 	public function q(): float
 	{
 		return $this->q;
-	}
-
-	public function __toString(): string
-	{
-		return "{$this->type}/{$this->subtype}{$this->weight()}";
 	}
 
 	public function mediaType(): ?MediaTypeInterface
@@ -82,11 +82,6 @@ readonly class MediaRange implements MediaRangeInterface
 		return null;
 	}
 
-	protected function weight(): string
-	{
-		return ';q=' . number_format($this->q, 3, '.', '');
-	}
-
 	protected function normalizeType(string $type): string
 	{
 		return strtolower($type);
@@ -97,17 +92,29 @@ readonly class MediaRange implements MediaRangeInterface
 		return strtolower($subtype);
 	}
 
+	protected function normalizeQ(string $q): float
+	{
+		return (float) $q;
+	}
+
 	protected function validateType(string $type): void
 	{
-		if ($type === '') {
-			throw new MediaRangeException('type is mandatory');
+		if (!preg_match('@\A' . Rfc9110::TYPE . '\z@', $type)) {
+			throw new MediaRangeException('invalid type');
 		}
 	}
 
 	protected function validateSubtype(string $subtype): void
 	{
-		if ($subtype === '') {
-			throw new MediaRangeException('subtype is mandatory');
+		if (!preg_match('@\A' . Rfc9110::SUBTYPE . '\z@', $subtype)) {
+			throw new MediaRangeException('invalid subtype');
+		}
+	}
+
+	protected function validateQ(string $q): void
+	{
+		if (!preg_match('@\A' . Rfc9110::QVALUE . '\z@', $q)) {
+			throw new MediaRangeException('invalid q');
 		}
 	}
 }

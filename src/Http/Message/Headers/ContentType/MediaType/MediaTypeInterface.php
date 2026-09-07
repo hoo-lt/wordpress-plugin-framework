@@ -2,10 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType;
 
-use Stringable;
-use Traversable;
-
-interface MediaTypeInterface extends Stringable
+interface MediaTypeInterface
 {
 	public function type(): string;
 	public function subtype(): string;
