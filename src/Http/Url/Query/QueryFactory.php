@@ -3,36 +3,30 @@
 namespace Hoo\WordPressPluginFramework\Http\Url\Query;
 
 use Hoo\WordPressPluginFramework\{
-	Helpers\KeyValue\HelperInterface,
-	Http\Coders\Query\CoderInterface,
+	Http\Accessor\AccessorInterface,
+	Http\Decoders\Query\DecoderInterface,
+	Http\Encoders\Query\EncoderInterface,
+	Http\Normalizers\NormalizersInterface,
 };
 
 readonly class QueryFactory implements QueryFactoryInterface
 {
 	public function __construct(
-		protected HelperInterface $helper,
-		protected CoderInterface $coder,
+		protected AccessorInterface $accessor,
+		protected DecoderInterface $decoder,
+		protected EncoderInterface $encoder,
+		protected NormalizersInterface $normalizers,
 	) {
 	}
 
-	public function create(array|string $query): QueryInterface
+	public function create(array $query): QueryInterface
 	{
-		if (is_string($query)) {
-			$query = $this->coder->decode($query);
-		}
-
-		return new Query(
-			$this->helper,
-			$this->coder,
-			$query,
-		);
+		return new Query($this->accessor, $this->encoder, $query);
 	}
 
-	public function tryCreate(array|string|null $query): ?QueryInterface
+	public function createFromEncoded(string $query): QueryInterface
 	{
-		if ($query === null) {
-			return null;
-		}
+		$query = $this->decoder->decode($query);
 
 		return $this->create($query);
 	}

@@ -6,6 +6,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Url\Query\QueryInterface,
 	Http\Url\Scheme\Scheme,
 };
+use Closure;
 use Stringable;
 
 interface UrlInterface extends Stringable
@@ -24,6 +25,6 @@ interface UrlInterface extends Stringable
 	public function withPath(string $path): static;
 
 	public function query(): ?QueryInterface;
-	public function withQuery(QueryInterface $query): static;
+	public function withQuery(QueryInterface|Closure $query): static;
 	public function withoutQuery(): static;
 }

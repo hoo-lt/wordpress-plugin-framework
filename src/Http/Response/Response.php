@@ -5,9 +5,9 @@ namespace Hoo\WordPressPluginFramework\Http\Response;
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Body\BodyInterface,
 	Http\Message\Headers\HeadersInterface,
-	Http\KeyValue\KeyValueInterface,
 	Uuid\UuidInterface,
 };
+use Closure;
 
 readonly class Response implements ResponseInterface
 {
@@ -40,14 +40,17 @@ readonly class Response implements ResponseInterface
 		return $this->headers;
 	}
 
-	public function withHeaders(HeadersInterface $headers): static //maybe Closure for better DX?
+	public function withHeaders(HeadersInterface|Closure $headers): static
 	{
-		return new static($this->uuid, $this->statusCode, $headers, $this->body);
-	}
+		if ($headers instanceof Closure) {
+			$headers = $headers($this->headers);
+		}
 
-	public function header(string $name): mixed
-	{
-		return $this->headers()->header($name);
+		if (!$headers instanceof HeadersInterface) {
+			throw new ResponseException('must provide header interface');
+		}
+
+		return new static($this->uuid, $this->statusCode, $headers, $this->body);
 	}
 
 	public function body(): ?BodyInterface
@@ -55,26 +58,22 @@ readonly class Response implements ResponseInterface
 		return $this->body;
 	}
 
-	public function withBody(BodyInterface $body): static
+	public function withBody(BodyInterface|Closure $body): static
 	{
+		if ($body instanceof Closure) {
+			$body = $body($this->body);
+		}
+
+		if (!$body instanceof BodyInterface) {
+			throw new ResponseException('must provide body interface');
+		}
+
 		return new static($this->uuid, $this->statusCode, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
 		return new static($this->uuid, $this->statusCode, $this->headers, null);
-	}
-
-	public function bodyValues(string $key): ?array
-	{
-		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->values($key) : null;
-	}
-
-	public function bodyValue(string $key): mixed
-	{
-		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->value($key) : null;
 	}
 
 	protected function validateStatusCode(int $statusCode): void

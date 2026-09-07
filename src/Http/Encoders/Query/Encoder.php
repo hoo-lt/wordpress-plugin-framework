@@ -4,7 +4,6 @@ namespace Hoo\WordPressPluginFramework\Http\Encoders\Query;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Encoders\EncoderException,
-	Http\Encoders\EncoderInterface,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 

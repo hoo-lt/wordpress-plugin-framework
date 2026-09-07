@@ -5,7 +5,6 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 use Hoo\WordPressPluginFramework\{
 	Http\Accessor\AccessorInterface,
 	Http\Encoders\EncoderInterface,
-	Http\Message\Body\BodyInterface,
 };
 use stdClass;
 

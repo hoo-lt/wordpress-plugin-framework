@@ -6,10 +6,10 @@ use Hoo\WordPressPluginFramework\{
 	Http\Message\Body\BodyInterface,
 	Http\Method\Method,
 	Http\Message\Headers\HeadersInterface,
-	Http\KeyValue\KeyValueInterface,
 	Http\Url\UrlInterface,
 	Uuid\UuidInterface,
 };
+use Closure;
 
 readonly class Request implements RequestInterface
 {
@@ -42,21 +42,17 @@ readonly class Request implements RequestInterface
 		return $this->url;
 	}
 
-	public function withUrl(UrlInterface $url): static
+	public function withUrl(UrlInterface|Closure $url): static
 	{
+		if ($url instanceof Closure) {
+			$url = $url($this->url);
+		}
+
+		if (!$url instanceof HeadersInterface) {
+			throw new RequestException('must provide url interface');
+		}
+
 		return new static($this->uuid, $this->method, $url, $this->headers, $this->body);
-	}
-
-	public function queryValues(string $key): ?array
-	{
-		$query = $this->url()->query();
-		return $query instanceof KeyValueInterface ? $query->values($key) : null;
-	}
-
-	public function queryValue(string $key): mixed
-	{
-		$query = $this->url()->query();
-		return $query instanceof KeyValueInterface ? $query->value($key) : null;
 	}
 
 	public function headers(): HeadersInterface
@@ -64,14 +60,17 @@ readonly class Request implements RequestInterface
 		return $this->headers;
 	}
 
-	public function withHeaders(HeadersInterface $headers): static
+	public function withHeaders(HeadersInterface|Closure $headers): static
 	{
-		return new static($this->uuid, $this->method, $this->url, $headers, $this->body);
-	}
+		if ($headers instanceof Closure) {
+			$headers = $headers($this->headers);
+		}
 
-	public function header(string $name): mixed
-	{
-		return $this->headers()->header($name);
+		if (!$headers instanceof HeadersInterface) {
+			throw new RequestException('must provide header interface');
+		}
+
+		return new static($this->uuid, $this->method, $this->url, $headers, $this->body);
 	}
 
 	public function body(): ?BodyInterface
@@ -79,25 +78,21 @@ readonly class Request implements RequestInterface
 		return $this->body;
 	}
 
-	public function withBody(BodyInterface $body): static
+	public function withBody(BodyInterface|Closure $body): static
 	{
+		if ($body instanceof Closure) {
+			$body = $body($this->body);
+		}
+
+		if (!$body instanceof BodyInterface) {
+			throw new RequestException('must provide body interface');
+		}
+
 		return new static($this->uuid, $this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
 		return new static($this->uuid, $this->method, $this->url, $this->headers, null);
-	}
-
-	public function bodyValues(string $key): ?array
-	{
-		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->values($key) : null;
-	}
-
-	public function bodyValue(string $key): mixed
-	{
-		$body = $this->body();
-		return $body instanceof KeyValueInterface ? $body->value($key) : null;
 	}
 }

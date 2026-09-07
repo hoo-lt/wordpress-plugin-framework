@@ -8,6 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Url\UrlInterface,
 	Uuid\UuidInterface,
 };
+use Closure;
 
 interface RequestInterface extends MessageInterface
 {
@@ -17,8 +18,5 @@ interface RequestInterface extends MessageInterface
 	public function withMethod(Method $method): static;
 
 	public function url(): UrlInterface;
-	public function withUrl(UrlInterface $url): static;
-
-	public function queryValues(string $key): ?array;
-	public function queryValue(string $key): mixed;
+	public function withUrl(UrlInterface|Closure $url): static;
 }

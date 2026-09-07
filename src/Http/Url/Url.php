@@ -6,6 +6,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Url\Query\QueryInterface,
 	Http\Url\Scheme\Scheme,
 };
+use Closure;
 
 readonly class Url implements UrlInterface
 {
@@ -80,8 +81,16 @@ readonly class Url implements UrlInterface
 		return $this->query;
 	}
 
-	public function withQuery(QueryInterface $query): static
+	public function withQuery(QueryInterface|Closure $query): static
 	{
+		if ($query instanceof Closure) {
+			$query = $query($this->query);
+		}
+
+		if (!$query instanceof QueryInterface) {
+			throw new UrlException('must provide query interface');
+		}
+
 		return new static($this->scheme, $this->host, $this->port, $this->path, $query);
 	}
 

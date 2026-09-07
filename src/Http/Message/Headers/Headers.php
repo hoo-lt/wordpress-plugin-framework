@@ -53,11 +53,6 @@ readonly class Headers implements HeadersInterface
 		return count($this->headers);
 	}
 
-	protected function normalizeHeaders(array $headers): array
-	{
-		return array_change_key_case($headers, CASE_LOWER);
-	}
-
 	protected function validateHeaders(array $headers): void
 	{
 		foreach ($headers as $name => $value) {
@@ -69,5 +64,10 @@ readonly class Headers implements HeadersInterface
 				throw new HeadersException("invalid field value for \"{$name}\"");
 			}
 		}
+	}
+
+	protected function normalizeHeaders(array $headers): array
+	{
+		return array_change_key_case($headers, CASE_LOWER);
 	}
 }
