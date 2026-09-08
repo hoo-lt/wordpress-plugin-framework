@@ -19,21 +19,21 @@ class Responses implements ResponsesInterface
         $this->responses[] = $response;
     }
 
-    public function first(): ?ResponseInterface
+    public function first(): ResponseInterface
     {
         $key = array_key_first($this->responses);
         if ($key === null) {
-            return null;
+            throw new ResponsesException('collection is empty');
         }
 
         return $this->responses[$key];
     }
 
-    public function last(): ?ResponseInterface
+    public function last(): ResponseInterface
     {
         $key = array_key_last($this->responses);
         if ($key === null) {
-            return null;
+            throw new ResponsesException('collection is empty');
         }
 
         return $this->responses[$key];
