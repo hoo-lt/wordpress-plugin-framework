@@ -51,7 +51,8 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 		$encoders = $this->encoders->filterByType($body);
 		foreach ($encoders as $encoder) {
-			foreach ($encoder->mediaTypes() as $mediaType) {
+			$mediaTypes = $encoder->mediaTypes();
+			foreach ($mediaTypes as $mediaType) {
 				$bodies[(string) $mediaType] = new Body($this->accessor, $encoder, $body);
 			}
 		}
