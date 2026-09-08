@@ -34,6 +34,11 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
 
+	public function withoutHeaders(): static
+	{
+		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, [], $this->bodies);
+	}
+
 	public function withHeader(string $name, string $value): static
 	{
 		$headers = $this->headers;
@@ -50,10 +55,25 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
 
+	public function withBodies(mixed $body): static
+	{
+		$bodies = [
+			...$this->bodies,
+			...$this->bodyFactory->createBodiesFromUnnormalized($body),
+		];
+
+		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+	}
+
+	public function withoutBodies(): static
+	{
+		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, []);
+	}
+
 	public function withBody(string $contentType, mixed $body): static
 	{
 		$bodies = $this->bodies;
-		$bodies[$contentType] = $this->bodyFactory->createFromUnnormalized($contentType, $body);
+		$bodies[$contentType] = $this->bodyFactory->createBodyFromUnnormalized($contentType, $body);
 
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
@@ -71,7 +91,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$view = $this->viewFactory->create($view, $viewModel);
 
 		$bodies = $this->bodies;
-		$bodies[$contentType] = $this->bodyFactory->create($contentType, $view);
+		$bodies[$contentType] = $this->bodyFactory->createBody($contentType, $view);
 
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
@@ -90,11 +110,10 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			throw new ResponsesBuilderException('status code is mandatory');
 		}
 
-		$headers = $this->headers;
-
 		$responses = new Responses();
 
 		if ($this->bodies === []) {
+			$headers = $this->headers;
 			unset($headers['content-type']);
 
 			$headers = new Headers($headers);
@@ -105,6 +124,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		}
 
 		foreach ($this->bodies as $contentType => $body) {
+			$headers = $this->headers;
 			$headers['content-type'] = $contentType;
 
 			$headers = new Headers($headers);

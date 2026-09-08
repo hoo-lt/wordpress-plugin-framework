@@ -30,6 +30,11 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->subtype;
 	}
 
+	public function __tostring(): string
+	{
+		return "{$this->type}/{$this->subtype}";
+	}
+
 	protected function validateType(string $type): void
 	{
 		if (!preg_match('@\A' . Rfc9110::TYPE . '\z@', $type)) {

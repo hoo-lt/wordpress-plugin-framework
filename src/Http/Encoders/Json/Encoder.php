@@ -8,13 +8,24 @@ use Hoo\WordPressPluginFramework\{
 	Http\Encoders\EncoderInterface,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
+use stdClass;
 use Throwable;
 
 readonly class Encoder implements EncoderInterface
 {
+	public function __construct(
+		protected array $mediaTypes,
+	) {
+	}
+
+	public function mediaTypes(): array
+	{
+		return $this->mediaTypes;
+	}
+
 	public function encode(mixed $decoded): string
 	{
-		if (!$this->encodes($decoded)) {
+		if (!$this->encodesType($decoded)) {
 			throw new EncoderException('does not encode');
 		}
 
@@ -25,9 +36,13 @@ readonly class Encoder implements EncoderInterface
 		}
 	}
 
-	public function encodes(mixed $decoded): bool
+	public function encodesType(mixed $decoded): bool
 	{
 		if (is_resource($decoded)) {
+			return false;
+		}
+
+		if (is_object($decoded) && !$decoded instanceof stdClass) {
 			return false;
 		}
 

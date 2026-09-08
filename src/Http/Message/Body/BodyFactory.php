@@ -19,30 +19,53 @@ readonly class BodyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function create(string $contentType, mixed $body): BodyInterface
+	public function createBody(string $contentType, mixed $body): BodyInterface
 	{
-		$encoder = $this->encoders->get($contentType, $body);
+		$encoder = $this->encoders
+			->filterByType($body)
+			->filterByContentType($contentType)
+			->first();
 
 		return new Body($this->accessor, $encoder, $body);
 	}
 
-	public function createFromEncoded(string $contentType, mixed $body): BodyInterface
+	public function createBodyFromEncoded(string $contentType, mixed $body): BodyInterface
 	{
 		$body = $this->decode($contentType, $body);
 
-		return $this->create($contentType, $body);
+		return $this->createBody($contentType, $body);
 	}
 
-	public function createFromUnnormalized(string $contentType, mixed $body): BodyInterface
+	public function createBodyFromUnnormalized(string $contentType, mixed $body): BodyInterface
 	{
 		$body = $this->normalize($body);
 
-		return $this->create($contentType, $body);
+		return $this->createBody($contentType, $body);
+	}
+
+	public function createBodiesFromUnnormalized(mixed $body): array
+	{
+		$body = $this->normalize($body);
+
+		$bodies = [];
+
+		$encoders = $this->encoders->filterByType($body);
+		foreach ($encoders as $encoder) {
+			foreach ($encoder->mediaTypes() as $mediaType) {
+				$bodies[(string) $mediaType] = new Body($this->accessor, $encoder, $body);
+			}
+		}
+
+		return $bodies;
 	}
 
 	protected function decode(string $contentType, mixed $body): mixed
 	{
-		$decoder = $this->decoders->get($contentType, $body);
+		$decoder = $this->decoders
+			->filterByType($body)
+			->filterByContentType($contentType)
+			->first();
+
 		return $decoder->decode($body);
 	}
 

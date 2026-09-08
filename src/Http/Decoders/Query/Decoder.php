@@ -9,9 +9,19 @@ use Hoo\WordPressPluginFramework\{
 
 readonly class Decoder implements DecoderInterface
 {
+	public function __construct(
+		protected array $mediaTypes,
+	) {
+	}
+
+	public function mediaTypes(): array
+	{
+		return $this->mediaTypes;
+	}
+
 	public function decode(mixed $encoded): mixed
 	{
-		if (!$this->decodes($encoded)) {
+		if (!$this->decodesType($encoded)) {
 			throw new DecoderException('does not decode');
 		}
 
@@ -19,7 +29,7 @@ readonly class Decoder implements DecoderInterface
 		return $decoded;
 	}
 
-	public function decodes(mixed $encoded): bool
+	public function decodesType(mixed $encoded): bool
 	{
 		if (!is_string($encoded)) {
 			return false;
@@ -30,6 +40,6 @@ readonly class Decoder implements DecoderInterface
 
 	public function decodesMediaType(MediaTypeInterface $mediaType): bool
 	{
-		return true;
+		return false;
 	}
 }

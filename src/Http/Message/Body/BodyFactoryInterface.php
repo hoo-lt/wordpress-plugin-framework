@@ -4,7 +4,12 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
 interface BodyFactoryInterface
 {
-	public function create(string $contentType, mixed $body): BodyInterface;
-	public function createFromEncoded(string $contentType, mixed $body): BodyInterface;
-	public function createFromUnnormalized(string $contentType, mixed $body): BodyInterface;
+	public function createBody(string $contentType, mixed $body): BodyInterface;
+	public function createBodyFromEncoded(string $contentType, mixed $body): BodyInterface;
+	public function createBodyFromUnnormalized(string $contentType, mixed $body): BodyInterface;
+
+	/**
+	 * @return array<string, BodyInterface>
+	 */
+	public function createBodiesFromUnnormalized(mixed $body): array;
 }

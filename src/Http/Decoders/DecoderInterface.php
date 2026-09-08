@@ -6,7 +6,10 @@ use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\Medi
 
 interface DecoderInterface
 {
+	public function mediaTypes(): array;
+
 	public function decode(mixed $encoded): mixed;
-	public function decodes(mixed $encoded): bool;
+
+	public function decodesType(mixed $encoded): bool;
 	public function decodesMediaType(MediaTypeInterface $mediaType): bool;
 }

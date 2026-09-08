@@ -12,19 +12,24 @@ readonly class BodyLazyProxyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function create(string $contentType, mixed $body): BodyInterface
+	public function createBody(string $contentType, mixed $body): BodyInterface
 	{
-		return $this->newLazyProxy(fn() => $this->bodyFactory->create($contentType, $body));
+		return $this->newLazyProxy(fn() => $this->bodyFactory->createBody($contentType, $body));
 	}
 
-	public function createFromEncoded(string $contentType, mixed $body): BodyInterface
+	public function createBodyFromEncoded(string $contentType, mixed $body): BodyInterface
 	{
-		return $this->newLazyProxy(fn() => $this->bodyFactory->createFromEncoded($contentType, $body));
+		return $this->newLazyProxy(fn() => $this->bodyFactory->createBodyFromEncoded($contentType, $body));
 	}
 
-	public function createFromUnnormalized(string $contentType, mixed $body): BodyInterface
+	public function createBodyFromUnnormalized(string $contentType, mixed $body): BodyInterface
 	{
-		return $this->newLazyProxy(fn() => $this->bodyFactory->createFromUnnormalized($contentType, $body));
+		return $this->newLazyProxy(fn() => $this->bodyFactory->createBodyFromUnnormalized($contentType, $body));
+	}
+
+	public function createBodiesFromUnnormalized(mixed $body): array
+	{
+		return $this->bodyFactory->createBodiesFromUnnormalized($body);
 	}
 
 	protected function newLazyProxy(Closure $closure): BodyInterface

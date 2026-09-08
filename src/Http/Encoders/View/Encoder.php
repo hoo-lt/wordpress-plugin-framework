@@ -17,16 +17,21 @@ readonly class Encoder implements EncoderInterface
 	) {
 	}
 
+	public function mediaTypes(): array
+	{
+		return [];
+	}
+
 	public function encode(mixed $decoded): string
 	{
-		if (!$this->encodes($decoded)) {
+		if (!$this->encodesType($decoded)) {
 			throw new EncoderException('does not encode');
 		}
 
 		return $this->renderer->render($decoded);
 	}
 
-	public function encodes(mixed $decoded): bool
+	public function encodesType(mixed $decoded): bool
 	{
 		if (!$decoded instanceof ViewInterface) {
 			return false;

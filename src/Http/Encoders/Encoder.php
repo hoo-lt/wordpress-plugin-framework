@@ -6,16 +6,26 @@ use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\Medi
 
 readonly class Encoder implements EncoderInterface
 {
+	public function __construct(
+		protected array $mediaTypes,
+	) {
+	}
+
+	public function mediaTypes(): array
+	{
+		return $this->mediaTypes;
+	}
+
 	public function encode(mixed $decoded): string
 	{
-		if (!$this->encodes($decoded)) {
+		if (!$this->encodesType($decoded)) {
 			throw new EncoderException('does not encode');
 		}
 
 		return $decoded;
 	}
 
-	public function encodes(mixed $decoded): bool
+	public function encodesType(mixed $decoded): bool
 	{
 		if (!is_string($decoded)) {
 			return false;

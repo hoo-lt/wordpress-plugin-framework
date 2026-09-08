@@ -54,7 +54,7 @@ readonly class ResponseBuilder implements ResponseBuilderInterface
 
 	public function withBody(string $contentType, mixed $body): static
 	{
-		$body = $this->bodyFactory->createFromUnnormalized($contentType, $body);
+		$body = $this->bodyFactory->createBodyFromUnnormalized($contentType, $body);
 
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $contentType, $body);
 	}
@@ -67,7 +67,7 @@ readonly class ResponseBuilder implements ResponseBuilderInterface
 	public function withView(string $contentType, string $view, mixed $viewModel): static
 	{
 		$view = $this->viewFactory->create($view, $viewModel);
-		$body = $this->bodyFactory->create($contentType, $view);
+		$body = $this->bodyFactory->createBody($contentType, $view);
 
 		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $contentType, $body);
 	}

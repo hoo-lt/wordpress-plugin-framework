@@ -71,6 +71,6 @@ readonly class RequestFactory implements RequestFactoryInterface
 			$contentType = self::CONTENT_TYPE;
 		}
 
-		return $this->bodyFactory->createFromEncoded($body, $contentType);
+		return $this->bodyFactory->createBodyFromEncoded($body, $contentType);
 	}
 }

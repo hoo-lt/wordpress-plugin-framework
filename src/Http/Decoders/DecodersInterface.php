@@ -2,7 +2,14 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Decoders;
 
-interface DecodersInterface
+use Countable;
+use IteratorAggregate;
+
+interface DecodersInterface extends IteratorAggregate, Countable
 {
-	public function get(string $contentType, mixed $encoded): DecoderInterface;
+	public function first(): DecoderInterface;
+	public function last(): DecoderInterface;
+
+	public function filterByType(mixed $encoded): static;
+	public function filterByContentType(string $contentType): static;
 }

@@ -7,9 +7,13 @@ interface ResponsesBuilderInterface
 	public function withStatusCode(int $statusCode): static;
 
 	public function withHeaders(array $headers): static;
+	public function withoutHeaders(): static;
 
 	public function withHeader(string $name, string $value): static;
 	public function withoutHeader(string $name): static;
+
+	public function withBodies(mixed $body): static;
+	public function withoutBodies(): static;
 
 	public function withBody(string $contentType, mixed $body): static;
 	public function withoutBody(string $contentType): static;

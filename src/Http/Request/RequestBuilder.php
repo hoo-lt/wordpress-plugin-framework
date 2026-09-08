@@ -67,7 +67,7 @@ readonly class RequestBuilder implements RequestBuilderInterface
 
 	public function withBody(string $contentType, mixed $body): static
 	{
-		$body = $this->bodyFactory->createFromUnnormalized($contentType, $body);
+		$body = $this->bodyFactory->createBodyFromUnnormalized($contentType, $body);
 
 		return new static($this->urlFactory, $this->bodyFactory, $this->viewFactory, $this->uuid, $this->method, $this->url, $this->headers, $contentType, $body);
 	}
@@ -80,7 +80,7 @@ readonly class RequestBuilder implements RequestBuilderInterface
 	public function withView(string $contentType, string $view, mixed $viewModel): static
 	{
 		$view = $this->viewFactory->create($view, $viewModel);
-		$body = $this->bodyFactory->create($contentType, $view);
+		$body = $this->bodyFactory->createBody($contentType, $view);
 
 		return new static($this->urlFactory, $this->bodyFactory, $this->viewFactory, $this->uuid, $this->method, $this->url, $this->headers, $contentType, $body);
 	}
