@@ -3,7 +3,11 @@
 namespace Hoo\WordPressPluginFramework\Http\Message\Headers;
 
 use ArrayIterator;
-use Hoo\WordPressPluginFramework\Http\Abnf\Rfc9110;
+use Hoo\WordPressPluginFramework\{
+	Http\Abnf\Rfc9110,
+	Http\Message\Headers\Accept\AcceptInterface,
+	Http\Message\Headers\ContentType\ContentTypeInterface,
+};
 use Traversable;
 
 readonly class Headers implements HeadersInterface
@@ -12,6 +16,8 @@ readonly class Headers implements HeadersInterface
 
 	public function __construct(
 		array $headers = [],
+		protected ?AcceptInterface $accept = null,
+		protected ?ContentTypeInterface $contentType = null,
 	) {
 		$this->validateHeaders($headers);
 		$this->headers = $this->normalizeHeaders($headers);
@@ -32,7 +38,7 @@ readonly class Headers implements HeadersInterface
 		$headers = $this->headers;
 		$headers[strtolower($name)] = $value;
 
-		return new static($headers);
+		return new static($headers, $this->accept, $this->contentType);
 	}
 
 	public function without(string $name): static
@@ -40,7 +46,37 @@ readonly class Headers implements HeadersInterface
 		$headers = $this->headers;
 		unset($headers[strtolower($name)]);
 
-		return new static($headers);
+		return new static($headers, $this->accept, $this->contentType);
+	}
+
+	public function accept(): ?AcceptInterface
+	{
+		return $this->accept;
+	}
+
+	public function withAccept(AcceptInterface $accept): static
+	{
+		return new static($this->headers, $accept, $this->contentType);
+	}
+
+	public function withoutAccept(): static
+	{
+		return new static($this->headers, null, $this->contentType);
+	}
+
+	public function contentType(): ?ContentTypeInterface
+	{
+		return $this->contentType;
+	}
+
+	public function withContentType(ContentTypeInterface $contentType): static
+	{
+		return new static($this->headers, $this->accept, $contentType);
+	}
+
+	public function withoutContentType(): static
+	{
+		return new static($this->headers, $this->accept, null);
 	}
 
 	public function getIterator(): Traversable

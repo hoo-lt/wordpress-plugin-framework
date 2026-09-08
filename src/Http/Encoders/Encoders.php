@@ -4,13 +4,12 @@ namespace Hoo\WordPressPluginFramework\Http\Encoders;
 
 use ArrayIterator;
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\ContentTypeFactoryInterface;
+use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeInterface;
 use Traversable;
 
 readonly class Encoders implements EncodersInterface
 {
 	public function __construct(
-		protected ContentTypeFactoryInterface $contentTypeFactory,
 		protected array $encoders,
 	) {
 	}
@@ -40,10 +39,8 @@ readonly class Encoders implements EncodersInterface
 		return $this->filter(fn($encoder) => $encoder->encodesType($decoded));
 	}
 
-	public function filterByContentType(string $contentType): static
+	public function filterByMediaType(MediaTypeInterface $mediaType): static
 	{
-		$mediaType = $this->contentTypeFactory->create($contentType)->mediaType();
-
 		return $this->filter(fn($encoder) => $encoder->encodesMediaType($mediaType));
 	}
 
@@ -63,6 +60,6 @@ readonly class Encoders implements EncodersInterface
 	{
 		$encoders = array_filter($this->encoders, $closure);
 
-		return new static($this->contentTypeFactory, $encoders);
+		return new static($encoders);
 	}
 }

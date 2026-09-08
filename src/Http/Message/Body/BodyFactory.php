@@ -6,6 +6,8 @@ use Hoo\WordPressPluginFramework\{
 	Http\Accessor\AccessorInterface,
 	Http\Decoders\DecodersInterface,
 	Http\Encoders\EncodersInterface,
+	Http\Message\Headers\ContentType\ContentTypeFactoryInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 	Http\Normalizers\NormalizersInterface,
 };
 
@@ -13,6 +15,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 {
 	public function __construct(
 		protected AccessorInterface $accessor,
+		protected ContentTypeFactoryInterface $contentTypeFactory,
 		protected DecodersInterface $decoders,
 		protected EncodersInterface $encoders,
 		protected NormalizersInterface $normalizers,
@@ -23,7 +26,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$encoder = $this->encoders
 			->filterByType($body)
-			->filterByContentType($contentType)
+			->filterByMediaType($this->mediaType($contentType))
 			->first();
 
 		return new Body($this->accessor, $encoder, $body);
@@ -64,7 +67,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$decoder = $this->decoders
 			->filterByType($body)
-			->filterByContentType($contentType)
+			->filterByMediaType($this->mediaType($contentType))
 			->first();
 
 		return $decoder->decode($body);
@@ -74,5 +77,10 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$normalizer = $this->normalizers->get($body);
 		return $normalizer === null ? $body : $normalizer->normalize($body);
+	}
+
+	protected function mediaType(string $contentType): MediaTypeInterface
+	{
+		return $this->contentTypeFactory->create($contentType)->mediaType();
 	}
 }

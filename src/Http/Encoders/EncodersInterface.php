@@ -3,6 +3,7 @@
 namespace Hoo\WordPressPluginFramework\Http\Encoders;
 
 use Countable;
+use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeInterface;
 use IteratorAggregate;
 
 interface EncodersInterface extends IteratorAggregate, Countable
@@ -11,5 +12,5 @@ interface EncodersInterface extends IteratorAggregate, Countable
 	public function last(): EncoderInterface;
 
 	public function filterByType(mixed $decoded): static;
-	public function filterByContentType(string $contentType): static;
+	public function filterByMediaType(MediaTypeInterface $mediaType): static;
 }

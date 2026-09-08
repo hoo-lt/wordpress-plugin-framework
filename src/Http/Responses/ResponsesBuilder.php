@@ -4,7 +4,7 @@ namespace Hoo\WordPressPluginFramework\Http\Responses;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Body\BodyFactoryInterface,
-	Http\Message\Headers\Headers,
+	Http\Message\Headers\HeadersFactoryInterface,
 	Http\Response\Response,
 	Uuid\UuidInterface,
 	View\ViewFactoryInterface,
@@ -14,6 +14,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 {
 	public function __construct(
 		protected BodyFactoryInterface $bodyFactory,
+		protected HeadersFactoryInterface $headersFactory,
 		protected ViewFactoryInterface $viewFactory,
 		protected UuidInterface $uuid,
 		protected ?int $statusCode = null,
@@ -24,19 +25,19 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 
 	public function withStatusCode(int $statusCode): static
 	{
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $statusCode, $this->headers, $this->bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $statusCode, $this->headers, $this->bodies);
 	}
 
 	public function withHeaders(array $headers): static
 	{
 		$headers = array_change_key_case($headers, CASE_LOWER);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
 
 	public function withoutHeaders(): static
 	{
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, [], $this->bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, [], $this->bodies);
 	}
 
 	public function withHeader(string $name, string $value): static
@@ -44,7 +45,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$headers = $this->headers;
 		$headers[strtolower($name)] = $value;
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
 
 	public function withoutHeader(string $name): static
@@ -52,7 +53,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$headers = $this->headers;
 		unset($headers[strtolower($name)]);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
 
 	public function withBodies(mixed $body): static
@@ -62,12 +63,12 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			...$this->bodyFactory->createBodiesFromUnnormalized($body),
 		];
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
 
 	public function withoutBodies(): static
 	{
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, []);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, []);
 	}
 
 	public function withBody(string $contentType, mixed $body): static
@@ -75,7 +76,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$bodies = $this->bodies;
 		$bodies[$contentType] = $this->bodyFactory->createBodyFromUnnormalized($contentType, $body);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
 
 	public function withoutBody(string $contentType): static
@@ -83,7 +84,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$bodies = $this->bodies;
 		unset($bodies[$contentType]);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
 
 	public function withView(string $contentType, string $view, mixed $viewModel): static
@@ -93,7 +94,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$bodies = $this->bodies;
 		$bodies[$contentType] = $this->bodyFactory->createBody($contentType, $view);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
 
 	public function withoutView(string $contentType): static
@@ -101,7 +102,7 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		$bodies = $this->bodies;
 		unset($bodies[$contentType]);
 
-		return new static($this->bodyFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
+		return new static($this->bodyFactory, $this->headersFactory, $this->viewFactory, $this->uuid, $this->statusCode, $this->headers, $bodies);
 	}
 
 	public function build(): ResponsesInterface
@@ -116,9 +117,9 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			$headers = $this->headers;
 			unset($headers['content-type']);
 
-			$headers = new Headers($headers);
+			$headers = $this->headersFactory->create($headers);
 
-			$responses->add(
+			$responses = $responses->with(
 				new Response($this->uuid, $this->statusCode, $headers),
 			);
 		}
@@ -127,9 +128,9 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			$headers = $this->headers;
 			$headers['content-type'] = $contentType;
 
-			$headers = new Headers($headers);
+			$headers = $this->headersFactory->create($headers);
 
-			$responses->add(
+			$responses = $responses->with(
 				new Response($this->uuid, $this->statusCode, $headers, $body),
 			);
 		}

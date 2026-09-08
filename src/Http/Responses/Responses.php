@@ -4,19 +4,25 @@ namespace Hoo\WordPressPluginFramework\Http\Responses;
 
 use ArrayIterator;
 use Closure;
-use Hoo\WordPressPluginFramework\Http\Response\ResponseInterface;
+use Hoo\WordPressPluginFramework\{
+    Http\Message\Headers\Accept\AcceptInterface,
+    Http\Response\ResponseInterface,
+};
 use Traversable;
 
-class Responses implements ResponsesInterface
+readonly class Responses implements ResponsesInterface
 {
     public function __construct(
         protected array $responses = [],
     ) {
     }
 
-    public function add(ResponseInterface $response): void
+    public function with(ResponseInterface $response): static
     {
-        $this->responses[] = $response;
+        $responses = $this->responses;
+        $responses[] = $response;
+
+        return new static($responses);
     }
 
     public function first(): ResponseInterface
@@ -39,19 +45,14 @@ class Responses implements ResponsesInterface
         return $this->responses[$key];
     }
 
-    public function filter(Closure $closure): static
+    public function filterByAccept(AcceptInterface $accept): static
     {
-        $responses = array_filter($this->responses, $closure);
-
-        return new static($responses);
+        return $this->filter(fn(ResponseInterface $response) => $this->q($accept, $response) > 0);
     }
 
-    public function sort(Closure $closure): static
+    public function sortByAccept(AcceptInterface $accept): static
     {
-        $responses = $this->responses;
-        usort($responses, $closure);
-
-        return new static($responses);
+        return $this->sort(fn(ResponseInterface $a, ResponseInterface $b) => $this->q($accept, $b) <=> $this->q($accept, $a));
     }
 
     public function getIterator(): Traversable
@@ -64,5 +65,31 @@ class Responses implements ResponsesInterface
     public function count(): int
     {
         return count($this->responses);
+    }
+
+    protected function filter(Closure $closure): static
+    {
+        $responses = array_filter($this->responses, $closure);
+
+        return new static($responses);
+    }
+
+    protected function sort(Closure $closure): static
+    {
+        $responses = $this->responses;
+        usort($responses, $closure);
+
+        return new static($responses);
+    }
+
+    protected function q(AcceptInterface $accept, ResponseInterface $response): float
+    {
+        $contentType = $response->headers()->contentType();
+        if ($contentType === null) {
+            return 1;
+        }
+
+        $mediaType = $contentType->mediaType();
+        return $accept->q($mediaType);
     }
 }
