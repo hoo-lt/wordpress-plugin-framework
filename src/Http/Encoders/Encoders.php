@@ -2,19 +2,19 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Encoders;
 
-use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeFactoryInterface;
+use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\ContentTypeFactoryInterface;
 
 readonly class Encoders implements EncodersInterface
 {
 	public function __construct(
-		protected MediaTypeFactoryInterface $mediaTypeFactory,
+		protected ContentTypeFactoryInterface $contentTypeFactory,
 		protected array $encoders,
 	) {
 	}
 
 	public function get(string $contentType, mixed $encoded): EncoderInterface
 	{
-		$mediaType = $this->mediaTypeFactory->create($contentType);
+		$mediaType = $this->contentTypeFactory->create($contentType)->mediaType();
 
 		foreach ($this->encoders as $encoder) {
 			if (

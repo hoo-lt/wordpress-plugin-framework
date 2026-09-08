@@ -19,11 +19,12 @@ readonly class Rfc9110
 	public const TYPE = '(?<type>' . self::TOKEN . ')';
 	public const SUBTYPE = '(?<subtype>' . self::TOKEN . ')';
 	public const MEDIA_TYPE = self::TYPE . '/' . self::SUBTYPE . self::PARAMETERS;
-	public const PARAMETER_NAME = '(?<parameter_name>' . self::TOKEN . ')';
-	public const PARAMETER_VALUE = '(?:(?<token>' . self::TOKEN . ')|(?<quoted_string>' . self::QUOTED_STRING . '))';
+	public const CONTENT_TYPE = self::MEDIA_TYPE;
+	public const PARAMETER_NAME = self::TOKEN;
+	public const PARAMETER_VALUE = '(?:' . self::TOKEN . '|' . self::QUOTED_STRING . ')';
 	public const PARAMETER = self::PARAMETER_NAME . '=' . self::PARAMETER_VALUE;
 	public const PARAMETERS = '(?:' . self::OWS . ';' . self::OWS . '(?:' . self::PARAMETER . ')?)*';
-	public const WEIGHT = self::OWS . ';' . self::OWS . '(?:Q|q)=' . self::QVALUE;
+	public const WEIGHT = self::OWS . ';' . self::OWS . '(?:Q|q)=(?<q>' . self::QVALUE . ')';
 	public const MEDIA_RANGE = '(?<media_range>' . self::TYPE . '/' . self::SUBTYPE . self::PARAMETERS . ')';
 	public const ACCEPT = '(?:(?:' . self::MEDIA_RANGE . '(?:' . self::WEIGHT . ')?))?(?:' . self::OWS . ',' . self::OWS . '(?:(?:' . self::MEDIA_RANGE . '(?:' . self::WEIGHT . ')?))?)*';
 }

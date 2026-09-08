@@ -10,5 +10,6 @@ use Hoo\WordPressPluginFramework\{
 
 interface ContentNegotiatorInterface
 {
-	public function negotiate(RequestInterface $request, ResponsesInterface $responses): ?ResponseInterface;
+	public function negotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface;
+	public function tryNegotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface;
 }

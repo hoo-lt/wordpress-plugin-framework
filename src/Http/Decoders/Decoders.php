@@ -2,19 +2,19 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Decoders;
 
-use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeFactoryInterface;
+use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\ContentTypeFactoryInterface;
 
 readonly class Decoders implements DecodersInterface
 {
 	public function __construct(
-		protected MediaTypeFactoryInterface $mediaTypeFactory,
+		protected ContentTypeFactoryInterface $contentTypeFactory,
 		protected array $decoders,
 	) {
 	}
 
 	public function get(string $contentType, mixed $encoded): DecoderInterface
 	{
-		$mediaType = $this->mediaTypeFactory->create($contentType);
+		$mediaType = $this->contentTypeFactory->create($contentType)->mediaType();
 
 		foreach ($this->decoders as $decoder) {
 			if (
