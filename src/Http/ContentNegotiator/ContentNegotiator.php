@@ -18,23 +18,30 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 			throw new NotAcceptableException('no acceptable representation', 'content_negotiator_error');
 		}
 
-		return $this->represent($acceptable, $responses);
+		return $acceptable
+			->first()
+			->withHeaders(fn($headers) => $headers->with('vary', 'accept'));
 	}
 
 	public function tryNegotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface
 	{
 		$acceptable = $this->acceptable($request, $responses);
-		if ($acceptable->count() === 0) {
-			$acceptable = $responses;
-		}
 
-		return $this->represent($acceptable, $responses);
+		$acceptable = $acceptable->count() === 0 ? $acceptable : $responses;
+		
+		return $acceptable
+			->first()
+			->withHeaders(fn($headers) => $headers->with('vary', 'accept'));
 	}
 
 	protected function acceptable(RequestInterface $request, ResponsesInterface $responses): ResponsesInterface
 	{
 		if ($responses->count() === 0) {
 			throw new ContentNegotiatorException('no representations available');
+		}
+
+		if ($responses->count() === 1) {
+			return $responses;
 		}
 
 		$accept = $request->headers()->accept();
@@ -45,12 +52,5 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 		return $responses
 			->filterByAccept($accept)
 			->sortByAccept($accept);
-	}
-
-	protected function represent(ResponsesInterface $acceptable, ResponsesInterface $responses): ResponseInterface
-	{
-		return $acceptable
-			->first()
-			->withHeaders(fn($headers) => $responses->count() > 1 ? $headers->with('vary', 'accept') : $headers->without('vary'));
 	}
 }
