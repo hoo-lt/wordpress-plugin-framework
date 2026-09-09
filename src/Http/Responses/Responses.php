@@ -86,10 +86,11 @@ readonly class Responses implements ResponsesInterface
     {
         $contentType = $response->headers()->contentType();
         if ($contentType === null) {
-            return 1;
+            throw new ResponsesException('cant get q w/o content-type');
         }
 
         $mediaType = $contentType->mediaType();
+        
         return $accept->q($mediaType);
     }
 }
