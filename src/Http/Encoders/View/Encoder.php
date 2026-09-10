@@ -14,12 +14,13 @@ readonly class Encoder implements EncoderInterface
 {
 	public function __construct(
 		protected RendererInterface $renderer,
+		protected MediaTypeInterface $mediaType,
 	) {
 	}
 
-	public function mediaTypes(): array
+	public function mediaType(): MediaTypeInterface
 	{
-		return [];
+		return $this->mediaType;
 	}
 
 	public function encode(mixed $decoded): string
@@ -42,6 +43,6 @@ readonly class Encoder implements EncoderInterface
 
 	public function encodesMediaType(MediaTypeInterface $mediaType): bool
 	{
-		return true;
+		return (string) $this->mediaType === (string) $mediaType;
 	}
 }

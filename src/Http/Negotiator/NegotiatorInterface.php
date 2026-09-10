@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\ContentNegotiation;
+namespace Hoo\WordPressPluginFramework\Http\Negotiator;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Request\RequestInterface,
@@ -8,7 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Responses\ResponsesInterface,
 };
 
-interface ContentNegotiatorInterface
+interface NegotiatorInterface
 {
 	public function negotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface;
 	public function tryNegotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface;

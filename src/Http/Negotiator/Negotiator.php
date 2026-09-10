@@ -1,6 +1,6 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\ContentNegotiation;
+namespace Hoo\WordPressPluginFramework\Http\Negotiator;
 
 use Hoo\WordPressPluginFramework\{
 	Http\Exceptions\NotAcceptable\Exception as NotAcceptableException,
@@ -9,35 +9,34 @@ use Hoo\WordPressPluginFramework\{
 	Http\Responses\ResponsesInterface,
 };
 
-readonly class ContentNegotiator implements ContentNegotiatorInterface
+readonly class Negotiator implements NegotiatorInterface
 {
 	public function negotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface
 	{
-		$responses = $this->acceptable($request, $responses);
-		if ($responses->count() === 0) {
+		$negotiatedResponses = $this->negotiateResponses($request, $responses);
+		if ($negotiatedResponses->count() === 0) {
 			throw new NotAcceptableException('no acceptable representation', 'content_negotiator_error');
 		}
 
-		return $this->response($responses);
+		return $negotiatedResponses
+			->first()
+			->withHeaders(fn($headers) => $headers->with('vary', 'accept'));
 	}
 
 	public function tryNegotiate(RequestInterface $request, ResponsesInterface $responses): ResponseInterface
 	{
-		$acceptable = $this->acceptable($request, $responses);
+		$negotiatedResponses = $this->negotiateResponses($request, $responses);
 
-		$acceptable = $acceptable->count() === 0 ? $acceptable : $responses;
-
-		return $this->response($acceptable);
+		$negotiatedResponses = $negotiatedResponses->count() === 0 ? $responses : $negotiatedResponses;
+		return $negotiatedResponses
+			->first()
+			->withHeaders(fn($headers) => $headers->with('vary', 'accept'));
 	}
 
-	protected function acceptable(RequestInterface $request, ResponsesInterface $responses): ResponsesInterface
+	protected function negotiateResponses(RequestInterface $request, ResponsesInterface $responses): ResponsesInterface
 	{
 		if ($responses->count() === 0) {
-			throw new ContentNegotiatorException('no representations available');
-		}
-
-		if ($responses->count() === 1) {
-			return $responses;
+			throw new NegotiatorException('no representations available');
 		}
 
 		$accept = $request->headers()->accept();
@@ -48,12 +47,5 @@ readonly class ContentNegotiator implements ContentNegotiatorInterface
 		return $responses
 			->filterByAccept($accept)
 			->sortByAccept($accept);
-	}
-
-	protected function response(ResponsesInterface $responses): ResponseInterface
-	{
-		return $responses
-			->first()
-			->withHeaders(fn($headers) => $headers->with('vary', 'accept'));
 	}
 }

@@ -14,10 +14,8 @@ interface RequestBuilderInterface
 	public function withoutHeader(string $name): static;
 
 	public function withBody(string $contentType, mixed $body): static;
+	public function withUnnormalizedBody(string $contentType, mixed $body): static;
 	public function withoutBody(): static;
-
-	public function withView(string $contentType, string $view, mixed $viewModel): static;
-	public function withoutView(): static;
 
 	public function build(): RequestInterface;
 }

@@ -12,13 +12,13 @@ use stdClass;
 readonly class Encoder implements EncoderInterface
 {
 	public function __construct(
-		protected array $mediaTypes,
+		protected MediaTypeInterface $mediaType,
 	) {
 	}
 
-	public function mediaTypes(): array
+	public function mediaType(): MediaTypeInterface
 	{
-		return $this->mediaTypes;
+		return $this->mediaType;
 	}
 
 	public function encode(mixed $decoded): string

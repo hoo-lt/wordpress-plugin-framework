@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Exceptions\Handler;
 use Hoo\WordPressPluginFramework\{
 	Exceptions\Handler\ViewModels\ViewModel,
 	Exceptions\Interfaces\HasStatusCodeInterface,
-	Http\Negotiation\NegotiatorInterface,
+	Http\Negotiator\NegotiatorInterface,
 	Http\Message\Headers\Accept\AcceptFactoryInterface,
 	Http\Request\RequestInterface,
 	Http\Response\ResponseInterface,

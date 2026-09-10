@@ -10,14 +10,9 @@ use stdClass;
 
 readonly class Encoder implements EncoderInterface
 {
-	public function __construct(
-		protected array $mediaTypes,
-	) {
-	}
-
-	public function mediaTypes(): array
+	public function mediaType(): ?MediaTypeInterface
 	{
-		return $this->mediaTypes;
+		return null;
 	}
 
 	public function encode(mixed $decoded): string

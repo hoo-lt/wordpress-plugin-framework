@@ -5,6 +5,7 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 use Hoo\WordPressPluginFramework\{
 	Http\Accessor\AccessorInterface,
 	Http\Encoders\EncoderInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 use stdClass;
 
@@ -13,8 +14,14 @@ readonly class Body implements BodyInterface
 	public function __construct(
 		protected AccessorInterface $accessor,
 		protected EncoderInterface $encoder,
+		protected MediaTypeInterface $mediaType,
 		protected mixed $body,
 	) {
+	}
+
+	public function mediaType(): MediaTypeInterface
+	{
+		return $this->mediaType;
 	}
 
 	public function values(string $key): array
@@ -36,14 +43,14 @@ readonly class Body implements BodyInterface
 	{
 		$value = $this->accessor->with($this->body, $key, $value);
 
-		return new static($this->accessor, $this->encoder, $value);
+		return new static($this->accessor, $this->encoder, $this->mediaType, $value);
 	}
 
 	public function without(string $key): static
 	{
 		$value = $this->accessor->without($this->body, $key);
 
-		return new static($this->accessor, $this->encoder, $value);
+		return new static($this->accessor, $this->encoder, $this->mediaType, $value);
 	}
 
 	public function __toString(): string

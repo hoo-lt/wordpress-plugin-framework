@@ -8,8 +8,7 @@ interface DecoderInterface
 {
 	public function mediaTypes(): array;
 
-	public function decode(mixed $encoded): mixed;
+	public function decode(string $encoded): mixed;
 
-	public function decodesType(mixed $encoded): bool;
 	public function decodesMediaType(MediaTypeInterface $mediaType): bool;
 }

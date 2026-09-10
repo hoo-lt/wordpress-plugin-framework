@@ -8,7 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Routes\RouteException,
 	Emitter\EmitterInterface,
 	Http\Coders\CodersInterface,
-	Http\ContentNegotiation\NegotiatorInterface,
+	Http\Negotiator\NegotiatorInterface,
 	Http\Message\Headers\Accept\AcceptFactoryInterface,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 	Http\Request\RequestInterface,

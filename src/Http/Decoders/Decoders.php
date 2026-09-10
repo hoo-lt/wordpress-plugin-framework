@@ -34,11 +34,6 @@ readonly class Decoders implements DecodersInterface
 		return $this->decoders[$key];
 	}
 
-	public function filterByType(mixed $encoded): static
-	{
-		return $this->filter(fn($decoder) => $decoder->decodesType($encoded));
-	}
-
 	public function filterByMediaType(MediaTypeInterface $mediaType): static
 	{
 		return $this->filter(fn($decoder) => $decoder->decodesMediaType($mediaType));

@@ -48,7 +48,7 @@ readonly class Request implements RequestInterface
 			$url = $url($this->url);
 		}
 
-		if (!$url instanceof HeadersInterface) {
+		if (!$url instanceof UrlInterface) {
 			throw new RequestException('must provide url interface');
 		}
 

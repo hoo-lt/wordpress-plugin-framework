@@ -13,13 +13,8 @@ interface ResponsesBuilderInterface
 	public function withoutHeader(string $name): static;
 
 	public function withBodies(mixed $body): static;
+	public function withUnnormalizedBodies(mixed $body): static;
 	public function withoutBodies(): static;
-
-	public function withBody(string $contentType, mixed $body): static;
-	public function withoutBody(string $contentType): static;
-
-	public function withView(string $contentType, string $view, mixed $viewModel): static;
-	public function withoutView(string $contentType): static;
 
 	public function build(): ResponsesInterface;
 }

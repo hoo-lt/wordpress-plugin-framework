@@ -2,11 +2,14 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 
+use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeInterface;
 use stdClass;
 use Stringable;
 
 interface BodyInterface extends Stringable
 {
+    public function mediaType(): MediaTypeInterface;
+
     public function values(string $key): array;
 
     public function has(string $key): bool;

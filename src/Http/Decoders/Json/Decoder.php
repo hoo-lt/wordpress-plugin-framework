@@ -22,26 +22,13 @@ readonly class Decoder implements DecoderInterface
 		return $this->mediaTypes;
 	}
 
-	public function decode(mixed $encoded): mixed
+	public function decode(string $encoded): mixed
 	{
-		if (!$this->decodesType($encoded)) {
-			throw new DecoderException('does not decode');
-		}
-
 		try {
 			return json_decode($encoded, false, 512, JSON_THROW_ON_ERROR);
 		} catch (Throwable $throwable) {
 			throw new DecoderException($throwable->getMessage());
 		}
-	}
-
-	public function decodesType(mixed $encoded): bool
-	{
-		if (!is_string($encoded)) {
-			return false;
-		}
-
-		return true;
 	}
 
 	public function decodesMediaType(MediaTypeInterface $mediaType): bool

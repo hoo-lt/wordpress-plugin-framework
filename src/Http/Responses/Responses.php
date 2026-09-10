@@ -15,6 +15,7 @@ readonly class Responses implements ResponsesInterface
     public function __construct(
         protected array $responses = [],
     ) {
+        $this->validate($this->responses);
     }
 
     public function with(ResponseInterface $response): static
@@ -67,6 +68,16 @@ readonly class Responses implements ResponsesInterface
         return count($this->responses);
     }
 
+    protected function validate(array $responses): void
+    {
+        foreach ($responses as $response) {
+            $contentType = $response->headers()->contentType();
+            if ($contentType === null) {
+                throw new ResponsesException('response without content-type is not negotiable');
+            }
+        }
+    }
+
     protected function filter(Closure $closure): static
     {
         $responses = array_filter($this->responses, $closure);
@@ -90,7 +101,7 @@ readonly class Responses implements ResponsesInterface
         }
 
         $mediaType = $contentType->mediaType();
-        
+
         return $accept->q($mediaType);
     }
 }

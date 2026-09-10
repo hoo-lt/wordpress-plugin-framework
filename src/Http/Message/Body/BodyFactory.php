@@ -5,9 +5,9 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Body;
 use Hoo\WordPressPluginFramework\{
 	Http\Accessor\AccessorInterface,
 	Http\Decoders\DecoderInterface,
+	Http\Encoders\EncoderInterface,
 	Http\Decoders\DecodersInterface,
 	Http\Encoders\EncodersInterface,
-	Http\Encoders\Query\EncoderInterface,
 	Http\Message\Headers\ContentType\ContentTypeFactoryInterface,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 	Http\Normalizers\NormalizersInterface,
@@ -31,7 +31,24 @@ readonly class BodyFactory implements BodyFactoryInterface
 		return new Body($this->accessor, $encoder, $body);
 	}
 
-	public function createBodyFromEncoded(string $contentType, mixed $body): BodyInterface
+	public function createBodies(mixed $body): array
+	{
+		$bodies = [];
+
+		$encoders = $this->encoders($body);
+		foreach ($encoders as $encoder) {
+			$mediaType = $encoder->mediaType();
+			if ($mediaType === null) {
+				continue;
+			}
+
+			$bodies[(string) $mediaType] = new Body($this->accessor, $encoder, $body);
+		}
+
+		return $bodies;
+	}
+
+	public function createBodyFromEncoded(string $contentType, string $body): BodyInterface
 	{
 		$body = $this->decode($contentType, $body);
 
@@ -49,17 +66,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$body = $this->normalize($body);
 
-		$bodies = [];
-
-		$encoders = $this->encoders($body);
-		foreach ($encoders as $encoder) {
-			$mediaTypes = $encoder->mediaTypes();
-			foreach ($mediaTypes as $mediaType) {
-				$bodies[(string) $mediaType] = new Body($this->accessor, $encoder, $body);
-			}
-		}
-
-		return $bodies;
+		return $this->createBodies($body);
 	}
 
 	protected function mediaType(string $contentType): MediaTypeInterface
@@ -83,19 +90,18 @@ readonly class BodyFactory implements BodyFactoryInterface
 			->first();
 	}
 
-	protected function decoder(string $contentType, mixed $body): DecoderInterface
+	protected function decoder(string $contentType): DecoderInterface
 	{
 		$mediaType = $this->mediaType($contentType);
 
 		return $this->decoders
-			->filterByType($body)
 			->filterByMediaType($mediaType)
 			->first();
 	}
 
-	protected function decode(string $contentType, mixed $body): mixed
+	protected function decode(string $contentType, string $body): mixed
 	{
-		$decoder = $this->decoder($contentType, $body);
+		$decoder = $this->decoder($contentType);
 		return $decoder->decode($body);
 	}
 
