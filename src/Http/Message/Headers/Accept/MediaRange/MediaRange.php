@@ -6,8 +6,11 @@ use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Accept\MediaRange\Precedence\Precedence,
 	Http\Message\Headers\ContentType\MediaType\MediaType,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
+	Http\Message\Headers\Parameters\Parameters,
+	Http\Message\Headers\Parameters\ParametersInterface,
 	Http\Abnf\Rfc9110,
 };
+use Closure;
 
 readonly class MediaRange implements MediaRangeInterface
 {
@@ -18,6 +21,7 @@ readonly class MediaRange implements MediaRangeInterface
 	public function __construct(
 		string $type,
 		string $subtype,
+		protected ParametersInterface $parameters = new Parameters([]),
 		string $q = '1',
 	) {
 		$this->validateType($type);
@@ -35,14 +39,47 @@ readonly class MediaRange implements MediaRangeInterface
 		return $this->type;
 	}
 
+	public function withType(string $type): static
+	{
+		return new static($type, $this->subtype, $this->parameters, (string) $this->q);
+	}
+
 	public function subtype(): string
 	{
 		return $this->subtype;
 	}
 
+	public function withSubtype(string $subtype): static
+	{
+		return new static($this->type, $subtype, $this->parameters, (string) $this->q);
+	}
+
+	public function parameters(): ParametersInterface
+	{
+		return $this->parameters;
+	}
+
+	public function withParameters(ParametersInterface|Closure $parameters): static
+	{
+		if ($parameters instanceof Closure) {
+			$parameters = $parameters($this->parameters);
+		}
+
+		if (!$parameters instanceof ParametersInterface) {
+			throw new MediaRangeException('must provide parameters interface');
+		}
+
+		return new static($this->type, $this->subtype, $parameters, (string) $this->q);
+	}
+
 	public function q(): float
 	{
 		return $this->q;
+	}
+
+	public function withQ(string $q): static
+	{
+		return new static($this->type, $this->subtype, $this->parameters, $q);
 	}
 
 	public function mediaType(): ?MediaTypeInterface
@@ -54,7 +91,7 @@ readonly class MediaRange implements MediaRangeInterface
 			return null;
 		}
 
-		return new MediaType($this->type, $this->subtype);
+		return new MediaType($this->type, $this->subtype, $this->parameters);
 	}
 
 	public function precedence(MediaTypeInterface $mediaType): ?Precedence

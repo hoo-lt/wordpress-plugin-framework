@@ -2,7 +2,12 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType;
 
-use Hoo\WordPressPluginFramework\Http\Abnf\Rfc9110;
+use Hoo\WordPressPluginFramework\{
+	Http\Abnf\Rfc9110,
+	Http\Message\Headers\Parameters\Parameters,
+	Http\Message\Headers\Parameters\ParametersInterface,
+};
+use Closure;
 
 readonly class MediaType implements MediaTypeInterface
 {
@@ -12,6 +17,7 @@ readonly class MediaType implements MediaTypeInterface
 	public function __construct(
 		string $type,
 		string $subtype,
+		protected ParametersInterface $parameters = new Parameters([]),
 	) {
 		$this->validateType($type);
 		$this->type = $this->normalizeType($type);
@@ -25,14 +31,42 @@ readonly class MediaType implements MediaTypeInterface
 		return $this->type;
 	}
 
+	public function withType(string $type): static
+	{
+		return new static($type, $this->subtype, $this->parameters);
+	}
+
 	public function subtype(): string
 	{
 		return $this->subtype;
 	}
 
+	public function withSubtype(string $subtype): static
+	{
+		return new static($this->type, $subtype, $this->parameters);
+	}
+
+	public function parameters(): ParametersInterface
+	{
+		return $this->parameters;
+	}
+
+	public function withParameters(ParametersInterface|Closure $parameters): static
+	{
+		if ($parameters instanceof Closure) {
+			$parameters = $parameters($this->parameters);
+		}
+
+		if (!$parameters instanceof ParametersInterface) {
+			throw new MediaTypeException('must provide parameters interface');
+		}
+
+		return new static($this->type, $this->subtype, $parameters);
+	}
+
 	public function __tostring(): string
 	{
-		return "{$this->type}/{$this->subtype}";
+		return "{$this->type}/{$this->subtype}{$this->parameters}";
 	}
 
 	protected function validateType(string $type): void
