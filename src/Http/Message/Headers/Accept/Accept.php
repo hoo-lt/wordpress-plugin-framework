@@ -24,11 +24,16 @@ readonly class Accept implements AcceptInterface
 		foreach (Precedence::cases() as $precedence) {
 			foreach ($this->mediaRanges as $mediaRange) {
 				if ($precedence === $mediaRange->precedence($mediaType)) {
-					return $mediaRange->q();
+					return $mediaRange->q() ?? '1';
 				}
 			}
 		}
 
 		return 0;
+	}
+
+	public function __tostring(): string
+	{
+		return implode(', ', $this->mediaRanges);
 	}
 }

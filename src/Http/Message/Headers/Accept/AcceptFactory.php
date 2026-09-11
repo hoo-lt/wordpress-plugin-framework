@@ -28,7 +28,7 @@ readonly class AcceptFactory implements AcceptFactoryInterface
 		foreach ($matches as $match) {
 			$parameters = $this->parametersFactory->create($match['parameters'] ?? '');
 
-			$mediaRanges[] = new MediaRange($match['type'], $match['subtype'], $parameters, $match['q'] ?? '1');
+			$mediaRanges[] = new MediaRange($match['type'], $match['subtype'], $parameters, $match['q'] ?? null);
 		}
 
 		return new Accept($mediaRanges);

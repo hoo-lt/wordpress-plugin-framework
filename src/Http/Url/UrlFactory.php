@@ -18,12 +18,9 @@ readonly class UrlFactory implements UrlFactoryInterface
 			throw new UrlFactoryException('seriously damaged url');
 		}
 
-		return new Url(
-			Scheme\Scheme::from($url['scheme'] ?? ''),
-			$url['host'] ?? '',
-			$url['port'] ?? null,
-			$url['path'] ?? '',
-			$this->queryFactory->tryCreate($url['query'] ?? null),
-		);
+		$scheme = Scheme\Scheme::create($url['scheme'] ?? '');
+		$query = $this->queryFactory->createFromEncoded($url['query'] ?? '');
+
+		return new Url($scheme, $url['host'] ?? '', $url['port'] ?? null, $url['path'] ?? '', $query);
 	}
 }

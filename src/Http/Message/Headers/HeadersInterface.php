@@ -5,7 +5,7 @@ namespace Hoo\WordPressPluginFramework\Http\Message\Headers;
 use Countable;
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Accept\AcceptInterface,
-	Http\Message\Headers\ContentType\ContentTypeInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 use IteratorAggregate;
 
@@ -21,7 +21,7 @@ interface HeadersInterface extends IteratorAggregate, Countable
 	public function withAccept(AcceptInterface $accept): static;
 	public function withoutAccept(): static;
 
-	public function contentType(): ?ContentTypeInterface;
-	public function withContentType(ContentTypeInterface $contentType): static;
+	public function contentType(): ?MediaTypeInterface;
+	public function withContentType(MediaTypeInterface $contentType): static;
 	public function withoutContentType(): static;
 }

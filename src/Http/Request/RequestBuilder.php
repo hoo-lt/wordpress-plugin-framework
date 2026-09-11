@@ -22,7 +22,6 @@ readonly class RequestBuilder implements RequestBuilderInterface
 		protected ?Method $method = null,
 		protected ?UrlInterface $url = null,
 		protected array $headers = [],
-		protected ?string $contentType = null,
 		protected ?BodyInterface $body = null,
 	) {
 	}
@@ -31,21 +30,21 @@ readonly class RequestBuilder implements RequestBuilderInterface
 	{
 		$method = Method::create($method);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $method, $this->url, $this->headers, $this->contentType, $this->body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $method, $this->url, $this->headers, $this->body);
 	}
 
 	public function withUrl(string $url): static
 	{
 		$url = $this->urlFactory->create($url);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $url, $this->headers, $this->contentType, $this->body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $url, $this->headers, $this->body);
 	}
 
 	public function withHeaders(array $headers): static
 	{
 		$headers = array_change_key_case($headers, CASE_LOWER);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->contentType, $this->body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->body);
 	}
 
 	public function withHeader(string $name, string $value): static
@@ -53,7 +52,7 @@ readonly class RequestBuilder implements RequestBuilderInterface
 		$headers = $this->headers;
 		$headers[strtolower($name)] = $value;
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->contentType, $this->body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->body);
 	}
 
 	public function withoutHeader(string $name): static
@@ -61,26 +60,26 @@ readonly class RequestBuilder implements RequestBuilderInterface
 		$headers = $this->headers;
 		unset($headers[strtolower($name)]);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->contentType, $this->body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $headers, $this->body);
 	}
 
 	public function withBody(string $contentType, mixed $body): static
 	{
 		$body = $this->bodyFactory->createBody($contentType, $body);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, $contentType, $body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withUnnormalizedBody(string $contentType, mixed $body): static
 	{
 		$body = $this->bodyFactory->createBodyFromUnnormalized($contentType, $body);
 
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, $contentType, $body);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, $body);
 	}
 
 	public function withoutBody(): static
 	{
-		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, null, null);
+		return new static($this->urlFactory, $this->headersFactory, $this->bodyFactory, $this->uuid, $this->method, $this->url, $this->headers, null);
 	}
 
 	public function build(): RequestInterface
@@ -93,15 +92,7 @@ readonly class RequestBuilder implements RequestBuilderInterface
 			throw new RequestBuilderException('url is mandatory');
 		}
 
-		$headers = $this->headers;
-
-		if ($this->body === null) {
-			unset($headers['content-type']);
-		} else {
-			$headers['content-type'] = $this->contentType;
-		}
-
-		$headers = $this->headersFactory->create($headers);
+		$headers = $this->headersFactory->create($this->headers);
 
 		return new Request($this->uuid, $this->method, $this->url, $headers, $this->body);
 	}

@@ -5,6 +5,7 @@ namespace Hoo\WordPressPluginFramework\Http\Encoders\Form;
 use Hoo\WordPressPluginFramework\{
 	Http\Encoders\EncoderException,
 	Http\Encoders\EncoderInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaType,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 use stdClass;
@@ -12,13 +13,21 @@ use stdClass;
 readonly class Encoder implements EncoderInterface
 {
 	public function __construct(
-		protected MediaTypeInterface $mediaType,
+		protected MediaTypeInterface $mediaType = new MediaType('application', 'x-www-form-urlencoded'),
 	) {
+		if (!$this->encodesMediaType($mediaType)) {
+			throw new EncoderException('does not encode this media type');
+		}
 	}
 
 	public function mediaType(): MediaTypeInterface
 	{
 		return $this->mediaType;
+	}
+
+	public function withMediaType(MediaTypeInterface $mediaType): static
+	{
+		return new static($mediaType);
 	}
 
 	public function encode(mixed $decoded): string

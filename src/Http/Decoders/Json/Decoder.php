@@ -6,6 +6,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Abnf\Rfc6838,
 	Http\Decoders\DecoderException,
 	Http\Decoders\DecoderInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaType,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 use Throwable;
@@ -13,13 +14,21 @@ use Throwable;
 readonly class Decoder implements DecoderInterface
 {
 	public function __construct(
-		protected array $mediaTypes,
+		protected MediaTypeInterface $mediaType = new MediaType('application', 'json'),
 	) {
+		if (!$this->decodesMediaType($mediaType)) {
+			throw new DecoderException('does not decode this media type');
+		}
 	}
 
-	public function mediaTypes(): array
+	public function mediaType(): MediaTypeInterface
 	{
-		return $this->mediaTypes;
+		return $this->mediaType;
+	}
+
+	public function withMediaType(MediaTypeInterface $mediaType): static
+	{
+		return new static($mediaType);
 	}
 
 	public function decode(string $encoded): mixed

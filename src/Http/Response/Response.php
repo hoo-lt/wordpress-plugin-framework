@@ -11,13 +11,17 @@ use Closure;
 
 readonly class Response implements ResponseInterface
 {
+	protected HeadersInterface $headers;
+
 	public function __construct(
 		protected UuidInterface $uuid,
 		protected int $statusCode,
-		protected HeadersInterface $headers,
+		HeadersInterface $headers,
 		protected ?BodyInterface $body = null,
 	) {
 		$this->validateStatusCode($statusCode);
+
+		$this->headers = $body === null ? $headers : $headers->withContentType($body->mediaType());
 	}
 
 	public function uuid(): UuidInterface

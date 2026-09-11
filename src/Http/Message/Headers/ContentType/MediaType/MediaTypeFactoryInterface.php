@@ -1,8 +1,8 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType;
+namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType;
 
-interface ContentTypeFactoryInterface
+interface MediaTypeFactoryInterface
 {
-	public function create(string $contentType): ContentTypeInterface;
+	public function create(string $contentType): MediaTypeInterface;
 }

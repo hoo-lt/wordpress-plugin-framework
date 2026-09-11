@@ -46,6 +46,28 @@ readonly class Responses implements ResponsesInterface
         return $this->responses[$key];
     }
 
+    public function filter(Closure $closure): static
+    {
+        $responses = array_filter($this->responses, $closure);
+
+        return new static($responses);
+    }
+
+    public function map(Closure $closure): static
+    {
+        $responses = array_map($closure, $this->responses);
+
+        return new static($responses);
+    }
+
+    public function sort(Closure $closure): static
+    {
+        $responses = $this->responses;
+        usort($responses, $closure);
+
+        return new static($responses);
+    }
+
     public function filterByAccept(AcceptInterface $accept): static
     {
         return $this->filter(fn(ResponseInterface $response) => $this->q($accept, $response) > 0);
@@ -63,6 +85,16 @@ readonly class Responses implements ResponsesInterface
         );
     }
 
+    public function isEmpty(): bool
+    {
+        return $this->count() === 0;
+    }
+
+    public function isNotEmpty(): bool
+    {
+        return !$this->isEmpty();
+    }
+
     public function count(): int
     {
         return count($this->responses);
@@ -71,6 +103,10 @@ readonly class Responses implements ResponsesInterface
     protected function validate(array $responses): void
     {
         foreach ($responses as $response) {
+            if (!$response instanceof ResponseInterface) {
+                throw new ResponsesException('must provide response interface');
+            }
+
             $contentType = $response->headers()->contentType();
             if ($contentType === null) {
                 throw new ResponsesException('response without content-type is not negotiable');
@@ -78,29 +114,12 @@ readonly class Responses implements ResponsesInterface
         }
     }
 
-    protected function filter(Closure $closure): static
-    {
-        $responses = array_filter($this->responses, $closure);
-
-        return new static($responses);
-    }
-
-    protected function sort(Closure $closure): static
-    {
-        $responses = $this->responses;
-        usort($responses, $closure);
-
-        return new static($responses);
-    }
-
     protected function q(AcceptInterface $accept, ResponseInterface $response): float
     {
-        $contentType = $response->headers()->contentType();
-        if ($contentType === null) {
+        $mediaType = $response->headers()->contentType();
+        if ($mediaType === null) {
             throw new ResponsesException('cant get q w/o content-type');
         }
-
-        $mediaType = $contentType->mediaType();
 
         return $accept->q($mediaType);
     }

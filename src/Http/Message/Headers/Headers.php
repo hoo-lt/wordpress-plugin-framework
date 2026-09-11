@@ -6,7 +6,7 @@ use ArrayIterator;
 use Hoo\WordPressPluginFramework\{
 	Http\Abnf\Rfc9110,
 	Http\Message\Headers\Accept\AcceptInterface,
-	Http\Message\Headers\ContentType\ContentTypeInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 };
 use Traversable;
 
@@ -17,7 +17,7 @@ readonly class Headers implements HeadersInterface
 	public function __construct(
 		array $headers = [],
 		protected ?AcceptInterface $accept = null,
-		protected ?ContentTypeInterface $contentType = null,
+		protected ?MediaTypeInterface $contentType = null,
 	) {
 		$this->validate($headers);
 		$this->headers = $this->normalize($headers);
@@ -35,16 +35,36 @@ readonly class Headers implements HeadersInterface
 
 	public function with(string $name, string $value): static
 	{
+		$name = strtolower($name);
+
+		if ($name === 'accept') {
+			throw new HeadersException('accept must be set through withAccept');
+		}
+
+		if ($name === 'content-type') {
+			throw new HeadersException('content-type must be set through withContentType');
+		}
+
 		$headers = $this->headers;
-		$headers[strtolower($name)] = $value;
+		$headers[$name] = $value;
 
 		return new static($headers, $this->accept, $this->contentType);
 	}
 
 	public function without(string $name): static
 	{
+		$name = strtolower($name);
+
+		if ($name === 'accept') {
+			throw new HeadersException('accept must be removed through withoutAccept');
+		}
+
+		if ($name === 'content-type') {
+			throw new HeadersException('content-type must be removed through withoutContentType');
+		}
+
 		$headers = $this->headers;
-		unset($headers[strtolower($name)]);
+		unset($headers[$name]);
 
 		return new static($headers, $this->accept, $this->contentType);
 	}
@@ -56,27 +76,39 @@ readonly class Headers implements HeadersInterface
 
 	public function withAccept(AcceptInterface $accept): static
 	{
-		return new static($this->headers, $accept, $this->contentType);
+		$headers = $this->headers;
+		$headers['accept'] = (string) $accept;
+
+		return new static($headers, $accept, $this->contentType);
 	}
 
 	public function withoutAccept(): static
 	{
-		return new static($this->headers, null, $this->contentType);
+		$headers = $this->headers;
+		unset($headers['accept']);
+
+		return new static($headers, null, $this->contentType);
 	}
 
-	public function contentType(): ?ContentTypeInterface
+	public function contentType(): ?MediaTypeInterface
 	{
 		return $this->contentType;
 	}
 
-	public function withContentType(ContentTypeInterface $contentType): static
+	public function withContentType(MediaTypeInterface $contentType): static
 	{
-		return new static($this->headers, $this->accept, $contentType);
+		$headers = $this->headers;
+		$headers['content-type'] = (string) $contentType;
+
+		return new static($headers, $this->accept, $contentType);
 	}
 
 	public function withoutContentType(): static
 	{
-		return new static($this->headers, $this->accept, null);
+		$headers = $this->headers;
+		unset($headers['content-type']);
+
+		return new static($headers, $this->accept, null);
 	}
 
 	public function getIterator(): Traversable

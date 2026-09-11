@@ -12,6 +12,15 @@ readonly class Encoders implements EncodersInterface
 	public function __construct(
 		protected array $encoders,
 	) {
+		$this->validate($this->encoders);
+	}
+
+	public function with(EncoderInterface $encoder): static
+	{
+		$encoders = $this->encoders;
+		$encoders[] = $encoder;
+
+		return new static($encoders);
 	}
 
 	public function first(): EncoderInterface
@@ -34,6 +43,28 @@ readonly class Encoders implements EncodersInterface
 		return $this->encoders[$key];
 	}
 
+	public function filter(Closure $closure): static
+	{
+		$encoders = array_filter($this->encoders, $closure);
+
+		return new static($encoders);
+	}
+
+	public function map(Closure $closure): static
+	{
+		$encoders = array_map($closure, $this->encoders);
+
+		return new static($encoders);
+	}
+
+	public function sort(Closure $closure): static
+	{
+		$encoders = $this->encoders;
+		usort($encoders, $closure);
+
+		return new static($encoders);
+	}
+
 	public function filterByType(mixed $decoded): static
 	{
 		return $this->filter(fn($encoder) => $encoder->encodesType($decoded));
@@ -44,6 +75,11 @@ readonly class Encoders implements EncodersInterface
 		return $this->filter(fn($encoder) => $encoder->encodesMediaType($mediaType));
 	}
 
+	public function mapMediaType(MediaTypeInterface $mediaType): static
+	{
+		return $this->map(fn($encoder) => $encoder->withMediaType($mediaType));
+	}
+
 	public function getIterator(): Traversable
 	{
 		return new ArrayIterator(
@@ -51,15 +87,27 @@ readonly class Encoders implements EncodersInterface
 		);
 	}
 
+	public function isEmpty(): bool
+	{
+		return $this->count() === 0;
+	}
+
+	public function isNotEmpty(): bool
+	{
+		return !$this->isEmpty();
+	}
+
 	public function count(): int
 	{
 		return count($this->encoders);
 	}
 
-	protected function filter(Closure $closure): static
+	protected function validate(array $encoders): void
 	{
-		$encoders = array_filter($this->encoders, $closure);
-
-		return new static($encoders);
+		foreach ($encoders as $encoder) {
+			if (!$encoder instanceof EncoderInterface) {
+				throw new EncodersException('must provide encoder interface');
+			}
+		}
 	}
 }

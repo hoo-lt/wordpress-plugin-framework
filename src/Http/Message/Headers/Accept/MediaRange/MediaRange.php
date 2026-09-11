@@ -16,13 +16,12 @@ readonly class MediaRange implements MediaRangeInterface
 {
 	protected string $type;
 	protected string $subtype;
-	protected float $q;
 
 	public function __construct(
 		string $type,
 		string $subtype,
 		protected ParametersInterface $parameters = new Parameters([]),
-		string $q = '1',
+		protected ?string $q = null,
 	) {
 		$this->validateType($type);
 		$this->type = $this->normalizeType($type);
@@ -30,8 +29,7 @@ readonly class MediaRange implements MediaRangeInterface
 		$this->validateSubtype($subtype);
 		$this->subtype = $this->normalizeSubtype($subtype);
 
-		$this->validateQ($q);
-		$this->q = $this->normalizeQ($q);
+		$this->validateQ($this->q);
 	}
 
 	public function type(): string
@@ -41,7 +39,7 @@ readonly class MediaRange implements MediaRangeInterface
 
 	public function withType(string $type): static
 	{
-		return new static($type, $this->subtype, $this->parameters, (string) $this->q);
+		return new static($type, $this->subtype, $this->parameters, $this->q);
 	}
 
 	public function subtype(): string
@@ -51,7 +49,7 @@ readonly class MediaRange implements MediaRangeInterface
 
 	public function withSubtype(string $subtype): static
 	{
-		return new static($this->type, $subtype, $this->parameters, (string) $this->q);
+		return new static($this->type, $subtype, $this->parameters, $this->q);
 	}
 
 	public function parameters(): ParametersInterface
@@ -69,10 +67,10 @@ readonly class MediaRange implements MediaRangeInterface
 			throw new MediaRangeException('must provide parameters interface');
 		}
 
-		return new static($this->type, $this->subtype, $parameters, (string) $this->q);
+		return new static($this->type, $this->subtype, $parameters, $this->q);
 	}
 
-	public function q(): float
+	public function q(): ?string
 	{
 		return $this->q;
 	}
@@ -80,6 +78,11 @@ readonly class MediaRange implements MediaRangeInterface
 	public function withQ(string $q): static
 	{
 		return new static($this->type, $this->subtype, $this->parameters, $q);
+	}
+
+	public function withoutQ(): static
+	{
+		return new static($this->type, $this->subtype, $this->parameters, null);
 	}
 
 	public function mediaType(): ?MediaTypeInterface
@@ -92,6 +95,16 @@ readonly class MediaRange implements MediaRangeInterface
 		}
 
 		return new MediaType($this->type, $this->subtype, $this->parameters);
+	}
+
+	public function __tostring(): string
+	{
+		$mediaRange = "{$this->type}/{$this->subtype}{$this->parameters}";
+		if ($this->q === null) {
+			return $mediaRange;
+		}
+
+		return "{$mediaRange}; q={$this->q}";
 	}
 
 	public function precedence(MediaTypeInterface $mediaType): ?Precedence
@@ -133,8 +146,12 @@ readonly class MediaRange implements MediaRangeInterface
 		}
 	}
 
-	protected function validateQ(string $q): void
+	protected function validateQ(?string $q): void
 	{
+		if ($q === null) {
+			return;
+		}
+
 		if (!preg_match('@\A' . Rfc9110::QVALUE . '\z@', $q)) {
 			throw new MediaRangeException('invalid q');
 		}
@@ -148,10 +165,5 @@ readonly class MediaRange implements MediaRangeInterface
 	protected function normalizeSubtype(string $subtype): string
 	{
 		return strtolower($subtype);
-	}
-
-	protected function normalizeQ(string $q): float
-	{
-		return (float) $q;
 	}
 }

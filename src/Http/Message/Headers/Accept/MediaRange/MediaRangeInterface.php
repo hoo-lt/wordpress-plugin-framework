@@ -8,8 +8,9 @@ use Hoo\WordPressPluginFramework\{
 	Http\Message\Headers\Parameters\ParametersInterface,
 };
 use Closure;
+use Stringable;
 
-interface MediaRangeInterface
+interface MediaRangeInterface extends Stringable
 {
 	public function type(): string;
 	public function withType(string $type): static;
@@ -20,8 +21,9 @@ interface MediaRangeInterface
 	public function parameters(): ParametersInterface;
 	public function withParameters(ParametersInterface|Closure $parameters): static;
 
-	public function q(): float;
+	public function q(): ?string;
 	public function withQ(string $q): static;
+	public function withoutQ(): static;
 
 	public function mediaType(): ?MediaTypeInterface;
 

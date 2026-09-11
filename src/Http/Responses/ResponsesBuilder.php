@@ -89,17 +89,14 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			throw new ResponsesBuilderException('building representations without bodies is prohibited');
 		}
 
+		$headers = $this->headersFactory->create($this->headers);
+
 		$responses = new Responses();
 
-		foreach ($this->bodies as $contentType => $body) {
-			$headers = $this->headers;
-			$headers['content-type'] = $contentType;
+		foreach ($this->bodies as $body) {
+			$response = new Response($this->uuid, $this->statusCode, $headers, $body);
 
-			$headers = $this->headersFactory->create($headers);
-
-			$responses = $responses->with(
-				new Response($this->uuid, $this->statusCode, $headers, $body),
-			);
+			$responses = $responses->with($response);
 		}
 
 		return $responses;

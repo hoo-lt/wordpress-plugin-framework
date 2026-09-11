@@ -5,6 +5,7 @@ namespace Hoo\WordPressPluginFramework\Http\Request;
 use Hoo\WordPressPluginFramework\{
 	Http\Exceptions\BadRequest\Exception as BadRequestException,
 	Http\Message\Body\BodyFactoryInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 	Http\Message\Headers\HeadersFactoryInterface,
 	Http\Method\Method,
 	Http\Url\UrlFactoryInterface,
@@ -21,27 +22,40 @@ readonly class RequestFactory implements RequestFactoryInterface
 		protected BodyFactoryInterface $bodyFactory,
 		protected UuidInterface $uuid,
 		protected array $server,
+		protected array $post,
 		protected string $input,
 	) {
 	}
 
 	public function create(): RequestInterface
 	{
-		$headers = $this->headers();
-		$body = $this->body();
+		$method = Method::create($this->method());
+		$url = $this->urlFactory->create($this->url());
+		$headers = $this->headersFactory->create($this->headers());
+
 		$contentType = $this->contentType();
+		$body = $this->body();
 
 		if ($body !== null && $contentType === null) {
 			throw new BadRequestException('content without content-type', 'request_factory_error');
 		}
 
-		return new Request(
-			$this->uuid,
-			Method::create($this->method()),
-			$this->urlFactory->create($this->url()),
-			$this->headersFactory->create($headers),
-			$body === null ? null : $this->bodyFactory->createBodyFromEncoded($contentType, $body),
-		);
+		if ($body !== null) {
+			$body = $this->parsed($method, $headers->contentType())
+				? $this->bodyFactory->createBody($contentType, $this->post)
+				: $this->bodyFactory->createBodyFromEncoded($contentType, $body);
+		}
+
+		return new Request($this->uuid, $method, $url, $headers, $body);
+	}
+
+	protected function parsed(Method $method, ?MediaTypeInterface $mediaType): bool
+	{
+		if ($method !== Method::Post) {
+			return false;
+		}
+
+		return $mediaType?->type() === 'multipart' && $mediaType?->subtype() === 'form-data';
 	}
 
 	protected function method(): string

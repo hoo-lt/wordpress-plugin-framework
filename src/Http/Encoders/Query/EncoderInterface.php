@@ -2,8 +2,7 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Encoders\Query;
 
-use Hoo\WordPressPluginFramework\Http;
-
-interface EncoderInterface extends Http\Encoders\EncoderInterface
+interface EncoderInterface
 {
+	public function encode(mixed $decoded): string;
 }

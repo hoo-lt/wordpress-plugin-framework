@@ -8,6 +8,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Encoders\Query\EncoderInterface,
 	Http\Normalizers\NormalizersInterface,
 };
+use stdClass;
 
 readonly class QueryFactory implements QueryFactoryInterface
 {
@@ -19,7 +20,7 @@ readonly class QueryFactory implements QueryFactoryInterface
 	) {
 	}
 
-	public function create(array $query): QueryInterface
+	public function create(array|stdClass $query): QueryInterface
 	{
 		return new Query($this->accessor, $this->encoder, $query);
 	}
@@ -29,5 +30,23 @@ readonly class QueryFactory implements QueryFactoryInterface
 		$query = $this->decoder->decode($query);
 
 		return $this->create($query);
+	}
+
+	public function createFromUnnormalized(mixed $query): QueryInterface
+	{
+		$query = $this->normalize($query);
+
+		if (!is_array($query) && !$query instanceof stdClass) {
+			throw new QueryFactoryException('query must be an array or an object');
+		}
+
+		return $this->create($query);
+	}
+
+	protected function normalize(mixed $query): mixed
+	{
+		$normalizer = $this->normalizers->get($query);
+
+		return $normalizer === null ? $query : $normalizer->normalize($query);
 	}
 }

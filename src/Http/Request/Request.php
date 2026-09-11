@@ -13,13 +13,16 @@ use Closure;
 
 readonly class Request implements RequestInterface
 {
+	protected HeadersInterface $headers;
+
 	public function __construct(
 		protected UuidInterface $uuid,
 		protected Method $method,
 		protected UrlInterface $url,
-		protected HeadersInterface $headers,
+		HeadersInterface $headers,
 		protected ?BodyInterface $body = null,
 	) {
+		$this->headers = $body === null ? $headers : $headers->withContentType($body->mediaType());
 	}
 
 	public function uuid(): UuidInterface

@@ -8,16 +8,16 @@ use Hoo\WordPressPluginFramework\{
 	Http\Encoders\EncoderInterface,
 	Http\Decoders\DecodersInterface,
 	Http\Encoders\EncodersInterface,
-	Http\Message\Headers\ContentType\ContentTypeFactoryInterface,
-	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeFactoryInterface,
 	Http\Normalizers\NormalizersInterface,
 };
+use stdClass;
 
 readonly class BodyFactory implements BodyFactoryInterface
 {
 	public function __construct(
 		protected AccessorInterface $accessor,
-		protected ContentTypeFactoryInterface $contentTypeFactory,
+		protected MediaTypeFactoryInterface $mediaTypeFactory,
 		protected DecodersInterface $decoders,
 		protected EncodersInterface $encoders,
 		protected NormalizersInterface $normalizers,
@@ -28,7 +28,11 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$encoder = $this->encoder($contentType, $body);
 
-		return new Body($this->accessor, $encoder, $body);
+		if (is_array($body) || $body instanceof stdClass) {
+			return new Accessor\Body($this->accessor, $encoder, $body);
+		}
+
+		return new Body($encoder, $body);
 	}
 
 	public function createBodies(mixed $body): array
@@ -37,12 +41,9 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 		$encoders = $this->encoders($body);
 		foreach ($encoders as $encoder) {
-			$mediaType = $encoder->mediaType();
-			if ($mediaType === null) {
-				continue;
-			}
-
-			$bodies[(string) $mediaType] = new Body($this->accessor, $encoder, $body);
+			$bodies[] = is_array($body) || $body instanceof stdClass
+				? new Accessor\Body($this->accessor, $encoder, $body)
+				: new Body($encoder, $body);
 		}
 
 		return $bodies;
@@ -69,11 +70,6 @@ readonly class BodyFactory implements BodyFactoryInterface
 		return $this->createBodies($body);
 	}
 
-	protected function mediaType(string $contentType): MediaTypeInterface
-	{
-		return $this->contentTypeFactory->create($contentType)->mediaType();
-	}
-
 	protected function encoders(mixed $body): EncodersInterface
 	{
 		return $this->encoders
@@ -82,20 +78,22 @@ readonly class BodyFactory implements BodyFactoryInterface
 
 	protected function encoder(string $contentType, mixed $body): EncoderInterface
 	{
-		$mediaType = $this->mediaType($contentType);
+		$mediaType = $this->mediaTypeFactory->create($contentType);
 
 		return $this->encoders
 			->filterByType($body)
 			->filterByMediaType($mediaType)
+			->mapMediaType($mediaType)
 			->first();
 	}
 
 	protected function decoder(string $contentType): DecoderInterface
 	{
-		$mediaType = $this->mediaType($contentType);
+		$mediaType = $this->mediaTypeFactory->create($contentType);
 
 		return $this->decoders
 			->filterByMediaType($mediaType)
+			->mapMediaType($mediaType)
 			->first();
 	}
 

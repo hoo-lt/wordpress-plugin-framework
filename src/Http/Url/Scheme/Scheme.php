@@ -7,14 +7,14 @@ enum Scheme: string
 	case Http = 'http';
 	case Https = 'https';
 
-	public static function create(string $method): static
+	public static function create(string $scheme): static
 	{
-		$method = static::tryFrom($method);
-		if ($method === null) {
+		$scheme = static::tryFrom($scheme);
+		if ($scheme === null) {
 			throw new SchemeException("invalid scheme");
 		}
 
-		return $method;
+		return $scheme;
 	}
 
 	public function port(): int

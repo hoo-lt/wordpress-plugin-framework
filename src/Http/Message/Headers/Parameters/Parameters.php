@@ -58,7 +58,7 @@ readonly class Parameters implements ParametersInterface
 		$parameters = '';
 
 		foreach ($this->parameters as $name => $value) {
-			$parameters .= ";{$name}={$this->quote($value)}";
+			$parameters .= "; {$name}={$this->quote($value)}";
 		}
 
 		return $parameters;

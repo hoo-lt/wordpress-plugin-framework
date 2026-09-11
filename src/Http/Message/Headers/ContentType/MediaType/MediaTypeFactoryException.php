@@ -1,9 +1,9 @@
 <?php
 
-namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType;
+namespace Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType;
 
 use Exception;
 
-class ContentTypeFactoryException extends Exception
+class MediaTypeFactoryException extends Exception
 {
 }

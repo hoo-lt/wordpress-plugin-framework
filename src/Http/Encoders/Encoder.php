@@ -2,18 +2,29 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Encoders;
 
-use Hoo\WordPressPluginFramework\Http\Message\Headers\ContentType\MediaType\MediaTypeInterface;
+use Hoo\WordPressPluginFramework\{
+	Http\Message\Headers\ContentType\MediaType\MediaType,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
+};
 
 readonly class Encoder implements EncoderInterface
 {
 	public function __construct(
-		protected MediaTypeInterface $mediaType,
+		protected MediaTypeInterface $mediaType = new MediaType('application', 'octet-stream'),
 	) {
+		if (!$this->encodesMediaType($mediaType)) {
+			throw new EncoderException('does not encode this media type');
+		}
 	}
 
 	public function mediaType(): MediaTypeInterface
 	{
 		return $this->mediaType;
+	}
+
+	public function withMediaType(MediaTypeInterface $mediaType): static
+	{
+		return new static($mediaType);
 	}
 
 	public function encode(mixed $decoded): string
