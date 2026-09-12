@@ -118,15 +118,15 @@ readonly class Route implements RouteInterface
 			return $this->responseBuilder->withStatusCode(406)->withoutBody()->build();
 		}
 
-		$builder = $this->responseBuilder->withStatusCode($statusCode)->withHeader('vary', 'accept');
+		$builder = $this->responseBuilder->withStatusCode($statusCode)->withHeaders(['vary' => 'accept']);
 
 		if ($this->html($mediaType)) {
-			return $builder->withHeader('content-type', (string) $mediaType)->withBody($this->renderer->render($view))->build();
+			return $builder->withBody((string) $mediaType, $this->renderer->render($view))->build();
 		}
 
 		return $model === null
 			? $builder->withoutBody()->build()
-			: $builder->withHeader('content-type', (string) $mediaType)->withBody($model)->build();
+			: $builder->withBody((string) $mediaType, $model)->build();
 	}
 
 	protected function available(mixed $model): array

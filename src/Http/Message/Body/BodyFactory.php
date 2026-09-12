@@ -9,6 +9,7 @@ use Hoo\WordPressPluginFramework\{
 	Http\Decoders\DecodersInterface,
 	Http\Encoders\EncodersInterface,
 	Http\Message\Headers\ContentType\MediaType\MediaTypeFactoryInterface,
+	Http\Message\Headers\ContentType\MediaType\MediaTypeInterface,
 	Http\Normalizers\NormalizersInterface,
 };
 use stdClass;
@@ -24,7 +25,7 @@ readonly class BodyFactory implements BodyFactoryInterface
 	) {
 	}
 
-	public function createBody(string $contentType, mixed $body): BodyInterface
+	public function createBody(MediaTypeInterface|string $contentType, mixed $body): BodyInterface
 	{
 		$encoder = $this->encoder($contentType, $body);
 
@@ -56,16 +57,16 @@ readonly class BodyFactory implements BodyFactoryInterface
 		return $this->createBody($contentType, $body);
 	}
 
-	public function createBodyFromUnnormalized(string $contentType, mixed $body): BodyInterface
+	public function createBodyFromUnnormalized(MediaTypeInterface|string $contentType, mixed $body): BodyInterface
 	{
-		$body = $this->normalize($body);
+		$body = $this->normalizers->normalize($body);
 
 		return $this->createBody($contentType, $body);
 	}
 
 	public function createBodiesFromUnnormalized(mixed $body): array
 	{
-		$body = $this->normalize($body);
+		$body = $this->normalizers->normalize($body);
 
 		return $this->createBodies($body);
 	}
@@ -76,9 +77,9 @@ readonly class BodyFactory implements BodyFactoryInterface
 			->filterByType($body);
 	}
 
-	protected function encoder(string $contentType, mixed $body): EncoderInterface
+	protected function encoder(MediaTypeInterface|string $contentType, mixed $body): EncoderInterface
 	{
-		$mediaType = $this->mediaTypeFactory->create($contentType);
+		$mediaType = $contentType instanceof MediaTypeInterface ? $contentType : $this->mediaTypeFactory->create($contentType);
 
 		return $this->encoders
 			->filterByType($body)
@@ -101,11 +102,5 @@ readonly class BodyFactory implements BodyFactoryInterface
 	{
 		$decoder = $this->decoder($contentType);
 		return $decoder->decode($body);
-	}
-
-	protected function normalize(mixed $body): mixed
-	{
-		$normalizer = $this->normalizers->get($body);
-		return $normalizer === null ? $body : $normalizer->normalize($body);
 	}
 }

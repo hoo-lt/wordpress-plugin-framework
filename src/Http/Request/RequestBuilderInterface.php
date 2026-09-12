@@ -2,19 +2,22 @@
 
 namespace Hoo\WordPressPluginFramework\Http\Request;
 
+use Hoo\WordPressPluginFramework\{
+	Http\Message\Headers\HeadersInterface,
+	Http\Method\Method,
+	Http\Url\UrlInterface,
+};
+
 interface RequestBuilderInterface
 {
-	public function withMethod(string $method): static;
+	public function withMethod(Method|string $method): static;
 
-	public function withUrl(string $url): static;
+	public function withUrl(UrlInterface|string $url): static;
 
-	public function withHeaders(array $headers): static;
+	public function withHeaders(HeadersInterface|array $headers): static;
 
-	public function withHeader(string $name, string $value): static;
-	public function withoutHeader(string $name): static;
-
-	public function withBody(string $contentType, mixed $body): static;
-	public function withUnnormalizedBody(string $contentType, mixed $body): static;
+	public function withBody(mixed $body): static;
+	public function withUnnormalizedBody(mixed $body): static;
 	public function withoutBody(): static;
 
 	public function build(): RequestInterface;

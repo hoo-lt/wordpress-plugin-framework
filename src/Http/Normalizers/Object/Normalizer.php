@@ -25,8 +25,7 @@ readonly class Normalizer implements NormalizerInterface
 		$normalized = new stdClass();
 
 		foreach (get_object_vars($unnormalized) as $key => $value) {
-			$normalizer = $this->normalizers->get($value);
-			$normalized->{$key} = $normalizer === null ? $value : $normalizer->normalize($value);
+			$normalized->{$key} = $this->normalizers->normalize($value);
 		}
 
 		return $normalized;

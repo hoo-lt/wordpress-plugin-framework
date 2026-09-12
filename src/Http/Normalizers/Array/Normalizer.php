@@ -24,8 +24,7 @@ readonly class Normalizer implements NormalizerInterface
 		$normalized = [];
 
 		foreach ($unnormalized as $key => $value) {
-			$normalizer = $this->normalizers->get($value);
-			$normalized[$key] = $normalizer === null ? $value : $normalizer->normalize($value);
+			$normalized[$key] = $this->normalizers->normalize($value);
 		}
 
 		return $normalized;

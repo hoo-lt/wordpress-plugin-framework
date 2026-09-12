@@ -5,20 +5,24 @@ namespace Hoo\WordPressPluginFramework\Http\Responses;
 use Hoo\WordPressPluginFramework\{
 	Http\Message\Body\BodyFactoryInterface,
 	Http\Message\Headers\HeadersFactoryInterface,
+	Http\Message\Headers\HeadersInterface,
 	Http\Response\Response,
 	Uuid\UuidInterface,
 };
 
 readonly class ResponsesBuilder implements ResponsesBuilderInterface
 {
+	protected HeadersInterface $headers;
+
 	public function __construct(
 		protected HeadersFactoryInterface $headersFactory,
 		protected BodyFactoryInterface $bodyFactory,
 		protected UuidInterface $uuid,
 		protected ?int $statusCode = null,
-		protected array $headers = [],
+		?HeadersInterface $headers = null,
 		protected array $bodies = [],
 	) {
+		$this->headers = $headers ?? $headersFactory->create();
 	}
 
 	public function withStatusCode(int $statusCode): static
@@ -26,30 +30,11 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 		return new static($this->headersFactory, $this->bodyFactory, $this->uuid, $statusCode, $this->headers, $this->bodies);
 	}
 
-	public function withHeaders(array $headers): static
+	public function withHeaders(HeadersInterface|array $headers): static
 	{
-		$headers = array_change_key_case($headers, CASE_LOWER);
-
-		return new static($this->headersFactory, $this->bodyFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
-	}
-
-	public function withoutHeaders(): static
-	{
-		return new static($this->headersFactory, $this->bodyFactory, $this->uuid, $this->statusCode, [], $this->bodies);
-	}
-
-	public function withHeader(string $name, string $value): static
-	{
-		$headers = $this->headers;
-		$headers[strtolower($name)] = $value;
-
-		return new static($this->headersFactory, $this->bodyFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
-	}
-
-	public function withoutHeader(string $name): static
-	{
-		$headers = $this->headers;
-		unset($headers[strtolower($name)]);
+		if (!$headers instanceof HeadersInterface) {
+			$headers = $this->headersFactory->create($headers);
+		}
 
 		return new static($this->headersFactory, $this->bodyFactory, $this->uuid, $this->statusCode, $headers, $this->bodies);
 	}
@@ -89,12 +74,10 @@ readonly class ResponsesBuilder implements ResponsesBuilderInterface
 			throw new ResponsesBuilderException('building representations without bodies is prohibited');
 		}
 
-		$headers = $this->headersFactory->create($this->headers);
-
 		$responses = new Responses();
 
 		foreach ($this->bodies as $body) {
-			$response = new Response($this->uuid, $this->statusCode, $headers, $body);
+			$response = new Response($this->uuid, $this->statusCode, $this->headers, $body);
 
 			$responses = $responses->with($response);
 		}

@@ -19,4 +19,11 @@ readonly class Normalizers implements NormalizersInterface
 
 		return null;
 	}
+
+	public function normalize(mixed $unnormalized): mixed
+	{
+		$normalizer = $this->get($unnormalized);
+
+		return $normalizer === null ? $unnormalized : $normalizer->normalize($unnormalized);
+	}
 }

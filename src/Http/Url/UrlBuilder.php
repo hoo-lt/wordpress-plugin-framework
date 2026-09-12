@@ -11,19 +11,24 @@ use stdClass;
 
 readonly class UrlBuilder implements UrlBuilderInterface
 {
+	protected QueryInterface $query;
+
 	public function __construct(
 		protected QueryFactoryInterface $queryFactory,
 		protected ?Scheme $scheme = null,
 		protected string $host = '',
 		protected ?int $port = null,
 		protected string $path = '',
-		protected ?QueryInterface $query = null,
+		?QueryInterface $query = null,
 	) {
+		$this->query = $query ?? $queryFactory->create([]);
 	}
 
-	public function withScheme(string $scheme): static
+	public function withScheme(Scheme|string $scheme): static
 	{
-		$scheme = Scheme::create($scheme);
+		if (!$scheme instanceof Scheme) {
+			$scheme = Scheme::create($scheme);
+		}
 
 		return new static($this->queryFactory, $scheme, $this->host, $this->port, $this->path, $this->query);
 	}
@@ -48,9 +53,11 @@ readonly class UrlBuilder implements UrlBuilderInterface
 		return new static($this->queryFactory, $this->scheme, $this->host, $this->port, $path, $this->query);
 	}
 
-	public function withQuery(array|stdClass $query): static
+	public function withQuery(QueryInterface|array|stdClass $query): static
 	{
-		$query = $this->queryFactory->create($query);
+		if (!$query instanceof QueryInterface) {
+			$query = $this->queryFactory->create($query);
+		}
 
 		return new static($this->queryFactory, $this->scheme, $this->host, $this->port, $this->path, $query);
 	}
@@ -72,8 +79,6 @@ readonly class UrlBuilder implements UrlBuilderInterface
 			throw new UrlBuilderException('host is mandatory');
 		}
 
-		$query = $this->query ?? $this->queryFactory->create([]);
-
-		return new Url($this->scheme, $this->host, $this->port, $this->path, $query);
+		return new Url($this->scheme, $this->host, $this->port, $this->path, $this->query);
 	}
 }

@@ -34,19 +34,12 @@ readonly class QueryFactory implements QueryFactoryInterface
 
 	public function createFromUnnormalized(mixed $query): QueryInterface
 	{
-		$query = $this->normalize($query);
+		$query = $this->normalizers->normalize($query);
 
 		if (!is_array($query) && !$query instanceof stdClass) {
 			throw new QueryFactoryException('query must be an array or an object');
 		}
 
 		return $this->create($query);
-	}
-
-	protected function normalize(mixed $query): mixed
-	{
-		$normalizer = $this->normalizers->get($query);
-
-		return $normalizer === null ? $query : $normalizer->normalize($query);
 	}
 }

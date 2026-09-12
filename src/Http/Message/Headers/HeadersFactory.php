@@ -15,7 +15,7 @@ readonly class HeadersFactory implements HeadersFactoryInterface
 	) {
 	}
 
-	public function create(array $headers): HeadersInterface
+	public function create(array $headers = []): HeadersInterface
 	{
 		$headers = array_change_key_case($headers, CASE_LOWER);
 
